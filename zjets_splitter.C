@@ -57,7 +57,7 @@ void zjets_splitter()
           TTree *tree = (TTree *)file->Get("tree");
 
           // Create a new TFile and TTree
-          TFile *file_output = new TFile(("../data/SAMPLES/Zjets0/" + filename + ".root").c_str(), "RECREATE");
+          TFile *file_output = new TFile(("../data/SAMPLES/Zjets3/" + filename + ".root").c_str(), "RECREATE");
           TTree *tree_output = tree->CloneTree(0); // Clone the structure of the tree
 
           // Retrieve the list of branches
@@ -105,7 +105,7 @@ void zjets_splitter()
           for (Int_t i = 0; i < tree->GetEntriesFast(); i++)
           {
                tree->GetEntry(i);
-               if (n_jets < 1)
+               if (n_jets > 2)
                {
                     // Copy the desired event(s) from the original TTree to the new TTree
                     tree->GetEntry(i);
