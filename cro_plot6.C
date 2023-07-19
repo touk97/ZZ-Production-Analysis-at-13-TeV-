@@ -349,7 +349,7 @@ void cro_plot6()
 
   for (string &directory : directories)
   {
-    string filepath = "./data/SAMPLES/" + directory + "/";
+    string filepath = "../data/SAMPLES/" + directory + "/";
     cout << endl << endl << endl;
     cout << "   ------------------------------------------   " << endl;
     cout << "   FILEPATH:   " << filepath << endl;
