@@ -940,8 +940,7 @@ void cro_plot6()
     hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
     hist_signal->SetStats(0);
 
-
-
+    pad1->RedrawAxis();
 
     // TLatex *tex1 = new TLatex(0.3, 0.8, "#intL dt = 138.9 fb^{-1}");
     TLatex *tex1 = new TLatex(0.6, 0.55, "#intL dt = 138.9 fb^{-1}");
@@ -1053,6 +1052,7 @@ void cro_plot6()
     line->SetLineStyle(2);
     line->SetLineWidth(2);
     line->Draw("same");
+    pad2->RedrawAxis();
     pad2->Update();
 
     if (directory == "SR")
