@@ -198,8 +198,8 @@ vector<Float_t> ZPlotter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
 
-  Float_t signal0, signal1, signal2 = 0.;
-  Float_t signaler0, signaler1, signaler2 = 0.;
+  Float_t signal0, signal1, signal2 = 0;
+  Float_t signaler0, signaler1, signaler2 = 0;
   // Float_t Norm = 1;
 
 
@@ -315,7 +315,7 @@ void cro_plot6()
   //Output log file
   ofstream logFile("../cro/plots/cro_plot_log6.txt");
   // ofstream logFile("../cro/plots/demo_log.txt");
-
+`
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
   std::streambuf *oldBuffer = std::cout.rdbuf(&dualBuffer);
@@ -797,7 +797,6 @@ void cro_plot6()
       sf_Zjets22 = (events_data - eventsmc_nonZjets2) / events_Zjets2;
       cout << "   Zjets2 SCALING FACTOR =  " << sf_Zjets22 << endl << endl;
 
-
       //Integrals
       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
       {
@@ -829,17 +828,6 @@ void cro_plot6()
         hist_WW->SetBinError(bin, sqrt(hist_WW->GetBinContent(bin)));
         hist_Zjets->SetBinError(bin, sqrt(hist_Zjets->GetBinContent(bin)));
         cout << hist_WZ->GetBinContent(bin) << "    " << hist_WZ->GetBinError(bin) << endl << endl;
-
-        // if (!std::isnan(hist_WZ->GetBinContent(bin)))
-        // {
-        //   WZ_error += hist_WZ->GetBinError(bin);
-        //   cout << WZ_error << endl << endl;
-        // }
-
-        // t_error += hist_t->SetBinError(bin, sqrt(hist_t->GetBinContent(bin)));
-        // WW_error += hist_WW->SetBinError(bin, sqrt(hist_WW->GetBinContent(bin)));
-        // Zjets_error += hist_Zjets->SetBinError(bin, sqrt(hist_Zjets->GetBinContent(bin)));
-        
       }
 
       cout << events_data << "    " << events_WZ*sf_3lCR2 << "   " << events_t*sf_emuB2 << "   " << events_WW*sf_emuA2 << "   " <<  events_Zjets0*sf_Zjets02 << "  " << events_Zjets1*sf_Zjets12 << "   " << events_Zjets2*sf_Zjets22 << "  " << events_othr << endl << endl; 
@@ -871,23 +859,14 @@ void cro_plot6()
 
     
 
-    if (directory == "SR")
-    {
-      // Stacking with a specific order
-      hist_Zjets->Add(hist_othr);
-      hist_t->Add(hist_Zjets);
-      hist_WW->Add(hist_t);
-      hist_WZ->Add(hist_WW);
-    }
-    else
-    {
-      // Stacking with a specific order
-      hist_Zjets->Add(hist_othr);
-      hist_t->Add(hist_Zjets);
-      hist_WW->Add(hist_t);
-      hist_WZ->Add(hist_WW);
-      hist_signal->Add(hist_WZ);
-    }
+
+    // Stacking with a specific order
+    hist_Zjets->Add(hist_othr);
+    hist_t->Add(hist_Zjets);
+    hist_WW->Add(hist_t);
+    hist_WZ->Add(hist_WW);
+    hist_signal->Add(hist_WZ);
+
 
     cout << "   DATA/MC = " << hist_data->Integral(0,1000)/hist_signal->Integral(0,1000) << endl << endl;
     cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
@@ -905,32 +884,13 @@ void cro_plot6()
 
     // Plotting according to stacking order
     pad1->cd();
-    if (directory == "SR")
-    {
-      hist_WZ->Draw("hist");
-      hist_signal->Draw("histsame");
-      hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
-      hist_WZ->SetStats(0);
-      hist_WZ->SetLineWidth(2);
-      hist_WZ->SetLineColor(kBlue);
-      hist_WZ->SetFillColorAlpha(TColor::GetColor("#6495ED"), 0.9);
-      hist_WZ->SetLineWidth(2);
-      hist_WZ->GetYaxis()->SetTitle("Events");
-      hist_signal->SetLineColor(TColor::GetColor("#DE3163"));
-      hist_signal->SetFillColorAlpha(TColor::GetColor("#DE3163"), 0.8);
-      hist_signal->SetLineWidth(2);
-      hist_signal->SetFillStyle(3244);
-    }
-    else
-    {
-      hist_signal->Draw("hist");
-      hist_WZ->Draw("histsame");
-      hist_WW->Draw("histsame");
-      hist_t->Draw("histsame");
-      hist_Zjets->Draw("histsame");
-      hist_othr->Draw("histsame");
-      hist_data->Draw("same");
-    }
+    hist_signal->Draw("hist");
+    hist_WZ->Draw("histsame");
+    hist_WW->Draw("histsame");
+    hist_t->Draw("histsame");
+    hist_Zjets->Draw("histsame");
+    hist_othr->Draw("histsame");
+    hist_data->Draw("same");
 
     hist_signal->GetXaxis()->SetTitleSize(0.03);
     hist_signal->GetXaxis()->SetTitleFont(42);
@@ -957,77 +917,35 @@ void cro_plot6()
     tex2->SetLineWidth(2);
     tex2->Draw();
 
-    if (directory == "SR")
-    {
-      TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
-      leg->SetBorderSize(0);
-      leg->SetTextSize(0.03);
-      leg->SetMargin(0.25);
-      leg->SetEntrySeparation(0.1);
-      leg->AddEntry(hist_signal, "Signal", "f");
-      leg->AddEntry(hist_WZ, "Backgournd", "f");
-      leg->Draw();
-    }
-    else
-    {
-      TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
-      leg->SetBorderSize(0);
-      leg->SetTextSize(0.03);
-      leg->SetMargin(0.25);
-      leg->SetEntrySeparation(0.1);
-      leg->SetNColumns(2);
-      leg->AddEntry(hist_data, "Data", "p");
-      leg->AddEntry(hist_signal, "Signal", "f");
-      leg->AddEntry(hist_WZ, "WZ", "f");
-      leg->AddEntry(hist_WW, "WW", "f");
-      leg->AddEntry(hist_Zjets, "Z+jets", "f");
-      leg->AddEntry(hist_t, "top", "f");
-      leg->AddEntry(hist_othr, "othr", "f");
-      leg->Draw("same");
-    }
+    TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
+    leg->SetBorderSize(0);
+    leg->SetTextSize(0.03);
+    leg->SetMargin(0.25);
+    leg->SetEntrySeparation(0.1);
+    leg->SetNColumns(2);
+    leg->AddEntry(hist_data, "Data", "p");
+    leg->AddEntry(hist_signal, "Signal", "f");
+    leg->AddEntry(hist_WZ, "WZ", "f");
+    leg->AddEntry(hist_WW, "WW", "f");
+    leg->AddEntry(hist_Zjets, "Z+jets", "f");
+    leg->AddEntry(hist_t, "top", "f");
+    leg->AddEntry(hist_othr, "othr", "f");
+    leg->Draw("same");
 
-    // PAD 2
-
-    // TH1F *numerator = nullptr;
-    // TH1F *denominator = nullptr;
-    // if (directory == "SR")
-    // {
-    //   numerator = (TH1F *)hist_data->Clone("numerator");
-    //   denominator = (TH1F *)hist_WZ->Clone("denominator");
-    // }
-    // else
-    // {
-    //   numerator = (TH1F *)hist_data->Clone("numerator");
-    //   denominator = (TH1F *)hist_signal->Clone("denominator");
-    // }
-
-    // numerator->Sumw2(1);
-    // denominator->Sumw2(1);
-    // numerator->Divide(denominator);
-    // pad2->SetLogy();
-    // pad2->cd();
+    pad2->cd();
+    pad2->SetLogy();
 
     TH1F *numerator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *denominator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
-    if (directory == "SR")
-    {
-      numerator->Add(hist_data);
-      denominator->Add(hist_WZ);
-      denominator->Add(hist_signal);
-    }
-    else
-    {
-      numerator->Add(hist_data);
-      denominator->Add(hist_signal);
-    }
+
+    numerator->Add(hist_data);
+    denominator->Add(hist_signal);
 
     numerator->Sumw2(1);
     denominator->Sumw2(1);
     numerator->Divide(denominator);
-    numerator->SetMarkerStyle(20);
-    pad2->SetLogy();
-    pad2->cd();
 
+    numerator->SetMarkerStyle(20);
     numerator->GetXaxis()->SetTitle("");
     numerator->GetXaxis()->SetTitleSize(0.15);
     numerator->GetXaxis()->SetTitle("m^{jj} [GeV]");
@@ -1037,7 +955,6 @@ void cro_plot6()
     numerator->GetYaxis()->SetTitleOffset(0.4);
     numerator->GetYaxis()->SetTitleSize(0.12);
     numerator->GetYaxis()->SetLabelSize(0.10);
-    numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
     numerator->SetStats(0);
 
     // numerator->GetYaxis()->SetLabelSize(0.12);
@@ -1065,6 +982,7 @@ void cro_plot6()
       tex3->SetTextSize(0.04);
       tex3->SetLineWidth(1);
       tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg}");
       pad1->Update();
       c1->Update();
       c1->SaveAs("../cro/plots/mjj_SR.png");
@@ -1080,6 +998,8 @@ void cro_plot6()
       tex3->SetTextSize(0.04);
       tex3->SetLineWidth(1);
       tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
       pad1->Update();
       c2->Update();
       c2->SaveAs("../cro/plots/mjj_3lCR.png");
@@ -1094,6 +1014,8 @@ void cro_plot6()
       tex3->SetTextSize(0.04);
       tex3->SetLineWidth(1);
       tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
       pad1->Update();
       c3->Update();
       c3->SaveAs("../cro/plots/mjj_emCR_B.png");
@@ -1108,6 +1030,8 @@ void cro_plot6()
       tex3->SetTextSize(0.04);
       tex3->SetLineWidth(1);
       tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
       pad1->Update();
       c4->Update();
       c4->SaveAs("../cro/plots/mjj_emCR_A.png");
@@ -1122,6 +1046,8 @@ void cro_plot6()
       tex3->SetTextSize(0.04);
       tex3->SetLineWidth(1);
       tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
       pad1->Update();
       c5->Update();
       c5->SaveAs("../cro/plots/mjj_Zjets.png");
