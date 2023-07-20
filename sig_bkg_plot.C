@@ -306,7 +306,7 @@ private:
 //
 //
 // MAIN
-void cro_plot6()
+void sig_bkg_plot()
 {
 
   // Timer start
