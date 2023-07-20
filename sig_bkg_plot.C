@@ -515,9 +515,31 @@ void cro_plot6()
     //Plotting
 
     TCanvas *c1 = new TCanvas("c1", "pTZ_SR", 1400, 600, 700, 700);
-    c1->cd();
+    TCanvas *c2 = new TCanvas("c2", "pTZ_3lCR", 1400, 600, 700, 700);
+    TCanvas *c3 = new TCanvas("c3", "pTZ_emuB", 1400, 600, 700, 700);
+    TCanvas *c4 = new TCanvas("c4", "pTZ_emuA", 1400, 600, 700, 700);
+    TCanvas *c5 = new TCanvas("c5", "pTZ_Zjets", 1400, 600, 700, 700);
 
-
+    if (directory == "SR")
+    {
+      c1->cd();
+    }
+    else if (directory == "3lCR")
+    {
+      c2->cd();
+    }
+    else if (directory == "emCR_B")
+    {
+      c3->cd();
+    }
+    else if (directory == "emCR_A")
+    {
+      c4->cd();
+    }
+    else if (directory == "Zjets0" || directory == "Zjets1" || directory == "Zjets2")
+    {
+      c5->cd();
+    }
 
     TPad *pad1 = new TPad("pad1", "pad1", 0.01, 0.23, 1., 1.);
     TPad *pad2 = new TPad("pad2", "pad2", 0.01, 0.01, 1., 0.25);
@@ -578,8 +600,22 @@ void cro_plot6()
     hist_Zjets2->Add(hist_Zjets_mumu2);
 
 
-
-    if (directory == "SR")
+    if (directory == "Zjets1")
+    {
+      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+      {
+        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
+      }
+    }
+    else if (directory == "Zjets2")
+    {
+      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+      {
+        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
+        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
+      }
+    }
+    else if (directory == "SR")
     {
       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
       {
@@ -655,9 +691,128 @@ void cro_plot6()
     Float_t error1 = 0;
 
     
+    
+    
 
 
-    if (directory == "SR")
+    // Calculating nmc integrals before stacking the histograms
+    
+
+    if (directory == "3lCR")
+    {
+
+      eventsmc_nonWZ = events_signal + events_WW + events_t + events_Zjets + events_othr;
+      sf_3lCR2 = (events_data - eventsmc_nonWZ) / events_WZ; 
+      cout << "   WZ SCALING FACTOR =  " << sf_3lCR2 << endl << endl;
+      
+      //Integrals
+      nmc_WZ = hist_WZ->Integral(-3000, 3000);
+      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
+      nmc_nonWZ = nmc_total - nmc_WZ ;
+      sf_3lCR = (hist_data->Integral(-3000, 3000) - nmc_nonWZ) / nmc_WZ;
+      cout << "   WZ SCALING FACTOR = " << sf_3lCR << endl << endl;
+    }
+    else if (directory == "emCR_B")
+    {
+
+      eventsmc_nont = events_signal + events_WZ*sf_3lCR2 + events_WW + events_Zjets + events_othr;
+      sf_emuB2 = (events_data - eventsmc_nont) / events_t;
+      cout << "   TOP SCALING FACTOR =  " << sf_emuB2 << endl << endl;
+
+      //Integrals
+      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+      {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+
+      }
+      nmc_top = hist_t->Integral(-3000, 3000);
+      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
+      nmc_nontop = nmc_total - nmc_top;
+      sf_emuB = (hist_data->Integral(-3000, 3000) - nmc_nontop) / nmc_top;
+      cout << "   TOP SCALING FACTOR = " << sf_emuB << endl << endl;
+    }
+    else if (directory == "emCR_A")
+    {
+
+      eventsmc_nonWW = events_signal + events_WZ*sf_3lCR2 + events_t*sf_emuB2 + events_Zjets + events_othr;
+      sf_emuA2 = (events_data - eventsmc_nonWW) / events_WW;
+      cout << "   WW SCALING FACTOR =  " << sf_emuA2 << endl << endl;
+
+      //Integrals
+      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+      {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
+      }
+      nmc_WW = hist_WW->Integral(-3000, 3000);
+      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
+      nmc_nonWW = nmc_total - nmc_WW;
+      sf_emuA = (hist_data->Integral(-3000, 3000) - nmc_nonWW) / nmc_WW;
+      cout << "   WW SCALING FACTOR = " << sf_emuA << endl << endl;
+    }
+    else if (directory == "Zjets0")
+    {
+      eventsmc_nonZjets0 = events_signal + events_WZ*sf_3lCR2 + events_t*sf_emuB2 + events_WW*sf_emuA2 + events_othr;
+      sf_Zjets02 = (events_data - eventsmc_nonZjets0) / events_Zjets0;
+      cout << "   Zjets0 SCALING FACTOR =  " << sf_Zjets02 << endl << endl;
+
+
+      //Integrals
+      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+      {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
+        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
+      }
+      nmc_Zjets0 = hist_Zjets0->Integral(-3000, 3000);
+      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets0->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
+      nmc_nonZjets0 = nmc_total - nmc_Zjets0;
+      sf_Zjets0 = (hist_data->Integral(-3000, 3000) - nmc_nonZjets0) / nmc_Zjets0;
+      cout << "   Zjets0 SCALING FACTOR = " << sf_Zjets0 << endl << endl;
+    }
+    else if (directory == "Zjets1")
+    {
+      eventsmc_nonZjets1 = events_signal + events_WZ*sf_3lCR2 + events_t*sf_emuB2 + events_WW*sf_emuA2 + events_othr;
+      sf_Zjets12 = (events_data - eventsmc_nonZjets1) / events_Zjets1;
+      cout << "   Zjets1 SCALING FACTOR =  " << sf_Zjets12 << endl << endl;
+
+
+      //Integrals
+      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+      {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
+        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
+        //Zjets0 scaled above
+      }
+      nmc_Zjets1 = hist_Zjets1->Integral(-3000, 3000);
+      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets1->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
+      nmc_nonZjets1 = nmc_total - nmc_Zjets1;
+      sf_Zjets1 = (hist_data->Integral(-3000, 3000) - nmc_nonZjets1) / nmc_Zjets1;
+      cout << "   Zjets1 SCALING FACTOR = " << sf_Zjets1 << endl << endl;
+    }
+    else if (directory == "Zjets2")
+    {
+      eventsmc_nonZjets2 = events_signal + events_WZ*sf_3lCR2 + events_t*sf_emuB2 + events_WW*sf_emuA2 + events_othr;
+      sf_Zjets22 = (events_data - eventsmc_nonZjets2) / events_Zjets2;
+      cout << "   Zjets2 SCALING FACTOR =  " << sf_Zjets22 << endl << endl;
+
+
+      //Integrals
+      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+      {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
+        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
+        //Zjets0 and Zjets1 scaled above
+      }
+      nmc_Zjets2 = hist_Zjets2->Integral(-3000, 3000);
+      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets2->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
+      nmc_nonZjets2 = nmc_total - nmc_Zjets2;
+      sf_Zjets2 = (hist_data->Integral(-3000, 3000) - nmc_nonZjets2) / nmc_Zjets2;
+      cout << "   Zjets2 SCALING FACTOR = " << sf_Zjets2 << endl << endl;
+    }
+    else if (directory == "SR")
     {
       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
       {
@@ -674,6 +829,16 @@ void cro_plot6()
         hist_WW->SetBinError(bin, sqrt(hist_WW->GetBinContent(bin)));
         hist_Zjets->SetBinError(bin, sqrt(hist_Zjets->GetBinContent(bin)));
         cout << hist_WZ->GetBinContent(bin) << "    " << hist_WZ->GetBinError(bin) << endl << endl;
+
+        // if (!std::isnan(hist_WZ->GetBinContent(bin)))
+        // {
+        //   WZ_error += hist_WZ->GetBinError(bin);
+        //   cout << WZ_error << endl << endl;
+        // }
+
+        // t_error += hist_t->SetBinError(bin, sqrt(hist_t->GetBinContent(bin)));
+        // WW_error += hist_WW->SetBinError(bin, sqrt(hist_WW->GetBinContent(bin)));
+        // Zjets_error += hist_Zjets->SetBinError(bin, sqrt(hist_Zjets->GetBinContent(bin)));
         
       }
 
@@ -714,6 +879,15 @@ void cro_plot6()
       hist_WW->Add(hist_t);
       hist_WZ->Add(hist_WW);
     }
+    else
+    {
+      // Stacking with a specific order
+      hist_Zjets->Add(hist_othr);
+      hist_t->Add(hist_Zjets);
+      hist_WW->Add(hist_t);
+      hist_WZ->Add(hist_WW);
+      hist_signal->Add(hist_WZ);
+    }
 
     cout << "   DATA/MC = " << hist_data->Integral(0,1000)/hist_signal->Integral(0,1000) << endl << endl;
     cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
@@ -746,6 +920,16 @@ void cro_plot6()
       hist_signal->SetFillColorAlpha(TColor::GetColor("#DE3163"), 0.8);
       hist_signal->SetLineWidth(2);
       hist_signal->SetFillStyle(3244);
+    }
+    else
+    {
+      hist_signal->Draw("hist");
+      hist_WZ->Draw("histsame");
+      hist_WW->Draw("histsame");
+      hist_t->Draw("histsame");
+      hist_Zjets->Draw("histsame");
+      hist_othr->Draw("histsame");
+      hist_data->Draw("same");
     }
 
     hist_signal->GetXaxis()->SetTitleSize(0.03);
@@ -812,6 +996,11 @@ void cro_plot6()
       numerator->Add(hist_signal);
       denominator->Add(hist_WZ);
     }
+    else
+    {
+          numerator->Add(hist_signal);
+          denominator->Add(hist_WZ);
+    }
 
     numerator->Sumw2(1);
     denominator->Sumw2(1);
@@ -860,6 +1049,74 @@ void cro_plot6()
       c1->SaveAs("../cro/plots/mjj_SR.png");
       cout << "  SIGGNAL INTEGRAL  " << hist_data->Integral(-3000, 3000) - hist_WZ->Integral(-3000, 3000) - hist_Zjets->Integral(-3000, 3000) - hist_WW->Integral(-3000, 3000) - hist_t->Integral(-3000, 3000) - hist_othr->Integral(-3000, 3000) << endl << endl;
     }
+    else if (directory == "3lCR")
+    {
+      pad1->cd();
+      // TLatex *tex3 = new TLatex(0.28, 0.65, "3l Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "3l Control Region");
+      tex3->SetNDC();
+      tex3->SetTextFont(1);
+      tex3->SetTextSize(0.04);
+      tex3->SetLineWidth(1);
+      tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
+      pad1->Update();
+      c2->Update();
+      c2->SaveAs("../cro/plots/mjj_3lCR.png");
+    }
+    else if (directory == "emCR_B")
+    {
+      pad1->cd();
+      // TLatex *tex3 = new TLatex(0.28, 0.65, "emuB Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "emuB Control Region");
+      tex3->SetNDC();
+      tex3->SetTextFont(1);
+      tex3->SetTextSize(0.04);
+      tex3->SetLineWidth(1);
+      tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
+      pad1->Update();
+      c3->Update();
+      c3->SaveAs("../cro/plots/mjj_emCR_B.png");
+    }
+    else if (directory == "emCR_A")
+    {
+      pad1->cd();
+      // TLatex *tex3 = new TLatex(0.58, 0.65, "emuA Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "emuA Control Region");
+      tex3->SetNDC();
+      tex3->SetTextFont(1);
+      tex3->SetTextSize(0.04);
+      tex3->SetLineWidth(1);
+      tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
+      pad1->Update();
+      c4->Update();
+      c4->SaveAs("../cro/plots/mjj_emCR_A.png");
+    }
+    else if (directory == "Zjets")
+    {
+      pad1->cd();
+      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets Control Region");
+      tex3->SetNDC();
+      tex3->SetTextFont(1);
+      tex3->SetTextSize(0.04);
+      tex3->SetLineWidth(1);
+      tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
+      pad1->Update();
+      c5->Update();
+      c5->SaveAs("../cro/plots/mjj_Zjets.png");
+
+
+    }
+
+    
 
 
     //To avoid memory leak
