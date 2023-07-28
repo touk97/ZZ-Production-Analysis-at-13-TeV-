@@ -821,9 +821,11 @@ void zjets()
        cout << "------------------------------------------------------------------" << endl << endl;
     }
 
-    
 
-
+    //Merge Zjets before start plotting
+    hist_Zjets->Add(hist_Zjets0);
+    hist_Zjets->Add(hist_Zjets1);
+    hist_Zjets->Add(hist_Zjets2);
     // Stacking with a specific order
     // hist_Zjets->Add(hist_othr);
     // hist_top->Add(hist_Zjets);
@@ -1143,9 +1145,9 @@ void zjets()
   cout << "   SCALING FACTORS:       μ_WZ = " <<  sf_3lCR << " +- " << sf_3lCR_er << endl << endl 
        << "                          μ_top = " << sf_emuB  << " +- " << sf_emuB_er << endl << endl 
        << "                          μ_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl
-       << "                          μ_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0 << endl << endl  
-       << "                          μ_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1 << endl << endl 
-       << "                          μ_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2 << endl << endl;
+       << "                          μ_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl  
+       << "                          μ_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl 
+       << "                          μ_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
           
           
   // Timer stop
