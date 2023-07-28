@@ -236,10 +236,10 @@ void zjets_unique()
   // Float_t xbins[21] = {100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100};  //mjj
   // Float_t xbins[31] = {-8, -7.5, -7.0, -6.5, -6.0, -5.5, -5.0, -4.5, -4, -3.5, -3, -2.5,-2, -1.5, -1.0, -0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 9.0};  //detajj
   
-  Float_t sf_3lCR, sf_3lCR2, sf_3lCR_er, sf_3lCR2_er;
-  Float_t sf_emuB, sf_emuB2, sf_emuB_er, sf_emuB2_er;
-  Float_t sf_emuA, sf_emuA2, sf_emuA_er, sf_emuA2_er;
-  Float_t sf_Zjets, sf_Zjets2, sf_Zjets_er, sf_Zjets2_er;
+  Float_t sf_3lCR, sf_3lCR_er;
+  Float_t sf_emuB, sf_emuB_er;
+  Float_t sf_emuA, sf_emuA_er;
+  Float_t sf_Zjets, sf_Zjets_er;
 
 
   for (string &directory : directories)
@@ -487,14 +487,6 @@ void zjets_unique()
     hist_othr->Add(hist_llvvjj_WW);
 
 
-    Float_t nmc_WZ, nmc_nonWZ;
-    Float_t nmc_top, nmc_nontop;
-    Float_t nmc_WW, nmc_nonWW;
-    Float_t nmc_Zjets, nmc_nonZjets;
-    Float_t nmc_othr;
-    Float_t nmc_total;
-    Float_t nmc_signal;
-
     Float_t events_total;
     Float_t events_nonWZ;
     Float_t events_nonWZ_er;
@@ -525,115 +517,78 @@ void zjets_unique()
     Float_t error1 = 0;
 
 
-    // Calculating nmc integrals before stacking the histograms
-    
+    //Scaling factors calculations 
 
     if (directory == "3lCR")
     {
 
       events_nonWZ = events_signal + events_WW + events_top + events_Zjets + events_othr;
       events_nonWZ_er = sqrt(pow(events_signal_er, 2) + pow(events_WW_er, 2) + pow(events_top_er, 2) + pow(events_Zjets_er, 2) + pow(events_othr_er, 2));
-      sf_3lCR2 = (events_data - events_nonWZ) / events_WZ; 
-      sf_3lCR2_er = sqrt(pow((events_data_er - events_nonWZ_er), 2)/pow(events_WZ, 2)  +  pow(sf_3lCR2, 2)/pow(events_WZ, 2) * pow(events_WZ_er, 2));
-      cout << "   WZ SCALING FACTOR =  " << sf_3lCR2 << " +- " << sf_3lCR2_er << endl << endl;
-      
-      //Integrals
-      nmc_WZ = hist_WZ->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_top->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nonWZ = nmc_total - nmc_WZ ;
-      sf_3lCR = (hist_data->Integral(-3000, 3000) - nmc_nonWZ) / nmc_WZ;
-      cout << "   WZ SCALING FACTOR = " << sf_3lCR << endl << endl;
+      sf_3lCR = (events_data - events_nonWZ) / events_WZ; 
+      sf_3lCR_er = sqrt(pow((events_data_er - events_nonWZ_er), 2)/pow(events_WZ, 2)  +  pow(sf_3lCR, 2)/pow(events_WZ, 2) * pow(events_WZ_er, 2));
+      cout << "   WZ SCALING FACTOR =  " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
+    
     }
     else if (directory == "emCR_B")
     {
+
       //Correcting for WZ events
-      events_WZ = events_WZ*sf_3lCR2;
-      events_WZ_er = sqrt( pow(sf_3lCR2, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR2_er, 2));
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
 
       events_nontop = events_signal + events_WZ + events_WW + events_Zjets + events_othr;
       events_nontop_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets_er, 2) + pow(events_othr_er, 2));
-      sf_emuB2 = (events_data - events_nontop) / events_top;
-      sf_emuB2_er = sqrt(pow((events_data_er - events_nontop_er), 2)/pow(events_top, 2)  +  pow(sf_3lCR2, 2)/pow(events_top, 2) * pow(events_top_er, 2));
-      cout << "   TOP SCALING FACTOR =  " << sf_emuB2 << " +- " << sf_emuB2_er << endl << endl;
+      sf_emuB = (events_data - events_nontop) / events_top;
+      sf_emuB_er = sqrt(pow((events_data_er - events_nontop_er), 2)/pow(events_top, 2)  +  pow(sf_3lCR, 2)/pow(events_top, 2) * pow(events_top_er, 2));
+      cout << "   TOP SCALING FACTOR =  " << sf_emuB << " +- " << sf_emuB_er << endl << endl;
 
-      //Integrals
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-
-      }
-      nmc_top = hist_top->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_top->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nontop = nmc_total - nmc_top;
-      sf_emuB = (hist_data->Integral(-3000, 3000) - nmc_nontop) / nmc_top;
-      cout << "   TOP SCALING FACTOR = " << sf_emuB << endl << endl;
     }
     else if (directory == "emCR_A")
     {
+
       //Correcting for WZ and top events
-      events_WZ = events_WZ*sf_3lCR2;
-      events_WZ_er = sqrt( pow(sf_3lCR2, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR2_er, 2));
-      events_top = events_top * sf_emuB2;
-      events_top_er = sqrt( pow(sf_emuB2, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB2_er, 2));
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
+      events_top = events_top * sf_emuB;
+      events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
 
       events_nonWW = events_signal + events_WZ + events_top + events_Zjets + events_othr;
       events_nonWW_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_Zjets_er, 2) + pow(events_othr_er, 2));
-      sf_emuA2 = (events_data - events_nonWW) / events_WW;
-      sf_emuA2_er = sqrt(pow((events_data_er - events_nonWW_er), 2)/pow(events_WW, 2)  +  pow(sf_emuA2, 2)/pow(events_WW, 2) * pow(events_WW_er, 2));
-      cout << "   WW SCALING FACTOR =  " << sf_emuA2 << " +- " << sf_emuA2_er << endl << endl;
+      sf_emuA = (events_data - events_nonWW) / events_WW;
+      sf_emuA_er = sqrt(pow((events_data_er - events_nonWW_er), 2)/pow(events_WW, 2)  +  pow(sf_emuA, 2)/pow(events_WW, 2) * pow(events_WW_er, 2));
+      cout << "   WW SCALING FACTOR =  " << sf_emuA << " +- " << sf_emuA_er << endl << endl;
 
-      //Integrals
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-      }
-      nmc_WW = hist_WW->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_top->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nonWW = nmc_total - nmc_WW;
-      sf_emuA = (hist_data->Integral(-3000, 3000) - nmc_nonWW) / nmc_WW;
-      cout << "   WW SCALING FACTOR = " << sf_emuA << endl << endl;
     }
     else if (directory == "Zjets")
     {
+
       //Correcting for WZ, top and WW events
-      events_WZ = events_WZ*sf_3lCR2;
-      events_WZ_er = sqrt( pow(sf_3lCR2, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR2_er, 2));
-      events_top = events_top * sf_emuB2;
-      events_top_er = sqrt( pow(sf_emuB2, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB2_er, 2));
-      events_WW = events_WW * sf_emuA2;
-      events_WW_er = sqrt( pow(sf_emuA2, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA2_er, 2));
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
+      events_top = events_top * sf_emuB;
+      events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
+      events_WW = events_WW * sf_emuA;
+      events_WW_er = sqrt( pow(sf_emuA, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA_er, 2));
 
       events_nonZjets = events_signal + events_WZ + events_top + events_WW + events_othr;
       events_nonZjets_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_othr_er, 2));
-      sf_Zjets2 = (events_data - events_nonZjets) / events_Zjets;
-      sf_Zjets2_er = sqrt(pow((events_data_er - events_nonZjets_er), 2)/pow(events_Zjets, 2)  +  pow(sf_Zjets2, 2)/pow(events_Zjets, 2) * pow(events_Zjets_er, 2));
-      cout << "   Zjets SCALING FACTOR =  " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
+      sf_Zjets = (events_data - events_nonZjets) / events_Zjets;
+      sf_Zjets_er = sqrt(pow((events_data_er - events_nonZjets_er), 2)/pow(events_Zjets, 2)  +  pow(sf_Zjets, 2)/pow(events_Zjets, 2) * pow(events_Zjets_er, 2));
+      cout << "   Zjets SCALING FACTOR =  " << sf_Zjets << " +- " << sf_Zjets_er << endl << endl;
 
-      //Integrals
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-      }
-      nmc_Zjets = hist_Zjets->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_top->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nonZjets = nmc_total - nmc_Zjets;
-      sf_Zjets = (hist_data->Integral(-3000, 3000) - nmc_nonZjets) / nmc_Zjets;
-      cout << "   Zjets SCALING FACTOR = " << sf_Zjets << endl << endl;
+
     }
     else if (directory == "SR")
     {
-      //Correcting for WZ, top and WW events
-      events_WZ = events_WZ*sf_3lCR2;
-      events_WZ_er = sqrt( pow(sf_3lCR2, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR2_er, 2));
-      events_top = events_top * sf_emuB2;
-      events_top_er = sqrt( pow(sf_emuB2, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB2_er, 2));
-      events_WW = events_WW * sf_emuA2;
-      events_WW_er = sqrt( pow(sf_emuA2, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA2_er, 2));
-      events_Zjets = events_Zjets * sf_Zjets2;
-      events_Zjets_er = sqrt( pow(sf_Zjets2, 2) * pow(events_Zjets_er, 2) + pow(events_Zjets, 2) * pow(sf_Zjets2_er, 2));
+      //Correcting for WZ, top, WW events and Zjets events
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
+      events_top = events_top * sf_emuB;
+      events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
+      events_WW = events_WW * sf_emuA;
+      events_WW_er = sqrt( pow(sf_emuA, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA_er, 2));
+      events_Zjets = events_Zjets * sf_Zjets;
+      events_Zjets_er = sqrt( pow(sf_Zjets, 2) * pow(events_Zjets_er, 2) + pow(events_Zjets, 2) * pow(sf_Zjets_er, 2));
 
       //Signal
       events_signal = events_data - events_WZ - events_top - events_WW - events_Zjets - events_othr;
@@ -646,28 +601,17 @@ void zjets_unique()
         hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
         hist_Zjets->SetBinContent(bin, hist_Zjets->GetBinContent(bin) * sf_Zjets);
       }
-    
 
-
-      //Bins already scaled
-      nmc_WZ = hist_WZ->Integral(-3000, 3000);
-      nmc_top = hist_top->Integral(-3000, 3000);
-      nmc_WW = hist_WW->Integral(-3000, 3000);
-      nmc_Zjets = hist_Zjets->Integral(-3000, 3000);
-      nmc_othr = hist_othr->Integral(-3000, 3000);
-      nmc_signal = hist_data->Integral(-3000, 3000) - nmc_WZ - nmc_top - nmc_WW - nmc_Zjets - nmc_othr;
+      //Print calculated events for every region
       
-
-
-
        cout << "------------------------------------------------------------------" << endl << endl;
-       cout << endl << endl  << "   SIGNAL  (I) = " << nmc_signal << "                 SIGNAL  (E) =  " << events_signal << " +- " << events_signal_er  << endl << endl;
-       cout << "   Data: " << "    " << hist_data->Integral(-3000, 3000) << "                        " << events_data << " +- " << events_data_er << endl << endl;
-       cout << "   WZ: " << "      " << nmc_WZ << ", " << sf_3lCR << "            " << events_WZ << " +- " << events_WZ_er << ", " << sf_3lCR2 << endl << endl;
-       cout << "   Top: " << "     " << nmc_top << ", " << sf_emuB << "            " << events_top << " +- " << events_top_er << ", " << sf_emuB2 << endl << endl;
-       cout << "   WW: " << "      " << nmc_WW << ", " << sf_emuA << "            " << events_WW << " +- " << events_WW_er << ", " << sf_emuA2 << endl << endl;
-       cout << "   Zjets: " << "   " << nmc_Zjets << ", " << sf_Zjets << "            " << events_Zjets << " +- " << events_Zjets_er << ", " << sf_Zjets2 << endl << endl;
-       cout << "   Other: " << "   " << nmc_othr << "                      " << events_othr << " +- " << events_othr_er << endl << endl;
+       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl << endl;
+       cout << "   Data: " << "    " << events_data << " +- " << events_data_er << endl << endl;
+       cout << "   WZ: " << "      " << events_WZ << " +- " << events_WZ_er << ", " << sf_3lCR << endl << endl;
+       cout << "   Top: " << "     " << events_top << " +- " << events_top_er << ", " << sf_emuB << endl << endl;
+       cout << "   WW: " << "      " << events_WW << " +- " << events_WW_er << ", " << sf_emuA << endl << endl;
+       cout << "   Zjets: " << "   " << events_Zjets << " +- " << events_Zjets_er << ", " << sf_Zjets << endl << endl;
+       cout << "   Other: " << "   " << events_othr << " +- " << events_othr_er << endl << endl;
        cout << "------------------------------------------------------------------" << endl << endl;
     }
 
@@ -893,7 +837,6 @@ void zjets_unique()
       pad1->Update();
       c1->Update();
       c1->SaveAs("../cro/plots/stjj_SR.png");
-      cout << "   SIGNAL INTEGRAL  " << nmc_signal << endl << endl;
     }
     else if (directory == "3lCR")
     {
@@ -991,13 +934,11 @@ void zjets_unique()
   }
   
   cout << endl << endl;
-  cout << "   SCALING FACTORS (integral):    " << "sf_3lCR = " <<  sf_3lCR << "    ||   sf_emuB = " << sf_emuB  << "   ||   sf_emuA = " << sf_emuA <<
+  cout << "   SCALING FACTORS (events):      " << "sf_3lCR = " <<  sf_3lCR << "   ||   sf_emuB = " << sf_emuB  << "   ||   sf_emuA = " << sf_emuA <<
   endl << "                                  " << "sf_Zjets = " << sf_Zjets << endl << endl;
-  cout << "   SCALING FACTORS (events):      " << "sf_3lCR2 = " <<  sf_3lCR2 << "   ||   sf_emuB2 = " << sf_emuB2  << "   ||   sf_emuA2 = " << sf_emuA <<
-  endl << "                                  " << "sf_Zjets2 = " << sf_Zjets << endl << endl;
           
-           
-  // Timer stop 
+          
+  // Timer stop
     auto end = chrono::high_resolution_clock::now();
 
     chrono::duration<float> duration = end - start;
