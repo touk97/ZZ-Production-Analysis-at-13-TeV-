@@ -599,7 +599,7 @@ void cro_plot6()
     hist_Zjets2->Add(hist_Zjets_ee2);
     hist_Zjets2->Add(hist_Zjets_mumu2);
 
-
+    //Correct the Zjets event before merging them back together
     if (directory == "Zjets1")
     {
       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
