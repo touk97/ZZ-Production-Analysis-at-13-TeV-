@@ -28,7 +28,7 @@ using namespace std;
 
 
 
-vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
+vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
 {
 
   TH1::SetDefaultSumw2(kTRUE);
@@ -148,7 +148,7 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
 //
 //
 //
-vector<Float_t> ZPlotter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, string directory)
+vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, string directory)
 {
 
   TH1::SetDefaultSumw2(kTRUE);
@@ -490,53 +490,53 @@ void zjets()
  
     cout << "   ================== DATA ==================    " << endl << endl;
     cout << "   DATA:";
-    vector<Float_t> n_data = Plotter(tree_data, hist_data, directory);
+    vector<Float_t> n_data = Counter(tree_data, hist_data, directory);
 
     cout << "   ================== SIGNAL ==================    " << endl << endl;
     cout << "   llvv:";
-    vector<Float_t> n_llvv = Plotter(tree_llvv, hist_llvv, directory);
+    vector<Float_t> n_llvv = Counter(tree_llvv, hist_llvv, directory);
     cout << "   llvvjj:";
-    vector<Float_t> n_llvvjj = Plotter(tree_llvvjj, hist_llvvjj, directory);
+    vector<Float_t> n_llvvjj = Counter(tree_llvvjj, hist_llvvjj, directory);
 
     cout << "   ================== WZ ==================    " << endl << endl;
     cout << "   WZ:";
-    vector<Float_t> n_WZ = Plotter(tree_WZ, hist_WZ, directory);
+    vector<Float_t> n_WZ = Counter(tree_WZ, hist_WZ, directory);
 
     cout << "   ================== Zjets ==================    " << endl << endl;
     cout << "   Z_jets_ee:";
-    vector<Float_t> n_Zjets_ee = ZPlotter(tree_Z_jets_ee, hist_Zjets_ee0, hist_Zjets_ee1, hist_Zjets_ee2, directory);
+    vector<Float_t> n_Zjets_ee = ZCounter(tree_Z_jets_ee, hist_Zjets_ee0, hist_Zjets_ee1, hist_Zjets_ee2, directory);
     cout << "   Z_jets_mumu:";
-    vector<Float_t> n_Zjets_mumu = ZPlotter(tree_Z_jets_mumu, hist_Zjets_mumu0, hist_Zjets_mumu1, hist_Zjets_mumu2, directory);
+    vector<Float_t> n_Zjets_mumu = ZCounter(tree_Z_jets_mumu, hist_Zjets_mumu0, hist_Zjets_mumu1, hist_Zjets_mumu2, directory);
 
     cout << "   ================== top ==================    " << endl << endl;
     cout << "   Top:";
-    vector<Float_t> n_top = Plotter(tree_top, hist_top, directory);
+    vector<Float_t> n_top = Counter(tree_top, hist_top, directory);
     cout << "   ttbarV_ttbarVV:";
-    vector<Float_t> n_ttbarV_ttbarVV = Plotter(tree_ttbarV_ttbarVV, hist_ttbarV_ttbarVV, directory);
+    vector<Float_t> n_ttbarV_ttbarVV = Counter(tree_ttbarV_ttbarVV, hist_ttbarV_ttbarVV, directory);
     cout << "   Wt:";
-    vector<Float_t> n_Wt = Plotter(tree_Wt, hist_Wt, directory);
+    vector<Float_t> n_Wt = Counter(tree_Wt, hist_Wt, directory);
 
     cout << "   ================== WW ==================    " << endl << endl;
     cout << "   WW:";
-    vector<Float_t> n_WW = Plotter(tree_WW, hist_WW, directory);
+    vector<Float_t> n_WW = Counter(tree_WW, hist_WW, directory);
 
     cout << "   ================== Othr ==================    " << endl << endl;
     cout << "   llll:";
-    vector<Float_t> n_llll = Plotter(tree_llll, hist_llll, directory);
+    vector<Float_t> n_llll = Counter(tree_llll, hist_llll, directory);
     cout << "   llqq:";
-    vector<Float_t> n_llqq = Plotter(tree_llqq, hist_llqq, directory);
+    vector<Float_t> n_llqq = Counter(tree_llqq, hist_llqq, directory);
     cout << "   VVV:";
-    vector<Float_t> n_VVV = Plotter(tree_VVV, hist_VVV, directory);
+    vector<Float_t> n_VVV = Counter(tree_VVV, hist_VVV, directory);
     cout << "   W_jets:";
-    vector<Float_t> n_Wjets = Plotter(tree_W_jets, hist_W_jets, directory);
+    vector<Float_t> n_Wjets = Counter(tree_W_jets, hist_W_jets, directory);
     cout << "   Ztt:";
-    vector<Float_t> n_Ztt = Plotter(tree_Ztt, hist_Ztt, directory);
+    vector<Float_t> n_Ztt = Counter(tree_Ztt, hist_Ztt, directory);
     cout << "   WZ_jj:";
-    vector<Float_t> n_WZjj = Plotter(tree_WZ_jj, hist_WZ_jj, directory);
+    vector<Float_t> n_WZjj = Counter(tree_WZ_jj, hist_WZ_jj, directory);
     cout << "   lllljj:";
-    vector<Float_t> n_lllljj = Plotter(tree_lllljj, hist_lllljj, directory);
+    vector<Float_t> n_lllljj = Counter(tree_lllljj, hist_lllljj, directory);
     cout << "   llvvjj_WW:";
-    vector<Float_t> n_llvvjj_WW = Plotter(tree_llvvjj_WW, hist_llvvjj_WW, directory);
+    vector<Float_t> n_llvvjj_WW = Counter(tree_llvvjj_WW, hist_llvvjj_WW, directory);
 
 
 
