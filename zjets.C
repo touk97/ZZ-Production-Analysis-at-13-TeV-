@@ -198,52 +198,32 @@ vector<Float_t> ZPlotter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
 
-  Double_t signal0, signal1, signal2 = 0.;
-  Double_t signaler0, signaler1, signaler2 = 0.;
+  Float_t signal0 = 0;
+  Float_t signal1 = 0;
+  Float_t signal2 = 0;
+  Float_t signaler0 = 0;
+  Float_t signaler1 = 0;
+  Float_t signaler2 = 0;
   // Float_t Norm = 1;
 
   // Loop over events
-  if (nentries > 0)
+
+  for (Int_t i = 0; i < nentries; i++)
   {
-    for (Int_t i = 0; i < nentries; i++)
+    tree->GetEntry(i);
+    if (directory == "SR")
     {
-      tree->GetEntry(i);
-      if (directory == "SR")
+      if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
+          leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
+          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
       {
-        if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
-            leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
-            dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
-        {
-          if (n_jets == 0)
-          {
-            signal0 = signal0 + weight;
-            signaler0 = signaler0 + weight * weight;
-            hist0->Fill(Z_pT, weight);
-          }
-          else if (n_jets == 1)
-          {
-            signal1 = signal1 + weight;
-            signaler1 = signaler1 + weight * weight;
-            hist1->Fill(Z_pT, weight);
-          }
-          else if (n_jets > 1)
-          {
-            signal2 = signal2 + weight;
-            signaler2 = signaler2 + weight * weight;
-            hist2->Fill(Z_pT, weight);
-          }
-        }
-      }
-      else
-      {
-        // Inclusive
-        if (n_jets == 0)
+        if (n_jets < 1)
         {
           signal0 = signal0 + weight;
           signaler0 = signaler0 + weight * weight;
           hist0->Fill(Z_pT, weight);
         }
-        else if (n_jets == 1)
+        else if (n_jets > 0 && n_jets < 2)
         {
           signal1 = signal1 + weight;
           signaler1 = signaler1 + weight * weight;
@@ -255,25 +235,38 @@ vector<Float_t> ZPlotter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
           signaler2 = signaler2 + weight * weight;
           hist2->Fill(Z_pT, weight);
         }
-        // // Exclusive
-        // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
-        // // if (met_tst > 70 && n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30 && detajj > 1 && MetOHT > 0.3 && dMetZPhi > 2.2 && n_bjets < 1 && dLepR < 2.2 )
-        // {
-        //   signal = signal + weight;
-        //   signaler = signaler + weight * weight;
-        //   hist->Fill(Z_pT + met_tst + leading_jet_\pt + second_jet_ptt, weight);
-        // }
       }
     }
-  }
-  else
-  {
-    signal0 = 0;
-    signaler0 = 0;
-    signal1 = 0;
-    signaler1 = 0;
-    signal2 = 0;
-    signaler2 = 0;
+    else
+    {
+      // Inclusive
+      if (n_jets < 1)
+      {
+        signal0 = signal0 + weight;
+        signaler0 = signaler0 + weight * weight;
+        hist0->Fill(Z_pT, weight);
+      }
+      else if (n_jets > 0 && n_jets < 2)
+      {
+        signal1 = signal1 + weight;
+        signaler1 = signaler1 + weight * weight;
+        hist1->Fill(Z_pT, weight);
+      }
+      else if (n_jets > 1)
+      {
+        signal2 = signal2 + weight;
+        signaler2 = signaler2 + weight * weight;
+        hist2->Fill(Z_pT, weight);
+      }
+      // // Exclusive
+      // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
+      // // if (met_tst > 70 && n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30 && detajj > 1 && MetOHT > 0.3 && dMetZPhi > 2.2 && n_bjets < 1 && dLepR < 2.2 )
+      // {
+      //   signal = signal + weight;
+      //   signaler = signaler + weight * weight;
+      //   hist->Fill(Z_pT + met_tst + leading_jet_\pt + second_jet_ptt, weight);
+      // }
+    }
   }
 
   cout << "     ENTRIES = " << tree->GetEntries() << endl << endl; 
@@ -708,8 +701,8 @@ void zjets()
     Float_t events_Zjets0_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
     Float_t events_Zjets1 = n_Zjets_ee[0] + n_Zjets_mumu[0];
     Float_t events_Zjets1_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
-    Float_t events_Zjets2 = n_Zjets_ee[4] + n_Zjets_mumu[4];
-    Float_t events_Zjets2_er = sqrt(pow(n_Zjets_ee[5], 2) + pow(n_Zjets_mumu[5], 2));
+    Float_t events_Zjets2 = n_Zjets_ee[0] + n_Zjets_mumu[0];
+    Float_t events_Zjets2_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
     Float_t events_top = n_top[0] + n_ttbarV_ttbarVV[0] + n_Wt[0];
     Float_t events_top_er = sqrt(pow(n_top[1],2) + pow(n_ttbarV_ttbarVV[1], 2) + pow(n_Wt[1], 2));
     Float_t events_WW = n_WW[0];
@@ -799,6 +792,8 @@ void zjets()
       events_nonZjets1_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       sf_Zjets1 = (events_data - events_nonZjets1) / events_Zjets1;
       sf_Zjets1_er = sqrt(pow((events_data - events_nonZjets1), 2) * pow(events_Zjets1_er, 2)/pow(events_Zjets1, 4) + (pow(events_data_er, 2) + pow(events_nonZjets1_er, 2))/pow(events_Zjets1, 2));
+      cout << events_nonZjets1 << " +- " << events_nonZjets1_er << endl << endl;
+      cout << events_Zjets1 << " +- " << events_Zjets1_er << endl << endl;
       cout << "   Zjets1 SCALING FACTOR =  " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
 
     }
@@ -821,6 +816,8 @@ void zjets()
       events_nonZjets2_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_othr_er, 2));
       sf_Zjets2 = (events_data - events_nonZjets2) / events_Zjets2;
       sf_Zjets2_er = sqrt(pow((events_data - events_nonZjets2), 2) * pow(events_Zjets2_er, 2)/pow(events_Zjets2, 4) + (pow(events_data_er, 2) + pow(events_nonZjets2_er, 2))/pow(events_Zjets2, 2));
+      cout << events_nonZjets2 << " +- " << events_nonZjets2_er << endl << endl;
+      cout << events_Zjets2 << " +- " << events_Zjets2_er << endl << endl;
       cout << "   Zjets2 SCALING FACTOR =  " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
 
     }
