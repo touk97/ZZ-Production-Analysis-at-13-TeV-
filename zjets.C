@@ -78,8 +78,8 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
 
-  Float_t signal = 0.;
-  Float_t signaler = 0.;
+  Double_t signal = 0.;
+  Double_t signaler = 0.;
   // Float_t Norm = 1;
 
 
@@ -198,20 +198,45 @@ vector<Float_t> ZPlotter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
 
-  Float_t signal0, signal1, signal2 = 0.;
-  Float_t signaler0, signaler1, signaler2 = 0.;
+  Double_t signal0, signal1, signal2 = 0.;
+  Double_t signaler0, signaler1, signaler2 = 0.;
   // Float_t Norm = 1;
 
   // Loop over events
-  for (Int_t i = 0; i < nentries; i++)
+  if (nentries > 0)
   {
-    tree->GetEntry(i);
-    if (directory == "SR")
+    for (Int_t i = 0; i < nentries; i++)
     {
-      if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
-          leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
-          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
+      tree->GetEntry(i);
+      if (directory == "SR")
       {
+        if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
+            leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
+            dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
+        {
+          if (n_jets == 0)
+          {
+            signal0 = signal0 + weight;
+            signaler0 = signaler0 + weight * weight;
+            hist0->Fill(Z_pT, weight);
+          }
+          else if (n_jets == 1)
+          {
+            signal1 = signal1 + weight;
+            signaler1 = signaler1 + weight * weight;
+            hist1->Fill(Z_pT, weight);
+          }
+          else if (n_jets > 1)
+          {
+            signal2 = signal2 + weight;
+            signaler2 = signaler2 + weight * weight;
+            hist2->Fill(Z_pT, weight);
+          }
+        }
+      }
+      else
+      {
+        // Inclusive
         if (n_jets == 0)
         {
           signal0 = signal0 + weight;
@@ -230,39 +255,25 @@ vector<Float_t> ZPlotter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
           signaler2 = signaler2 + weight * weight;
           hist2->Fill(Z_pT, weight);
         }
+        // // Exclusive
+        // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
+        // // if (met_tst > 70 && n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30 && detajj > 1 && MetOHT > 0.3 && dMetZPhi > 2.2 && n_bjets < 1 && dLepR < 2.2 )
+        // {
+        //   signal = signal + weight;
+        //   signaler = signaler + weight * weight;
+        //   hist->Fill(Z_pT + met_tst + leading_jet_\pt + second_jet_ptt, weight);
+        // }
       }
     }
-    else
-    {
-      // Inclusive
-      if (n_jets == 0)
-      {
-        signal0 = signal0 + weight;
-        signaler0 = signaler0 + weight * weight;
-        hist0->Fill(Z_pT, weight);
-      }
-      else if (n_jets == 1)
-      {
-        signal1 = signal1 + weight;
-        signaler1 = signaler1 + weight * weight;
-        hist1->Fill(Z_pT, weight);
-      }
-      else if (n_jets > 1)
-      {
-        signal2 = signal2 + weight;
-        signaler2 = signaler2 + weight * weight;
-        hist2->Fill(Z_pT, weight);
-      }
-
-      // // Exclusive
-      // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
-      // // if (met_tst > 70 && n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30 && detajj > 1 && MetOHT > 0.3 && dMetZPhi > 2.2 && n_bjets < 1 && dLepR < 2.2 )
-      // {
-      //   signal = signal + weight;
-      //   signaler = signaler + weight * weight;
-      //   hist->Fill(Z_pT + met_tst + leading_jet_\pt + second_jet_ptt, weight);
-      // }
-    }
+  }
+  else
+  {
+    signal0 = 0;
+    signaler0 = 0;
+    signal1 = 0;
+    signaler1 = 0;
+    signal2 = 0;
+    signaler2 = 0;
   }
 
   cout << "     ENTRIES = " << tree->GetEntries() << endl << endl; 
@@ -746,7 +757,7 @@ void zjets()
       events_top = events_top * sf_emuB;
       events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
 
-      events_nonWW = events_signal + events_WZ + events_top + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonWW = events_signal + events_WZ + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
       events_nonWW_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       sf_emuA = (events_data - events_nonWW) / events_WW;
       sf_emuA_er = sqrt(pow((events_data - events_nonWW), 2) * pow(events_WW_er, 2)/pow(events_WW, 4) + (pow(events_data_er, 2) + pow(events_nonWW_er, 2))/pow(events_WW, 2));
@@ -791,7 +802,7 @@ void zjets()
       cout << "   Zjets1 SCALING FACTOR =  " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
 
     }
-    else if (directory == "Zjets1")
+    else if (directory == "Zjets2")
     {
 
       //Correcting for WZ, top, WW, Zjets0 and Zjets1 events
@@ -832,14 +843,6 @@ void zjets()
       //Signal
       events_signal = events_data - events_WZ - events_top - events_WW - events_Zjets0 - events_Zjets1 - events_Zjets2 - events_othr;
       events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
-
-      // for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      // {
-      //   hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-      //   hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-      //   hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-      //   hist_Zjets->SetBinContent(bin, hist_Zjets->GetBinContent(bin) * sf_Zjets);
-      // }
 
       //Print calculated events for every region
       
