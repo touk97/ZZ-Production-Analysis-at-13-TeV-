@@ -627,37 +627,6 @@ void zjets()
     hist_Zjets2->Add(hist_Zjets_ee2);
     hist_Zjets2->Add(hist_Zjets_mumu2);
 
-    // //Correct the Zjets event before merging them back together
-    // if (directory == "Zjets1")
-    // {
-    //   for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-    //   {
-    //     hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-    //   }
-    // }
-    // else if (directory == "Zjets2")
-    // {
-    //   for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-    //   {
-    //     hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-    //     hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
-    //   }
-    // }
-    // else if (directory == "SR")
-    // {
-    //   for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-    //   {
-    //     hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-    //     hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
-    //     hist_Zjets2->SetBinContent(bin, hist_Zjets2->GetBinContent(bin) * sf_Zjets2);
-    //   }
-    // }
-
-    // hist_Zjets->Add(hist_Zjets0);
-    // hist_Zjets->Add(hist_Zjets1);
-    // hist_Zjets->Add(hist_Zjets2);
-
-
     // Othr = llll + llqq + VVV + Wjets + Ztt
     hist_othr->SetFillColor(TColor::GetColor("#50C878")); // KHAKI
     hist_othr->SetLineColor(kBlack);
@@ -699,10 +668,10 @@ void zjets()
     Float_t events_Zjets_er;
     Float_t events_Zjets0 = n_Zjets_ee[0] + n_Zjets_mumu[0];
     Float_t events_Zjets0_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
-    Float_t events_Zjets1 = n_Zjets_ee[0] + n_Zjets_mumu[0];
-    Float_t events_Zjets1_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
-    Float_t events_Zjets2 = n_Zjets_ee[0] + n_Zjets_mumu[0];
-    Float_t events_Zjets2_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
+    Float_t events_Zjets1 = n_Zjets_ee[2] + n_Zjets_mumu[2];
+    Float_t events_Zjets1_er = sqrt(pow(n_Zjets_ee[3], 2) + pow(n_Zjets_mumu[3], 2));
+    Float_t events_Zjets2 = n_Zjets_ee[4] + n_Zjets_mumu[4];
+    Float_t events_Zjets2_er = sqrt(pow(n_Zjets_ee[5], 2) + pow(n_Zjets_mumu[5], 2));
     Float_t events_top = n_top[0] + n_ttbarV_ttbarVV[0] + n_Wt[0];
     Float_t events_top_er = sqrt(pow(n_top[1],2) + pow(n_ttbarV_ttbarVV[1], 2) + pow(n_Wt[1], 2));
     Float_t events_WW = n_WW[0];
@@ -712,7 +681,6 @@ void zjets()
 
     Float_t WZ_error, t_error, WW_error, Zjets_error = 0;
     Float_t error1 = 0;
-
 
     //Scaling factors calculations 
 
@@ -792,8 +760,6 @@ void zjets()
       events_nonZjets1_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       sf_Zjets1 = (events_data - events_nonZjets1) / events_Zjets1;
       sf_Zjets1_er = sqrt(pow((events_data - events_nonZjets1), 2) * pow(events_Zjets1_er, 2)/pow(events_Zjets1, 4) + (pow(events_data_er, 2) + pow(events_nonZjets1_er, 2))/pow(events_Zjets1, 2));
-      cout << events_nonZjets1 << " +- " << events_nonZjets1_er << endl << endl;
-      cout << events_Zjets1 << " +- " << events_Zjets1_er << endl << endl;
       cout << "   Zjets1 SCALING FACTOR =  " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
 
     }
@@ -816,8 +782,6 @@ void zjets()
       events_nonZjets2_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_othr_er, 2));
       sf_Zjets2 = (events_data - events_nonZjets2) / events_Zjets2;
       sf_Zjets2_er = sqrt(pow((events_data - events_nonZjets2), 2) * pow(events_Zjets2_er, 2)/pow(events_Zjets2, 4) + (pow(events_data_er, 2) + pow(events_nonZjets2_er, 2))/pow(events_Zjets2, 2));
-      cout << events_nonZjets2 << " +- " << events_nonZjets2_er << endl << endl;
-      cout << events_Zjets2 << " +- " << events_Zjets2_er << endl << endl;
       cout << "   Zjets2 SCALING FACTOR =  " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
 
     }
@@ -844,15 +808,16 @@ void zjets()
       //Print calculated events for every region
       
        cout << "------------------------------------------------------------------" << endl << endl;
-       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl << endl;
-       cout << "   Data: " << "    " << events_data << " +- " << events_data_er << endl << endl;
-       cout << "   WZ: " << "      " << events_WZ << " +- " << events_WZ_er << ",   mu_WZ = " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
-       cout << "   Top: " << "      " << events_top << " +- " << events_top_er << ",   mu_top = " << sf_emuB << " +- " << sf_emuB_er << endl << endl;
-       cout << "   WW: " << "      " << events_WW << " +- " << events_WW_er << ",   mu_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl;
-       cout << "   Zjets0: " << "   " << events_Zjets0 << " +- " << events_Zjets0_er << ",   mu_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl;
-       cout << "   Zjets1: " << "   " << events_Zjets1 << " +- " << events_Zjets1_er << ",   mu_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
-       cout << "   Zjets2: " << "   " << events_Zjets2 << " +- " << events_Zjets2_er << ",   mu_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
-       cout << "   Other: " << "   "  << events_othr << " +- " << events_othr_er << endl << endl;
+       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
+       cout << "_________________________________" << endl << endl;
+       cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
+       cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << "   |   mu_WZ = " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
+       cout << "   Top: " << "      " << events_top << " +- " << events_top_er << "   |   mu_top = " << sf_emuB << " +- " << sf_emuB_er << endl << endl;
+       cout << "   WW: " << "       " << events_WW << " +- " << events_WW_er << "   |   mu_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl;
+       cout << "   Zjets0: " << "   " << events_Zjets0 << " +- " << events_Zjets0_er << "   |   mu_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl;
+       cout << "   Zjets1: " << "   " << events_Zjets1 << " +- " << events_Zjets1_er << "   |   mu_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
+       cout << "   Zjets2: " << "   " << events_Zjets2 << " +- " << events_Zjets2_er << "   |   mu_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
+       cout << "   Other: " << "    "  << events_othr << " +- " << events_othr_er << endl << endl;
        cout << "------------------------------------------------------------------" << endl << endl;
     }
 
@@ -885,16 +850,16 @@ void zjets()
        hist_signal->Add(hist_WZ);
     }
 
-    if (directory != "SR")
-    {
-       cout << "   DATA/MC = " << hist_data->Integral(-3000, 3000) / hist_signal->Integral(-3000, 3000) << endl << endl;
-       cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
-       cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
-       cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
-       cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
-       cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
-       cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
-    }
+    // if (directory != "SR")
+    // {
+    //    cout << "   DATA/MC = " << hist_data->Integral(-3000, 3000) / hist_signal->Integral(-3000, 3000) << endl << endl;
+    //    cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
+    //    cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
+    //    cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
+    //    cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
+    //    cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
+    //    cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+    // }
 
     //----------------------------------------PLOTS----------------------------------------//
 
@@ -1175,8 +1140,12 @@ void zjets()
   }
   
   cout << endl << endl;
-  cout << "   SCALING FACTORS (events):      " << "sf_3lCR = " <<  sf_3lCR << " +- " << sf_3lCR_er << "   ||   sf_emuB = " << sf_emuB  << " +- " << sf_emuB_er << "   ||   sf_emuA = " << sf_emuA << " +- " << sf_emuA_er <<
-  endl << "                                  " << "sf_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0 << "sf_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1 << "sf_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2 << endl << endl;
+  cout << "   SCALING FACTORS:       μ_WZ = " <<  sf_3lCR << " +- " << sf_3lCR_er << endl << endl 
+       << "                          μ_top = " << sf_emuB  << " +- " << sf_emuB_er << endl << endl 
+       << "                          μ_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl
+       << "                          μ_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0 << endl << endl  
+       << "                          μ_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1 << endl << endl 
+       << "                          μ_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2 << endl << endl;
           
           
   // Timer stop
