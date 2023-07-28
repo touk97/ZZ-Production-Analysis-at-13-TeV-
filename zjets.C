@@ -28,7 +28,7 @@ using namespace std;
 
 
 
-vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
+vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
 {
 
   TH1::SetDefaultSumw2(kTRUE);
@@ -78,8 +78,8 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
 
-  Float_t signal = 0.;
-  Float_t signaler = 0.;
+  Double_t signal = 0.;
+  Double_t signaler = 0.;
   // Float_t Norm = 1;
 
 
@@ -99,7 +99,7 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
         // Inclusive
         signal = signal + weight;
         signaler = signaler + weight * weight;
-        hist->Fill(Z_pT, weight);
+        hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
       }
       // {
         // // Exclusive
@@ -108,7 +108,7 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
         // {
         //   signal = signal + weight;
         //   signaler = signaler + weight * weight;
-        //   hist->Fill(Z_pT, weight);
+        //   hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_ptt, weight);
         // }
       // }
     }
@@ -118,7 +118,7 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
       //Inclusive
       signal = signal + weight;
       signaler = signaler + weight * weight;
-      hist->Fill(Z_pT, weight);
+      hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
 
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -126,7 +126,7 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
       // {
       //   signal = signal + weight;
       //   signaler = signaler + weight * weight;
-      //   hist->Fill(Z_pT, weight);
+      //   hist->Fill(Z_pT + met_tst + leading_jet_\pt + second_jet_ptt, weight);
       // }
     }
   }
@@ -148,7 +148,7 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
 //
 //
 //
-vector<Float_t> ZPlotter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, string directory)
+vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, string directory)
 {
 
   TH1::SetDefaultSumw2(kTRUE);
@@ -198,44 +198,78 @@ vector<Float_t> ZPlotter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
 
-  Float_t signal0, signal1, signal2 = 0;
-  Float_t signaler0, signaler1, signaler2 = 0;
+  Float_t signal0 = 0;
+  Float_t signal1 = 0;
+  Float_t signal2 = 0;
+  Float_t signaler0 = 0;
+  Float_t signaler1 = 0;
+  Float_t signaler2 = 0;
   // Float_t Norm = 1;
 
-
-  
-
   // Loop over events
+
   for (Int_t i = 0; i < nentries; i++)
   {
     tree->GetEntry(i);
-    if ((directory == "SR" && event_3CR == 0 && (event_type == 0 || event_type == 1) &&
-          leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
-          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65) || directory != "SR")
+    if (directory == "SR")
     {
-      if (n_jets < 1)
+      if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
+          leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
+          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
       {
+        if (n_jets < 1)
+        {
           signal0 = signal0 + weight;
           signaler0 = signaler0 + weight * weight;
           hist0->Fill(Z_pT, weight);
-      }
-      else if (n_jets > 0 && n_jets < 2)
-      {
+        }
+        else if (n_jets > 0 && n_jets < 2)
+        {
           signal1 = signal1 + weight;
           signaler1 = signaler1 + weight * weight;
           hist1->Fill(Z_pT, weight);
-      }
-      else if (n_jets > 1)
-      {
+        }
+        else if (n_jets > 1)
+        {
           signal2 = signal2 + weight;
           signaler2 = signaler2 + weight * weight;
           hist2->Fill(Z_pT, weight);
+        }
       }
+    }
+    else
+    {
+      // Inclusive
+      if (n_jets < 1)
+      {
+        signal0 = signal0 + weight;
+        signaler0 = signaler0 + weight * weight;
+        hist0->Fill(Z_pT, weight);
+      }
+      else if (n_jets > 0 && n_jets < 2)
+      {
+        signal1 = signal1 + weight;
+        signaler1 = signaler1 + weight * weight;
+        hist1->Fill(Z_pT, weight);
+      }
+      else if (n_jets > 1)
+      {
+        signal2 = signal2 + weight;
+        signaler2 = signaler2 + weight * weight;
+        hist2->Fill(Z_pT, weight);
+      }
+      // // Exclusive
+      // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
+      // // if (met_tst > 70 && n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30 && detajj > 1 && MetOHT > 0.3 && dMetZPhi > 2.2 && n_bjets < 1 && dLepR < 2.2 )
+      // {
+      //   signal = signal + weight;
+      //   signaler = signaler + weight * weight;
+      //   hist->Fill(Z_pT + met_tst + leading_jet_\pt + second_jet_ptt, weight);
+      // }
     }
   }
 
-  
-  cout << "    ENTRIES = " << tree->GetEntries() << endl << endl; 
+  cout << "     ENTRIES = " << tree->GetEntries() << endl << endl; 
   cout << "          N0 = " << signal0 << "+-" << sqrt(signaler0) << endl << endl; 
   cout << "          N1 = " << signal1 << "+-" << sqrt(signaler1) << endl << endl; 
   cout << "          N2 = " << signal2 << "+-" << sqrt(signaler2) << endl << endl; 
@@ -306,16 +340,16 @@ private:
 //
 //
 // MAIN
-void cro_plot6()
+void zjets()
 {
 
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/plots/cro_plot_log6.txt");
+  ofstream logFile("../cro/plots/zjets_splitted.txt");
   // ofstream logFile("../cro/plots/demo_log.txt");
-`
+
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
   std::streambuf *oldBuffer = std::cout.rdbuf(&dualBuffer);
@@ -341,10 +375,12 @@ void cro_plot6()
   // Float_t xbins[21] = {100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100};  //mjj
   // Float_t xbins[31] = {-8, -7.5, -7.0, -6.5, -6.0, -5.5, -5.0, -4.5, -4, -3.5, -3, -2.5,-2, -1.5, -1.0, -0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 7.0, 9.0};  //detajj
   
-  Float_t sf_3lCR, sf_3lCR2;
-  Float_t sf_emuB, sf_emuB2;
-  Float_t sf_emuA, sf_emuA2;
-  Float_t sf_Zjets0, sf_Zjets1, sf_Zjets2, sf_Zjets02, sf_Zjets12, sf_Zjets22;
+  Float_t sf_3lCR, sf_3lCR_er;
+  Float_t sf_emuB, sf_emuB_er;
+  Float_t sf_emuA, sf_emuA_er;
+  Float_t sf_Zjets0, sf_Zjets0_er;
+  Float_t sf_Zjets1, sf_Zjets1_er;
+  Float_t sf_Zjets2, sf_Zjets2_er;
 
 
   for (string &directory : directories)
@@ -432,7 +468,6 @@ void cro_plot6()
     TH1F *hist_Zjets_mumu2 = new TH1F("hist_Zjets_mumu2", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
     // top = top + ttbarV_ttbar_VV + Wt
-    TH1F *hist_t = new TH1F("Hist_t", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_top = new TH1F("Hist_top", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_ttbarV_ttbarVV = new TH1F("Hist_ttbarV_ttbarVV", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_Wt = new TH1F("Hist_Wt", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
@@ -455,59 +490,53 @@ void cro_plot6()
  
     cout << "   ================== DATA ==================    " << endl << endl;
     cout << "   DATA:";
-    vector<Float_t> n_data = Plotter(tree_data, hist_data, directory);
+    vector<Float_t> n_data = Counter(tree_data, hist_data, directory);
 
     cout << "   ================== SIGNAL ==================    " << endl << endl;
     cout << "   llvv:";
-    vector<Float_t> n_llvv = Plotter(tree_llvv, hist_llvv, directory);
+    vector<Float_t> n_llvv = Counter(tree_llvv, hist_llvv, directory);
     cout << "   llvvjj:";
-    vector<Float_t> n_llvvjj = Plotter(tree_llvvjj, hist_llvvjj, directory);
+    vector<Float_t> n_llvvjj = Counter(tree_llvvjj, hist_llvvjj, directory);
 
     cout << "   ================== WZ ==================    " << endl << endl;
     cout << "   WZ:";
-    vector<Float_t> n_WZ = Plotter(tree_WZ, hist_WZ, directory);
+    vector<Float_t> n_WZ = Counter(tree_WZ, hist_WZ, directory);
 
     cout << "   ================== Zjets ==================    " << endl << endl;
     cout << "   Z_jets_ee:";
-    vector<Float_t> n_Zjets_ee = ZPlotter(tree_Z_jets_ee, hist_Zjets_ee0, hist_Zjets_ee1, hist_Zjets_ee2, directory);
+    vector<Float_t> n_Zjets_ee = ZCounter(tree_Z_jets_ee, hist_Zjets_ee0, hist_Zjets_ee1, hist_Zjets_ee2, directory);
     cout << "   Z_jets_mumu:";
-    vector<Float_t> n_Zjets_mumu = ZPlotter(tree_Z_jets_mumu, hist_Zjets_mumu0, hist_Zjets_mumu1, hist_Zjets_mumu2, directory);
-
-    // cout << "   ================== Zjets ==================    " << endl << endl;
-    // cout << "   Z_jets_ee:";
-    // vector<Float_t> n_Zjets_ee = Plotter(tree_Z_jets_ee, hist_Zjets_ee, directory);
-    // cout << "   Z_jets_mumu:";
-    // vector<Float_t> n_Zjets_mumu = Plotter(tree_Z_jets_mumu, hist_Zjets_mumu, directory);
+    vector<Float_t> n_Zjets_mumu = ZCounter(tree_Z_jets_mumu, hist_Zjets_mumu0, hist_Zjets_mumu1, hist_Zjets_mumu2, directory);
 
     cout << "   ================== top ==================    " << endl << endl;
     cout << "   Top:";
-    vector<Float_t> n_top = Plotter(tree_top, hist_top, directory);
+    vector<Float_t> n_top = Counter(tree_top, hist_top, directory);
     cout << "   ttbarV_ttbarVV:";
-    vector<Float_t> n_ttbarV_ttbarVV = Plotter(tree_ttbarV_ttbarVV, hist_ttbarV_ttbarVV, directory);
+    vector<Float_t> n_ttbarV_ttbarVV = Counter(tree_ttbarV_ttbarVV, hist_ttbarV_ttbarVV, directory);
     cout << "   Wt:";
-    vector<Float_t> n_Wt = Plotter(tree_Wt, hist_Wt, directory);
+    vector<Float_t> n_Wt = Counter(tree_Wt, hist_Wt, directory);
 
     cout << "   ================== WW ==================    " << endl << endl;
     cout << "   WW:";
-    vector<Float_t> n_WW = Plotter(tree_WW, hist_WW, directory);
+    vector<Float_t> n_WW = Counter(tree_WW, hist_WW, directory);
 
     cout << "   ================== Othr ==================    " << endl << endl;
     cout << "   llll:";
-    vector<Float_t> n_llll = Plotter(tree_llll, hist_llll, directory);
+    vector<Float_t> n_llll = Counter(tree_llll, hist_llll, directory);
     cout << "   llqq:";
-    vector<Float_t> n_llqq = Plotter(tree_llqq, hist_llqq, directory);
+    vector<Float_t> n_llqq = Counter(tree_llqq, hist_llqq, directory);
     cout << "   VVV:";
-    vector<Float_t> n_VVV = Plotter(tree_VVV, hist_VVV, directory);
+    vector<Float_t> n_VVV = Counter(tree_VVV, hist_VVV, directory);
     cout << "   W_jets:";
-    vector<Float_t> n_Wjets = Plotter(tree_W_jets, hist_W_jets, directory);
+    vector<Float_t> n_Wjets = Counter(tree_W_jets, hist_W_jets, directory);
     cout << "   Ztt:";
-    vector<Float_t> n_Ztt = Plotter(tree_Ztt, hist_Ztt, directory);
+    vector<Float_t> n_Ztt = Counter(tree_Ztt, hist_Ztt, directory);
     cout << "   WZ_jj:";
-    vector<Float_t> n_WZjj = Plotter(tree_WZ_jj, hist_WZ_jj, directory);
+    vector<Float_t> n_WZjj = Counter(tree_WZ_jj, hist_WZ_jj, directory);
     cout << "   lllljj:";
-    vector<Float_t> n_lllljj = Plotter(tree_lllljj, hist_lllljj, directory);
+    vector<Float_t> n_lllljj = Counter(tree_lllljj, hist_lllljj, directory);
     cout << "   llvvjj_WW:";
-    vector<Float_t> n_llvvjj_WW = Plotter(tree_llvvjj_WW, hist_llvvjj_WW, directory);
+    vector<Float_t> n_llvvjj_WW = Counter(tree_llvvjj_WW, hist_llvvjj_WW, directory);
 
 
 
@@ -536,7 +565,7 @@ void cro_plot6()
     {
       c4->cd();
     }
-    else if (directory == "Zjets0" || directory == "Zjets1" || directory == "Zjets2")
+    else if (directory == "Zjets")
     {
       c5->cd();
     }
@@ -580,12 +609,11 @@ void cro_plot6()
     hist_WW->SetLineWidth(1);
 
     // top = top + ttbarV_ttbar_VV + Wt
-    hist_t->SetFillColor(TColor::GetColor("#6495ED")); // LIGHT BLUE
-    hist_t->SetLineColor(kBlack);
-    hist_t->SetLineWidth(1);
-    hist_t->Add(hist_top);
-    hist_t->Add(hist_ttbarV_ttbarVV);
-    hist_t->Add(hist_Wt);
+    hist_top->SetFillColor(TColor::GetColor("#6495ED")); // LIGHT BLUE
+    hist_top->SetLineColor(kBlack);
+    hist_top->SetLineWidth(1);
+    hist_top->Add(hist_ttbarV_ttbarVV);
+    hist_top->Add(hist_Wt);
 
     // Zjets = Zjets_ee + Zjets_mumu
     hist_Zjets->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
@@ -598,37 +626,6 @@ void cro_plot6()
     hist_Zjets1->Add(hist_Zjets_mumu1);
     hist_Zjets2->Add(hist_Zjets_ee2);
     hist_Zjets2->Add(hist_Zjets_mumu2);
-
-    //Correct the Zjets event before merging them back together
-    if (directory == "Zjets1")
-    {
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-      }
-    }
-    else if (directory == "Zjets2")
-    {
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
-      }
-    }
-    else if (directory == "SR")
-    {
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
-        hist_Zjets2->SetBinContent(bin, hist_Zjets2->GetBinContent(bin) * sf_Zjets2);
-      }
-    }
-
-    hist_Zjets->Add(hist_Zjets0);
-    hist_Zjets->Add(hist_Zjets1);
-    hist_Zjets->Add(hist_Zjets2);
-
 
     // Othr = llll + llqq + VVV + Wjets + Ztt
     hist_othr->SetFillColor(TColor::GetColor("#50C878")); // KHAKI
@@ -644,26 +641,21 @@ void cro_plot6()
     hist_othr->Add(hist_llvvjj_WW);
 
 
-    Float_t nmc_WZ, nmc_nonWZ;
-    Float_t nmc_top, nmc_nontop;
-    Float_t nmc_WW, nmc_nonWW;
-    Float_t nmc_Zjets, nmc_nonZjets;
-    Float_t nmc_Zjets0, nmc_nonZjets0;
-    Float_t nmc_Zjets1, nmc_nonZjets1;
-    Float_t nmc_Zjets2, nmc_nonZjets2;
-    Float_t nmc_othr;
-    Float_t nmc_total;
-    Float_t nmc_signal;
-
-    Float_t eventsmc_total;
-    Float_t eventsmc_nonWZ;
-    Float_t eventsmc_nont;
-    Float_t eventsmc_nonWW;
-    Float_t eventsmc_nonZjets;
-    Float_t eventsmc_nonZjets0;
-    Float_t eventsmc_nonZjets1;
-    Float_t eventsmc_nonZjets2;
-    Float_t eventsmc_signal;
+    Float_t events_total;
+    Float_t events_nonWZ;
+    Float_t events_nonWZ_er;
+    Float_t events_nontop;
+    Float_t events_nontop_er;
+    Float_t events_nonWW;
+    Float_t events_nonWW_er;
+    Float_t events_nonZjets;
+    Float_t events_nonZjets_er;
+    Float_t events_nonZjets0;
+    Float_t events_nonZjets0_er;
+    Float_t events_nonZjets1;
+    Float_t events_nonZjets1_er;
+    Float_t events_nonZjets2;
+    Float_t events_nonZjets2_er;
 
 
     Float_t events_data = n_data[0];
@@ -672,16 +664,16 @@ void cro_plot6()
     Float_t events_signal_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
     Float_t events_WZ = n_WZ[0];
     Float_t events_WZ_er = n_WZ[1];
-    Float_t events_Zjets = n_Zjets_ee[0] + n_Zjets_mumu[0];
-    Float_t events_Zjets_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
+    Float_t events_Zjets;
+    Float_t events_Zjets_er;
     Float_t events_Zjets0 = n_Zjets_ee[0] + n_Zjets_mumu[0];
     Float_t events_Zjets0_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
-    Float_t events_Zjets1 = n_Zjets_ee[0] + n_Zjets_mumu[0];
-    Float_t events_Zjets1_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
-    Float_t events_Zjets2 = n_Zjets_ee[0] + n_Zjets_mumu[0];
-    Float_t events_Zjets2_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
-    Float_t events_t = n_top[0] + n_ttbarV_ttbarVV[0] + n_Wt[0];
-    Float_t events_t_er = sqrt(pow(n_top[1],2) + pow(n_ttbarV_ttbarVV[1], 2) + pow(n_Wt[1], 2));
+    Float_t events_Zjets1 = n_Zjets_ee[2] + n_Zjets_mumu[2];
+    Float_t events_Zjets1_er = sqrt(pow(n_Zjets_ee[3], 2) + pow(n_Zjets_mumu[3], 2));
+    Float_t events_Zjets2 = n_Zjets_ee[4] + n_Zjets_mumu[4];
+    Float_t events_Zjets2_er = sqrt(pow(n_Zjets_ee[5], 2) + pow(n_Zjets_mumu[5], 2));
+    Float_t events_top = n_top[0] + n_ttbarV_ttbarVV[0] + n_Wt[0];
+    Float_t events_top_er = sqrt(pow(n_top[1],2) + pow(n_ttbarV_ttbarVV[1], 2) + pow(n_Wt[1], 2));
     Float_t events_WW = n_WW[0];
     Float_t events_WW_er = n_WW[1];
     Float_t events_othr = n_llll[0] + n_llqq[0] + n_VVV[0] + n_Wjets[0] + n_Ztt[0] + n_WZjj[0] + n_lllljj[0] + n_llvvjj_WW[0];
@@ -690,193 +682,186 @@ void cro_plot6()
     Float_t WZ_error, t_error, WW_error, Zjets_error = 0;
     Float_t error1 = 0;
 
-    
-    
-    
-
-
-    // Calculating nmc integrals before stacking the histograms
-    
+    //Scaling factors calculations 
 
     if (directory == "3lCR")
     {
-
-      eventsmc_nonWZ = events_signal + events_WW + events_t + events_Zjets + events_othr;
-      sf_3lCR2 = (events_data - eventsmc_nonWZ) / events_WZ; 
-      cout << "   WZ SCALING FACTOR =  " << sf_3lCR2 << endl << endl;
-      
-      //Integrals
-      nmc_WZ = hist_WZ->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nonWZ = nmc_total - nmc_WZ ;
-      sf_3lCR = (hist_data->Integral(-3000, 3000) - nmc_nonWZ) / nmc_WZ;
-      cout << "   WZ SCALING FACTOR = " << sf_3lCR << endl << endl;
+      events_nonWZ = events_signal + events_WW + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonWZ_er = sqrt(pow(events_signal_er, 2) + pow(events_WW_er, 2) + pow(events_top_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      sf_3lCR = (events_data - events_nonWZ) / events_WZ; 
+      sf_3lCR_er = sqrt(pow((events_data - events_nonWZ), 2) * pow(events_WZ_er, 2)/pow(events_WZ, 4)  +  (pow(events_data_er, 2) + pow(events_nonWZ_er, 2))/pow(events_WZ, 2));
+      cout << "evenets_nonWZ =  " << events_nonWZ << " +- " << events_nonWZ_er << endl << endl;
+      cout << "evenets_WZ =  " << events_WZ << " +- " << events_WZ_er << endl << endl;
+      cout << "   WZ SCALING FACTOR =  " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
+    
     }
     else if (directory == "emCR_B")
     {
 
-      eventsmc_nont = events_signal + events_WZ*sf_3lCR2 + events_WW + events_Zjets + events_othr;
-      sf_emuB2 = (events_data - eventsmc_nont) / events_t;
-      cout << "   TOP SCALING FACTOR =  " << sf_emuB2 << endl << endl;
+      //Correcting for WZ events
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
 
-      //Integrals
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+      events_nontop = events_signal + events_WZ + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nontop_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      sf_emuB = (events_data - events_nontop) / events_top;
+      sf_emuB_er = sqrt(pow((events_data - events_nontop), 2) * pow(events_top_er, 2)/pow(events_top, 4) + (pow(events_data_er, 2) + pow(events_nontop_er, 2))/pow(events_top, 2));
+      cout << "   TOP SCALING FACTOR =  " << sf_emuB << " +- " << sf_emuB_er << endl << endl;
 
-      }
-      nmc_top = hist_t->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nontop = nmc_total - nmc_top;
-      sf_emuB = (hist_data->Integral(-3000, 3000) - nmc_nontop) / nmc_top;
-      cout << "   TOP SCALING FACTOR = " << sf_emuB << endl << endl;
     }
     else if (directory == "emCR_A")
     {
 
-      eventsmc_nonWW = events_signal + events_WZ*sf_3lCR2 + events_t*sf_emuB2 + events_Zjets + events_othr;
-      sf_emuA2 = (events_data - eventsmc_nonWW) / events_WW;
-      cout << "   WW SCALING FACTOR =  " << sf_emuA2 << endl << endl;
+      //Correcting for WZ and top events
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
+      events_top = events_top * sf_emuB;
+      events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
 
-      //Integrals
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
-      }
-      nmc_WW = hist_WW->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nonWW = nmc_total - nmc_WW;
-      sf_emuA = (hist_data->Integral(-3000, 3000) - nmc_nonWW) / nmc_WW;
-      cout << "   WW SCALING FACTOR = " << sf_emuA << endl << endl;
+      events_nonWW = events_signal + events_WZ + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonWW_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      sf_emuA = (events_data - events_nonWW) / events_WW;
+      sf_emuA_er = sqrt(pow((events_data - events_nonWW), 2) * pow(events_WW_er, 2)/pow(events_WW, 4) + (pow(events_data_er, 2) + pow(events_nonWW_er, 2))/pow(events_WW, 2));
+      cout << "   WW SCALING FACTOR =  " << sf_emuA << " +- " << sf_emuA_er << endl << endl;
+
     }
     else if (directory == "Zjets0")
     {
-      eventsmc_nonZjets0 = events_signal + events_WZ*sf_3lCR2 + events_t*sf_emuB2 + events_WW*sf_emuA2 + events_othr;
-      sf_Zjets02 = (events_data - eventsmc_nonZjets0) / events_Zjets0;
-      cout << "   Zjets0 SCALING FACTOR =  " << sf_Zjets02 << endl << endl;
 
+      //Correcting for WZ, top and WW events
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
+      events_top = events_top * sf_emuB;
+      events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
+      events_WW = events_WW * sf_emuA;
+      events_WW_er = sqrt( pow(sf_emuA, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA_er, 2));
 
-      //Integrals
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-      }
-      nmc_Zjets0 = hist_Zjets0->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets0->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nonZjets0 = nmc_total - nmc_Zjets0;
-      sf_Zjets0 = (hist_data->Integral(-3000, 3000) - nmc_nonZjets0) / nmc_Zjets0;
-      cout << "   Zjets0 SCALING FACTOR = " << sf_Zjets0 << endl << endl;
+      events_nonZjets0 = events_signal + events_WZ + events_top + events_WW + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonZjets0_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2)   + pow(events_othr_er, 2));
+      sf_Zjets0 = (events_data - events_nonZjets0) / events_Zjets0;
+      sf_Zjets0_er = sqrt(pow((events_data - events_nonZjets0), 2) * pow(events_Zjets0_er, 2)/pow(events_Zjets0, 4) + (pow(events_data_er, 2) + pow(events_nonZjets0_er, 2))/pow(events_Zjets0, 2));
+      cout << "   Zjets0 SCALING FACTOR =  " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl;
+
     }
     else if (directory == "Zjets1")
     {
-      eventsmc_nonZjets1 = events_signal + events_WZ*sf_3lCR2 + events_t*sf_emuB2 + events_WW*sf_emuA2 + events_othr;
-      sf_Zjets12 = (events_data - eventsmc_nonZjets1) / events_Zjets1;
-      cout << "   Zjets1 SCALING FACTOR =  " << sf_Zjets12 << endl << endl;
 
+      //Correcting for WZ, top, WW and Zjets0 events
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
+      events_top = events_top * sf_emuB;
+      events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
+      events_WW = events_WW * sf_emuA;
+      events_WW_er = sqrt( pow(sf_emuA, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA_er, 2));
+      events_Zjets0 = events_Zjets0 * sf_Zjets0;
+      events_Zjets0_er = sqrt( pow(sf_Zjets0, 2) * pow(events_Zjets0_er, 2) + pow(events_Zjets0, 2) * pow(sf_Zjets0_er, 2));
 
-      //Integrals
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        //Zjets0 scaled above
-      }
-      nmc_Zjets1 = hist_Zjets1->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets1->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nonZjets1 = nmc_total - nmc_Zjets1;
-      sf_Zjets1 = (hist_data->Integral(-3000, 3000) - nmc_nonZjets1) / nmc_Zjets1;
-      cout << "   Zjets1 SCALING FACTOR = " << sf_Zjets1 << endl << endl;
+      events_nonZjets1 = events_signal + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets2 + events_othr;
+      events_nonZjets1_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      sf_Zjets1 = (events_data - events_nonZjets1) / events_Zjets1;
+      sf_Zjets1_er = sqrt(pow((events_data - events_nonZjets1), 2) * pow(events_Zjets1_er, 2)/pow(events_Zjets1, 4) + (pow(events_data_er, 2) + pow(events_nonZjets1_er, 2))/pow(events_Zjets1, 2));
+      cout << "   Zjets1 SCALING FACTOR =  " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
+
     }
     else if (directory == "Zjets2")
     {
-      eventsmc_nonZjets2 = events_signal + events_WZ*sf_3lCR2 + events_t*sf_emuB2 + events_WW*sf_emuA2 + events_othr;
-      sf_Zjets22 = (events_data - eventsmc_nonZjets2) / events_Zjets2;
-      cout << "   Zjets2 SCALING FACTOR =  " << sf_Zjets22 << endl << endl;
 
-      //Integrals
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        //Zjets0 and Zjets1 scaled above
-      }
-      nmc_Zjets2 = hist_Zjets2->Integral(-3000, 3000);
-      nmc_total = hist_signal->Integral(-3000, 3000) + hist_WZ->Integral(-3000, 3000) + hist_WW->Integral(-3000, 3000) + hist_t->Integral(-3000, 3000) + hist_Zjets2->Integral(-3000, 3000) + hist_othr->Integral(-3000, 3000);
-      nmc_nonZjets2 = nmc_total - nmc_Zjets2;
-      sf_Zjets2 = (hist_data->Integral(-3000, 3000) - nmc_nonZjets2) / nmc_Zjets2;
-      cout << "   Zjets2 SCALING FACTOR = " << sf_Zjets2 << endl << endl;
+      //Correcting for WZ, top, WW, Zjets0 and Zjets1 events
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
+      events_top = events_top * sf_emuB;
+      events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
+      events_WW = events_WW * sf_emuA;
+      events_WW_er = sqrt( pow(sf_emuA, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA_er, 2));
+      events_Zjets0 = events_Zjets0 * sf_Zjets0;
+      events_Zjets0_er = sqrt( pow(sf_Zjets0, 2) * pow(events_Zjets0_er, 2) + pow(events_Zjets0, 2) * pow(sf_Zjets0_er, 2));
+      events_Zjets1 = events_Zjets1 * sf_Zjets1;
+      events_Zjets1_er = sqrt( pow(sf_Zjets1, 2) * pow(events_Zjets1_er, 2) + pow(events_Zjets1, 2) * pow(sf_Zjets1_er, 2));
+
+      events_nonZjets2 = events_signal + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_othr;
+      events_nonZjets2_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_othr_er, 2));
+      sf_Zjets2 = (events_data - events_nonZjets2) / events_Zjets2;
+      sf_Zjets2_er = sqrt(pow((events_data - events_nonZjets2), 2) * pow(events_Zjets2_er, 2)/pow(events_Zjets2, 4) + (pow(events_data_er, 2) + pow(events_nonZjets2_er, 2))/pow(events_Zjets2, 2));
+      cout << "   Zjets2 SCALING FACTOR =  " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
+
     }
     else if (directory == "SR")
     {
-      for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-      {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_t->SetBinContent(bin, hist_t->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        //Zjets0, Zjets1 and Zjets2 scaled above
+      //Correcting for WZ, top, WW, Zjets0 ,Zjets1 and Zjets2 events
+      events_WZ = events_WZ*sf_3lCR;
+      events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
+      events_top = events_top * sf_emuB;
+      events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
+      events_WW = events_WW * sf_emuA;
+      events_WW_er = sqrt( pow(sf_emuA, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA_er, 2));
+      events_Zjets0 = events_Zjets0 * sf_Zjets0;
+      events_Zjets0_er = sqrt( pow(sf_Zjets0, 2) * pow(events_Zjets0_er, 2) + pow(events_Zjets0, 2) * pow(sf_Zjets0_er, 2));
+      events_Zjets1 = events_Zjets1 * sf_Zjets1;
+      events_Zjets1_er = sqrt( pow(sf_Zjets1, 2) * pow(events_Zjets1_er, 2) + pow(events_Zjets1, 2) * pow(sf_Zjets1_er, 2));
+      events_Zjets2 = events_Zjets2 * sf_Zjets2;
+      events_Zjets2_er = sqrt( pow(sf_Zjets2, 2) * pow(events_Zjets2_er, 2) + pow(events_Zjets2, 2) * pow(sf_Zjets2_er, 2));
 
-        //Errors after scaling (sqrt of integrals not bin per bin)
-        WZ_error = sqrt(hist_WZ->Integral(-3000, 3000));
+      //Signal
+      events_signal = events_data - events_WZ - events_top - events_WW - events_Zjets0 - events_Zjets1 - events_Zjets2 - events_othr;
+      events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
 
-        hist_WZ->SetBinError(bin, sqrt(hist_WZ->GetBinContent(bin)));
-        hist_t->SetBinError(bin, sqrt(hist_t->GetBinContent(bin)));
-        hist_WW->SetBinError(bin, sqrt(hist_WW->GetBinContent(bin)));
-        hist_Zjets->SetBinError(bin, sqrt(hist_Zjets->GetBinContent(bin)));
-        cout << hist_WZ->GetBinContent(bin) << "    " << hist_WZ->GetBinError(bin) << endl << endl;
-      }
-
-      cout << events_data << "    " << events_WZ*sf_3lCR2 << "   " << events_t*sf_emuB2 << "   " << events_WW*sf_emuA2 << "   " <<  events_Zjets0*sf_Zjets02 << "  " << events_Zjets1*sf_Zjets12 << "   " << events_Zjets2*sf_Zjets22 << "  " << events_othr << endl << endl; 
-      cout << hist_data->Integral(-3000, 3000) << "    " << nmc_WZ << "   " << nmc_top << "   " << nmc_WW << "   " <<  nmc_Zjets0 << "  " << nmc_Zjets1 << "   " << nmc_Zjets2 << "  " << nmc_othr << endl << endl; 
-
-      //BIns already scaled
-      nmc_WZ = hist_WZ->Integral(-3000, 3000);
-      nmc_top = hist_t->Integral(-3000, 3000);
-      nmc_WW = hist_WW->Integral(-3000, 3000);
-      nmc_Zjets = hist_Zjets->Integral(-3000, 3000);
-      nmc_othr = hist_othr->Integral(-3000, 3000);
-      nmc_signal = hist_data->Integral(-3000, 3000) - nmc_WZ - nmc_top - nmc_WW - nmc_Zjets - nmc_othr;
-      eventsmc_signal = events_data - events_WZ*sf_3lCR2 - events_t*sf_emuB2 - events_WW*sf_emuA2 - events_Zjets0*sf_Zjets02 - events_Zjets1*sf_Zjets12 - events_Zjets2*sf_Zjets22 - events_othr;
-
-
-
-      cout << "------------------------------------------------------------------" << endl << endl;
-       cout << endl << endl  << "    SIGNAL  (I) = " << nmc_signal << "       SIGNAL  (E) =  " << eventsmc_signal << endl << endl;
-       cout << "    " << hist_data->Integral(-3000, 3000) << "                        " << events_data << endl << endl;
-       cout << "    " << nmc_WZ << ", " << sf_3lCR << "            " << events_WZ << "*"<< sf_3lCR2 << endl << endl;
-       cout << "    " << nmc_top << ", " << sf_emuB << "            " << events_t << "*"<< sf_emuB2 << endl << endl;
-       cout << "    " << nmc_WW << ", " << sf_emuA << "            " << events_WW << "*"<< sf_emuA2 << endl << endl;
-       cout << "    " << nmc_Zjets0 << ", " << sf_Zjets0 << "            " << events_Zjets0 << "*"<< sf_Zjets02 << endl << endl;
-       cout << "    " << nmc_Zjets1 << ", " << sf_Zjets1 << "            " << events_Zjets1 << "*"<< sf_Zjets12 << endl << endl;
-       cout << "    " << nmc_Zjets2 << ", " << sf_Zjets2 << "            " << events_Zjets2 << "*"<< sf_Zjets22 << endl << endl;
-       cout << "    " << nmc_othr << "                      " << events_othr << endl << endl;
+      //Print calculated events for every region
+      
+       cout << "------------------------------------------------------------------" << endl << endl;
+       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
+       cout << "_________________________________" << endl << endl;
+       cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
+       cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << "   |   mu_WZ = " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
+       cout << "   Top: " << "      " << events_top << " +- " << events_top_er << "   |   mu_top = " << sf_emuB << " +- " << sf_emuB_er << endl << endl;
+       cout << "   WW: " << "       " << events_WW << " +- " << events_WW_er << "   |   mu_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl;
+       cout << "   Zjets0: " << "   " << events_Zjets0 << " +- " << events_Zjets0_er << "   |   mu_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl;
+       cout << "   Zjets1: " << "   " << events_Zjets1 << " +- " << events_Zjets1_er << "   |   mu_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
+       cout << "   Zjets2: " << "   " << events_Zjets2 << " +- " << events_Zjets2_er << "   |   mu_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
+       cout << "   Other: " << "    "  << events_othr << " +- " << events_othr_er << endl << endl;
        cout << "------------------------------------------------------------------" << endl << endl;
     }
 
-    
 
-
+    //Merge Zjets before start plotting
+    hist_Zjets->Add(hist_Zjets0);
+    hist_Zjets->Add(hist_Zjets1);
+    hist_Zjets->Add(hist_Zjets2);
     // Stacking with a specific order
-    hist_Zjets->Add(hist_othr);
-    hist_t->Add(hist_Zjets);
-    hist_WW->Add(hist_t);
-    hist_WZ->Add(hist_WW);
-    hist_signal->Add(hist_WZ);
+    // hist_Zjets->Add(hist_othr);
+    // hist_top->Add(hist_Zjets);
+    // hist_WW->Add(hist_top);
+    // hist_WZ->Add(hist_WW);
+    // hist_signal->Add(hist_WZ);
 
 
-    cout << "   DATA/MC = " << hist_data->Integral(0,1000)/hist_signal->Integral(0,1000) << endl << endl;
-    cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
-    cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
-    cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
-    cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
-    cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
-    cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+    if (directory == "SR")
+    {
+       // Stacking with a specific order
+       hist_Zjets->Add(hist_othr);
+       hist_top->Add(hist_Zjets);
+       hist_WW->Add(hist_top);
+       hist_WZ->Add(hist_WW);
+    }
+    else
+    {
+       // Stacking with a specific order
+       hist_Zjets->Add(hist_othr);
+       hist_top->Add(hist_Zjets);
+       hist_WW->Add(hist_top);
+       hist_WZ->Add(hist_WW);
+       hist_signal->Add(hist_WZ);
+    }
 
-
+    // if (directory != "SR")
+    // {
+    //    cout << "   DATA/MC = " << hist_data->Integral(-3000, 3000) / hist_signal->Integral(-3000, 3000) << endl << endl;
+    //    cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
+    //    cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
+    //    cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
+    //    cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
+    //    cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
+    //    cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+    // }
 
     //----------------------------------------PLOTS----------------------------------------//
 
@@ -884,13 +869,41 @@ void cro_plot6()
 
     // Plotting according to stacking order
     pad1->cd();
-    hist_signal->Draw("hist");
-    hist_WZ->Draw("histsame");
-    hist_WW->Draw("histsame");
-    hist_t->Draw("histsame");
-    hist_Zjets->Draw("histsame");
-    hist_othr->Draw("histsame");
-    hist_data->Draw("same");
+
+    // hist_signal->Draw("hist");
+    // hist_WZ->Draw("histsame");
+    // hist_WW->Draw("histsame");
+    // hist_top->Draw("histsame");
+    // hist_Zjets->Draw("histsame");
+    // hist_othr->Draw("histsame");
+    // hist_data->Draw("same");
+    
+    if (directory == "SR")
+    {
+      hist_WZ->Draw("hist");
+      hist_signal->Draw("histsame");
+      hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
+      hist_WZ->SetStats(0);
+      hist_WZ->SetLineWidth(2);
+      hist_WZ->SetLineColor(kBlue);
+      hist_WZ->SetFillColorAlpha(TColor::GetColor("#6495ED"), 0.9);
+      hist_WZ->SetLineWidth(2);
+      hist_WZ->GetYaxis()->SetTitle("Events");
+      hist_signal->SetLineColor(TColor::GetColor("#DE3163"));
+      hist_signal->SetFillColorAlpha(TColor::GetColor("#DE3163"), 0.8);
+      hist_signal->SetLineWidth(2);
+      hist_signal->SetFillStyle(3244);
+    }
+    else
+    {
+      hist_signal->Draw("hist");
+      hist_WZ->Draw("histsame");
+      hist_WW->Draw("histsame");
+      hist_top->Draw("histsame");
+      hist_Zjets->Draw("histsame");
+      hist_othr->Draw("histsame");
+      hist_data->Draw("same");
+    }
 
     hist_signal->GetXaxis()->SetTitleSize(0.03);
     hist_signal->GetXaxis()->SetTitleFont(42);
@@ -917,23 +930,52 @@ void cro_plot6()
     tex2->SetLineWidth(2);
     tex2->Draw();
 
-    TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
-    leg->SetBorderSize(0);
-    leg->SetTextSize(0.03);
-    leg->SetMargin(0.25);
-    leg->SetEntrySeparation(0.1);
-    leg->SetNColumns(2);
-    leg->AddEntry(hist_data, "Data", "p");
-    leg->AddEntry(hist_signal, "Signal", "f");
-    leg->AddEntry(hist_WZ, "WZ", "f");
-    leg->AddEntry(hist_WW, "WW", "f");
-    leg->AddEntry(hist_Zjets, "Z+jets", "f");
-    leg->AddEntry(hist_t, "top", "f");
-    leg->AddEntry(hist_othr, "othr", "f");
-    leg->Draw("same");
+    // TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
+    // leg->SetBorderSize(0);
+    // leg->SetTextSize(0.03);
+    // leg->SetMargin(0.25);
+    // leg->SetEntrySeparation(0.1);
+    // leg->SetNColumns(2);
+    // leg->AddEntry(hist_data, "Data", "p");
+    // leg->AddEntry(hist_signal, "Signal", "f");
+    // leg->AddEntry(hist_WZ, "WZ", "f");
+    // leg->AddEntry(hist_WW, "WW", "f");
+    // leg->AddEntry(hist_Zjets, "Z+jets", "f");
+    // leg->AddEntry(hist_top, "top", "f");
+    // leg->AddEntry(hist_othr, "othr", "f");
+    // leg->Draw("same");
+
+    if (directory == "SR")
+    {
+      TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
+      leg->SetBorderSize(0);
+      leg->SetTextSize(0.03);
+      leg->SetMargin(0.25);
+      leg->SetEntrySeparation(0.1);
+      leg->AddEntry(hist_signal, "Signal", "f");
+      leg->AddEntry(hist_WZ, "Backgournd", "f");
+      leg->Draw("same");
+    }
+    else
+    {
+      TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
+      leg->SetBorderSize(0);
+      leg->SetTextSize(0.03);
+      leg->SetMargin(0.25);
+      leg->SetEntrySeparation(0.1);
+      leg->SetNColumns(2);
+      leg->AddEntry(hist_data, "Data", "p");
+      leg->AddEntry(hist_signal, "Signal", "f");
+      leg->AddEntry(hist_WZ, "WZ", "f");
+      leg->AddEntry(hist_WW, "WW", "f");
+      leg->AddEntry(hist_Zjets, "Z+jets", "f");
+      leg->AddEntry(hist_top, "top", "f");
+      leg->AddEntry(hist_othr, "othr", "f");
+      leg->Draw("same");
+    }
 
     pad2->cd();
-    pad2->SetLogy();
+    
 
     TH1F *numerator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *denominator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
@@ -941,14 +983,31 @@ void cro_plot6()
     numerator->Add(hist_data);
     denominator->Add(hist_signal);
 
+    if (directory == "SR")
+    {
+      numerator->Add(hist_signal);
+      denominator->Add(hist_WZ);
+    }
+    else
+    {
+      numerator->Add(hist_data);
+      denominator->Add(hist_signal);
+      pad2->SetLogy();
+      pad2->Update();
+    }
+
     numerator->Sumw2(1);
     denominator->Sumw2(1);
     numerator->Divide(denominator);
+    if (directory == "SR")
+    {
+      numerator->GetYaxis()->SetRangeUser(-1, 5);
+    }
 
     numerator->SetMarkerStyle(20);
     numerator->GetXaxis()->SetTitle("");
     numerator->GetXaxis()->SetTitleSize(0.15);
-    numerator->GetXaxis()->SetTitle("m^{jj} [GeV]");
+    numerator->GetXaxis()->SetTitle("S^{jj}_{T} [GeV]");
     numerator->GetXaxis()->SetTitleOffset(1.1);
     numerator->GetXaxis()->SetLabelSize(0.14);
 
@@ -982,11 +1041,10 @@ void cro_plot6()
       tex3->SetTextSize(0.04);
       tex3->SetLineWidth(1);
       tex3->Draw();
-      numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg}");
+      numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg.}");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/plots/mjj_SR.png");
-      cout << "  SIGGNAL INTEGRAL  " << hist_data->Integral(-3000, 3000) - hist_WZ->Integral(-3000, 3000) - hist_Zjets->Integral(-3000, 3000) - hist_WW->Integral(-3000, 3000) - hist_t->Integral(-3000, 3000) - hist_othr->Integral(-3000, 3000) << endl << endl;
+      c1->SaveAs("../cro/plots/stjj_SR.png");
     }
     else if (directory == "3lCR")
     {
@@ -1002,7 +1060,7 @@ void cro_plot6()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/plots/mjj_3lCR.png");
+      c2->SaveAs("../cro/plots/stjj_3lCR.png");
     }
     else if (directory == "emCR_B")
     {
@@ -1018,7 +1076,7 @@ void cro_plot6()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/plots/mjj_emCR_B.png");
+      c3->SaveAs("../cro/plots/stjj_emCR_B.png");
     }
     else if (directory == "emCR_A")
     {
@@ -1034,7 +1092,7 @@ void cro_plot6()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/plots/mjj_emCR_A.png");
+      c4->SaveAs("../cro/plots/stjj_emCR_A.png");
     }
     else if (directory == "Zjets")
     {
@@ -1050,10 +1108,13 @@ void cro_plot6()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/plots/mjj_Zjets.png");
+      c5->SaveAs("../cro/plots/stjj_Zjets.png");
 
 
     }
+
+
+
 
     
 
@@ -1081,15 +1142,20 @@ void cro_plot6()
   }
   
   cout << endl << endl;
-  cout << "   SCALING FACTORS (integral):    " << "sf_3lCR = " <<  sf_3lCR << "   ||   sf_emuB = " << sf_emuB  << "   ||   sf_emuA = " << sf_emuA <<
-  endl << "                                  " << "sf_Zjets0 = " << sf_Zjets0 << "   ||   sf_Zjets1 = " << sf_Zjets1 << "   ||   sf_Zjets2 = " << sf_Zjets2 << endl << endl;
+  cout << "   SCALING FACTORS:       μ_WZ = " <<  sf_3lCR << " +- " << sf_3lCR_er << endl << endl 
+       << "                          μ_top = " << sf_emuB  << " +- " << sf_emuB_er << endl << endl 
+       << "                          μ_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl
+       << "                          μ_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl  
+       << "                          μ_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl 
+       << "                          μ_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
+          
           
   // Timer stop
     auto end = chrono::high_resolution_clock::now();
 
     chrono::duration<float> duration = end - start;
 
-    cout << endl << "   Script executed in: " << int(duration.count() / 60.0) << " minutes" << " and " << int((duration.count() / 60.0 - int(duration.count() / 60.0))*60) << " s" <<  endl;
+    cout << endl << "   Script executed in: " << int(duration.count() / 60.0) << " minutes" << " and " << int((duration.count() / 60.0 - int(duration.count() / 60.0))*60) << " s" <<  endl << endl;
 
     // For the log file
     std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
