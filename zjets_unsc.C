@@ -672,6 +672,8 @@ void zjets_unsc()
     Float_t events_data_er = n_data[1];
     Float_t events_signal = n_llvv[0] + n_llvvjj[0];
     Float_t events_signal_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
+    Float_t events_bkg;
+    Float_t events_bkg_er;
     Float_t events_WZ = n_WZ[0];
     Float_t events_WZ_er = n_WZ[1];
     Float_t events_Zjets;
@@ -812,14 +814,16 @@ void zjets_unsc()
       events_Zjets2_er = sqrt( pow(sf_Zjets2, 2) * pow(events_Zjets2_er, 2) + pow(events_Zjets2, 2) * pow(sf_Zjets2_er, 2));
 
       //Signal
-      events_signal = events_data - events_WZ - events_top - events_WW - events_Zjets0 - events_Zjets1 - events_Zjets2 - events_othr;
-      events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      events_bkg = events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      events_signal = events_data - events_bkg;
+      events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_bkg_er, 2));
 
       //Print calculated events for every region
       
        cout << "------------------------------------------------------------------" << endl << endl;
        cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
-       cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
+       cout << "   SIGNAL/BKG = " << events_signal/events_bkg << endl << endl;
        cout << "_________________________________" << endl << endl;
        cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
        cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << "   |   mu_WZ = " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
@@ -837,21 +841,15 @@ void zjets_unsc()
     hist_Zjets->Add(hist_Zjets0);
     hist_Zjets->Add(hist_Zjets1);
     hist_Zjets->Add(hist_Zjets2);
-    // Stacking with a specific order
-    // hist_Zjets->Add(hist_othr);
-    // hist_top->Add(hist_Zjets);
-    // hist_WW->Add(hist_top);
-    // hist_WZ->Add(hist_WW);
-    // hist_signal->Add(hist_WZ);
-
 
     if (directory == "SR")
     {
-       // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
+      // Stacking with a specific order
+      hist_Zjets->Add(hist_othr);
+      hist_top->Add(hist_Zjets);
+      hist_WW->Add(hist_top);
+      hist_WZ->Add(hist_WW);
+      cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
     }
     else
     {
@@ -861,18 +859,17 @@ void zjets_unsc()
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
        hist_signal->Add(hist_WZ);
+       cout << "   DATA/MC = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
     }
 
-    if (directory != "SR")
-    {
-      cout << "   DATA/MC = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
-      //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
-      //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
-      //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
-      //  cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
-      //  cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
-      //  cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
-    }
+
+    //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
+    //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
+    //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
+    //  cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
+    //  cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
+    //  cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+
 
     //----------------------------------------PLOTS----------------------------------------//
 
@@ -893,7 +890,7 @@ void zjets_unsc()
     {
       hist_WZ->Draw("hist");
       hist_signal->Draw("histsame");
-      hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
+      hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
       hist_WZ->SetStats(0);
       hist_WZ->SetLineWidth(2);
       hist_WZ->SetLineColor(kBlue);
@@ -921,7 +918,7 @@ void zjets_unsc()
     hist_signal->GetYaxis()->SetTitle("Events");
     hist_signal->GetXaxis()->SetTitleOffset(1.1);
     hist_signal->GetYaxis()->SetTitleFont(42);
-    hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
+    hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
     hist_signal->SetStats(0);
 
     pad1->RedrawAxis();
@@ -1119,7 +1116,7 @@ void zjets_unsc()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/zjets_splitted_unsc/stjj_Zjets_unsc.png");
+      c5->SaveAs("../cro/zjets_splitted_unsc/stjj_Zjets0_unsc.png");
 
     }
     else if (directory == "Zjets1")
@@ -1136,7 +1133,7 @@ void zjets_unsc()
 
       pad1->Update();
       c6->Update();
-      c6->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets1_unsc.png");
+      c6->SaveAs("../cro/zjets_splitted_unsc/stjj_Zjets1_unsc.png");
 
     }
     else if (directory == "Zjets2")
@@ -1153,7 +1150,7 @@ void zjets_unsc()
 
       pad1->Update();
       c7->Update();
-      c7->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets2_unsc.png");
+      c7->SaveAs("../cro/zjets_splitted_unsc/stjj_Zjets2_unsc.png");
 
     }
 
