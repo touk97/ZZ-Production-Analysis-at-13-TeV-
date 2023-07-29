@@ -912,7 +912,7 @@ void zjets_scaled()
     else
     {
       // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
+       hist_Zjets0->Add(hist_othr);
        hist_top->Add(hist_Zjets);
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
@@ -922,7 +922,7 @@ void zjets_scaled()
     if (directory == "SR")
     {
       // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
+       hist_Zjets1->Add(hist_othr);
        hist_top->Add(hist_Zjets);
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
@@ -931,7 +931,7 @@ void zjets_scaled()
     else if(directory == "Zjets2")
     {
       // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
+       hist_Zjets2->Add(hist_othr);
        hist_top->Add(hist_Zjets);
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
@@ -1083,7 +1083,18 @@ void zjets_scaled()
       leg->AddEntry(hist_signal, "Signal", "f");
       leg->AddEntry(hist_WZ, "WZ", "f");
       leg->AddEntry(hist_WW, "WW", "f");
-      leg->AddEntry(hist_Zjets2, "Z+jets2", "f");
+      if (directory == "Zjets0")
+      {
+        leg->AddEntry(hist_Zjets0, "Z+jets0", "f");
+      }
+      else if (directory == "Zjets1")
+      {
+        leg->AddEntry(hist_Zjets1, "Z+jets1", "f");
+      }
+      else if (directory == "Zjets2")
+      {
+        leg->AddEntry(hist_Zjets2, "Z+jets2", "f");
+      }
       leg->AddEntry(hist_top, "top", "f");
       leg->AddEntry(hist_othr, "othr", "f");
       leg->Draw("same");
