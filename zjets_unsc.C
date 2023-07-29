@@ -221,19 +221,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
         {
           signal0 = signal0 + weight;
           signaler0 = signaler0 + weight * weight;
-          hist0->Fill(Z_pT, weight);
+          hist0->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
         }
         else if (n_jets > 0 && n_jets < 2)
         {
           signal1 = signal1 + weight;
           signaler1 = signaler1 + weight * weight;
-          hist1->Fill(Z_pT, weight);
+          hist1->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
         }
         else if (n_jets > 1)
         {
           signal2 = signal2 + weight;
           signaler2 = signaler2 + weight * weight;
-          hist2->Fill(Z_pT, weight);
+          hist2->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
         }
       }
     }
@@ -244,19 +244,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
       {
         signal0 = signal0 + weight;
         signaler0 = signaler0 + weight * weight;
-        hist0->Fill(Z_pT, weight);
+        hist0->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
       }
       else if (n_jets > 0 && n_jets < 2)
       {
         signal1 = signal1 + weight;
         signaler1 = signaler1 + weight * weight;
-        hist1->Fill(Z_pT, weight);
+        hist1->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
       }
       else if (n_jets > 1)
       {
         signal2 = signal2 + weight;
         signaler2 = signaler2 + weight * weight;
-        hist2->Fill(Z_pT, weight);
+        hist2->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
       }
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -340,14 +340,15 @@ private:
 //
 //
 // MAIN
-void zjets_scaled()
+void zjets_unsc()
 {
 
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/zjets_splitted_sc/zjets_splitted_sc.txt");
+  ofstream logFile("../cro/zjets_splitted_unsc/zjets_splitted_unsc.txt");
+  // ofstream logFile("../cro/zjets_splitted_unsc/demo_log.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -818,6 +819,7 @@ void zjets_scaled()
       
        cout << "------------------------------------------------------------------" << endl << endl;
        cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
+       cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
        cout << "_________________________________" << endl << endl;
        cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
        cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << "   |   mu_WZ = " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
@@ -830,64 +832,6 @@ void zjets_scaled()
        cout << "------------------------------------------------------------------" << endl << endl;
     }
     
-    //Scale histograms before adding and plotting
-    if (directory == "emCR_B")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-       }
-    }
-    if (directory == "emCR_A")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-       }
-    }
-    if (directory == "Zjets0")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-       }
-    }
-    if (directory == "Zjets1")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-       }
-    }
-    else if (directory == "Zjets2")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
-       }
-    }
-    else if (directory == "SR")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
-        hist_Zjets2->SetBinContent(bin, hist_Zjets2->GetBinContent(bin) * sf_Zjets2);
-       }
-    }
 
     //Merge Zjets before start plotting
     hist_Zjets->Add(hist_Zjets0);
@@ -911,35 +855,17 @@ void zjets_scaled()
     }
     else
     {
-      // Stacking with a specific order
-       hist_Zjets0->Add(hist_othr);
+       // Stacking with a specific order
+       hist_Zjets->Add(hist_othr);
        hist_top->Add(hist_Zjets);
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
        hist_signal->Add(hist_WZ);
     }
 
-    if (directory == "SR")
+    if (directory != "SR")
     {
-      // Stacking with a specific order
-       hist_Zjets1->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
-       hist_signal->Add(hist_WZ);
-    }
-    else if(directory == "Zjets2")
-    {
-      // Stacking with a specific order
-       hist_Zjets2->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
-       hist_signal->Add(hist_WZ);
-    }
-    else
-    {
-      cout << "   DATA/MC (Integral) = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
+      cout << "   DATA/MC = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
       //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
       //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
       //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
@@ -978,36 +904,6 @@ void zjets_scaled()
       hist_signal->SetFillColorAlpha(TColor::GetColor("#DE3163"), 0.8);
       hist_signal->SetLineWidth(2);
       hist_signal->SetFillStyle(3244);
-    }
-    else if (directory == "Zjets0")
-    {
-      hist_signal->Draw("hist");
-      hist_WZ->Draw("histsame");
-      hist_WW->Draw("histsame");
-      hist_top->Draw("histsame");
-      hist_Zjets0->Draw("histsame");
-      hist_othr->Draw("histsame");
-      hist_data->Draw("same");
-    }
-    else if (directory == "Zjets1")
-    {
-      hist_signal->Draw("hist");
-      hist_WZ->Draw("histsame");
-      hist_WW->Draw("histsame");
-      hist_top->Draw("histsame");
-      hist_Zjets1->Draw("histsame");
-      hist_othr->Draw("histsame");
-      hist_data->Draw("same");
-    }
-    else if (directory == "Zjets2")
-    {
-      hist_signal->Draw("hist");
-      hist_WZ->Draw("histsame");
-      hist_WW->Draw("histsame");
-      hist_top->Draw("histsame");
-      hist_Zjets2->Draw("histsame");
-      hist_othr->Draw("histsame");
-      hist_data->Draw("same");
     }
     else
     {
@@ -1083,18 +979,7 @@ void zjets_scaled()
       leg->AddEntry(hist_signal, "Signal", "f");
       leg->AddEntry(hist_WZ, "WZ", "f");
       leg->AddEntry(hist_WW, "WW", "f");
-      if (directory == "Zjets0")
-      {
-        leg->AddEntry(hist_Zjets0, "Z+jets0", "f");
-      }
-      else if (directory == "Zjets1")
-      {
-        leg->AddEntry(hist_Zjets1, "Z+jets1", "f");
-      }
-      else if (directory == "Zjets2")
-      {
-        leg->AddEntry(hist_Zjets2, "Z+jets2", "f");
-      }
+      leg->AddEntry(hist_Zjets, "Z+jets", "f");
       leg->AddEntry(hist_top, "top", "f");
       leg->AddEntry(hist_othr, "othr", "f");
       leg->Draw("same");
@@ -1170,7 +1055,7 @@ void zjets_scaled()
       numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg.}");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/zjets_splitted_sc/stjj_SR_sc.png");
+      c1->SaveAs("../cro/zjets_splitted_unsc/stjj_SR_unsc.png");
     }
     else if (directory == "3lCR")
     {
@@ -1186,7 +1071,7 @@ void zjets_scaled()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/zjets_splitted_sc/stjj_3lCR_sc.png");
+      c2->SaveAs("../cro/zjets_splitted_unsc/stjj_3lCR_unsc.png");
     }
     else if (directory == "emCR_B")
     {
@@ -1202,7 +1087,7 @@ void zjets_scaled()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/zjets_splitted_sc/stjj_emCR_B_sc.png");
+      c3->SaveAs("../cro/zjets_splitted_unsc/stjj_emCR_B_unsc.png");
     }
     else if (directory == "emCR_A")
     {
@@ -1218,13 +1103,13 @@ void zjets_scaled()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/zjets_splitted_sc/stjj_emCR_A_sc.png");
+      c4->SaveAs("../cro/zjets_splitted_unsc/stjj_emCR_A_unsc.png");
     }
     else if (directory == "Zjets0")
     {
       pad1->cd();
-      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets0 Control Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets0 Control Region");
+      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets Control Region");
       tex3->SetNDC();
       tex3->SetTextFont(1);
       tex3->SetTextSize(0.04);
@@ -1234,7 +1119,7 @@ void zjets_scaled()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets0_sc.png");
+      c5->SaveAs("../cro/zjets_splitted_unsc/stjj_Zjets_unsc.png");
 
     }
     else if (directory == "Zjets1")
@@ -1251,7 +1136,7 @@ void zjets_scaled()
 
       pad1->Update();
       c6->Update();
-      c6->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets1_sc.png");
+      c6->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets1_unsc.png");
 
     }
     else if (directory == "Zjets2")
@@ -1268,7 +1153,7 @@ void zjets_scaled()
 
       pad1->Update();
       c7->Update();
-      c7->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets2_sc.png");
+      c7->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets2_unsc.png");
 
     }
 

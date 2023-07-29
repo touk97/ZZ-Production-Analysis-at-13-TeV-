@@ -201,7 +201,7 @@ private:
 //
 //
 // MAIN
-void zjets_unique()
+void zjets_single_sc()
 {
 
   // Timer start
