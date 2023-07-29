@@ -76,7 +76,8 @@
         "zjets_sc.C": "cpp",
         "zjets_single_scaled.C": "cpp",
         "zjets_single_sc.C": "cpp",
-        "zjets_unsc.C": "cpp"
+        "zjets_unsc.C": "cpp",
+        "zjets_single_unsc.C": "cpp"
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"

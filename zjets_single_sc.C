@@ -28,7 +28,7 @@ using namespace std;
 
 
 
-vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
+vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
 {
 
   TH1::SetDefaultSumw2(kTRUE);
@@ -78,8 +78,8 @@ vector<Float_t> Plotter(TTree *tree, TH1F *hist, string directory)
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
 
-  Float_t signal = 0.;
-  Float_t signaler = 0.;
+  Double_t signal = 0.;
+  Double_t signaler = 0.;
   // Float_t Norm = 1;
 
 
@@ -208,8 +208,8 @@ void zjets_single_sc()
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/plots/zjets_unique.txt");
-  // ofstream logFile("../cro/plots/demo_log.txt");
+  ofstream logFile("../cro/zjets_single_sc/zjets_single_sc.txt");
+  // ofstream logFile("../cro/zjets_single_sc/demo_log.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -340,53 +340,53 @@ void zjets_single_sc()
  
     cout << "   ================== DATA ==================    " << endl << endl;
     cout << "   DATA:";
-    vector<Float_t> n_data = Plotter(tree_data, hist_data, directory);
+    vector<Float_t> n_data = Counter(tree_data, hist_data, directory);
 
     cout << "   ================== SIGNAL ==================    " << endl << endl;
     cout << "   llvv:";
-    vector<Float_t> n_llvv = Plotter(tree_llvv, hist_llvv, directory);
+    vector<Float_t> n_llvv = Counter(tree_llvv, hist_llvv, directory);
     cout << "   llvvjj:";
-    vector<Float_t> n_llvvjj = Plotter(tree_llvvjj, hist_llvvjj, directory);
+    vector<Float_t> n_llvvjj = Counter(tree_llvvjj, hist_llvvjj, directory);
 
     cout << "   ================== WZ ==================    " << endl << endl;
     cout << "   WZ:";
-    vector<Float_t> n_WZ = Plotter(tree_WZ, hist_WZ, directory);
+    vector<Float_t> n_WZ = Counter(tree_WZ, hist_WZ, directory);
 
     cout << "   ================== Zjets ==================    " << endl << endl;
     cout << "   Z_jets_ee:";
-    vector<Float_t> n_Zjets_ee = Plotter(tree_Z_jets_ee, hist_Zjets_ee, directory);
+    vector<Float_t> n_Zjets_ee = Counter(tree_Z_jets_ee, hist_Zjets_ee, directory);
     cout << "   Z_jets_mumu:";
-    vector<Float_t> n_Zjets_mumu = Plotter(tree_Z_jets_mumu, hist_Zjets_mumu, directory);
+    vector<Float_t> n_Zjets_mumu = Counter(tree_Z_jets_mumu, hist_Zjets_mumu, directory);
 
     cout << "   ================== top ==================    " << endl << endl;
     cout << "   Top:";
-    vector<Float_t> n_top = Plotter(tree_top, hist_top, directory);
+    vector<Float_t> n_top = Counter(tree_top, hist_top, directory);
     cout << "   ttbarV_ttbarVV:";
-    vector<Float_t> n_ttbarV_ttbarVV = Plotter(tree_ttbarV_ttbarVV, hist_ttbarV_ttbarVV, directory);
+    vector<Float_t> n_ttbarV_ttbarVV = Counter(tree_ttbarV_ttbarVV, hist_ttbarV_ttbarVV, directory);
     cout << "   Wt:";
-    vector<Float_t> n_Wt = Plotter(tree_Wt, hist_Wt, directory);
+    vector<Float_t> n_Wt = Counter(tree_Wt, hist_Wt, directory);
 
     cout << "   ================== WW ==================    " << endl << endl;
     cout << "   WW:";
-    vector<Float_t> n_WW = Plotter(tree_WW, hist_WW, directory);
+    vector<Float_t> n_WW = Counter(tree_WW, hist_WW, directory);
 
     cout << "   ================== Othr ==================    " << endl << endl;
     cout << "   llll:";
-    vector<Float_t> n_llll = Plotter(tree_llll, hist_llll, directory);
+    vector<Float_t> n_llll = Counter(tree_llll, hist_llll, directory);
     cout << "   llqq:";
-    vector<Float_t> n_llqq = Plotter(tree_llqq, hist_llqq, directory);
+    vector<Float_t> n_llqq = Counter(tree_llqq, hist_llqq, directory);
     cout << "   VVV:";
-    vector<Float_t> n_VVV = Plotter(tree_VVV, hist_VVV, directory);
+    vector<Float_t> n_VVV = Counter(tree_VVV, hist_VVV, directory);
     cout << "   W_jets:";
-    vector<Float_t> n_Wjets = Plotter(tree_W_jets, hist_W_jets, directory);
+    vector<Float_t> n_Wjets = Counter(tree_W_jets, hist_W_jets, directory);
     cout << "   Ztt:";
-    vector<Float_t> n_Ztt = Plotter(tree_Ztt, hist_Ztt, directory);
+    vector<Float_t> n_Ztt = Counter(tree_Ztt, hist_Ztt, directory);
     cout << "   WZ_jj:";
-    vector<Float_t> n_WZjj = Plotter(tree_WZ_jj, hist_WZ_jj, directory);
+    vector<Float_t> n_WZjj = Counter(tree_WZ_jj, hist_WZ_jj, directory);
     cout << "   lllljj:";
-    vector<Float_t> n_lllljj = Plotter(tree_lllljj, hist_lllljj, directory);
+    vector<Float_t> n_lllljj = Counter(tree_lllljj, hist_lllljj, directory);
     cout << "   llvvjj_WW:";
-    vector<Float_t> n_llvvjj_WW = Plotter(tree_llvvjj_WW, hist_llvvjj_WW, directory);
+    vector<Float_t> n_llvvjj_WW = Counter(tree_llvvjj_WW, hist_llvvjj_WW, directory);
 
 
 
@@ -502,6 +502,8 @@ void zjets_single_sc()
     Float_t events_data_er = n_data[1];
     Float_t events_signal = n_llvv[0] + n_llvvjj[0];
     Float_t events_signal_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
+    Float_t events_bkg;
+    Float_t events_bkg_er;
     Float_t events_WZ = n_WZ[0];
     Float_t events_WZ_er = n_WZ[1];
     Float_t events_Zjets = n_Zjets_ee[0] + n_Zjets_mumu[0];
@@ -591,8 +593,10 @@ void zjets_single_sc()
       events_Zjets_er = sqrt( pow(sf_Zjets, 2) * pow(events_Zjets_er, 2) + pow(events_Zjets, 2) * pow(sf_Zjets_er, 2));
 
       //Signal
-      events_signal = events_data - events_WZ - events_top - events_WW - events_Zjets - events_othr;
-      events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets_er, 2) + pow(events_othr_er, 2));
+      events_bkg = events_WZ + events_top + events_WW + events_Zjets + events_othr;
+      events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets_er, 2) + pow(events_othr_er, 2));
+      events_signal = events_data - events_bkg;
+      events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_bkg_er, 2));
 
       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
       {
@@ -603,57 +607,51 @@ void zjets_single_sc()
       }
 
       //Print calculated events for every region
-      
-       cout << "------------------------------------------------------------------" << endl << endl;
-       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl << endl;
-       cout << "   Data: " << "    " << events_data << " +- " << events_data_er << endl << endl;
-       cout << "   WZ: " << "      " << events_WZ << " +- " << events_WZ_er << ", " << sf_3lCR << endl << endl;
-       cout << "   Top: " << "     " << events_top << " +- " << events_top_er << ", " << sf_emuB << endl << endl;
-       cout << "   WW: " << "      " << events_WW << " +- " << events_WW_er << ", " << sf_emuA << endl << endl;
-       cout << "   Zjets: " << "   " << events_Zjets << " +- " << events_Zjets_er << ", " << sf_Zjets << endl << endl;
-       cout << "   Other: " << "   " << events_othr << " +- " << events_othr_er << endl << endl;
-       cout << "------------------------------------------------------------------" << endl << endl;
+    
+      cout << "------------------------------------------------------------------" << endl << endl;
+      cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
+      cout << "   SIGNAL/BKG = " << events_signal/events_bkg << endl << endl;
+      cout << "_________________________________" << endl << endl;
+      cout << "   Data: " << "    " << events_data << " +- " << events_data_er << endl << endl;
+      cout << "   WZ: " << "      " << events_WZ << " +- " << events_WZ_er << ", " << sf_3lCR << endl << endl;
+      cout << "   Top: " << "     " << events_top << " +- " << events_top_er << ", " << sf_emuB << endl << endl;
+      cout << "   WW: " << "      " << events_WW << " +- " << events_WW_er << ", " << sf_emuA << endl << endl;
+      cout << "   Zjets: " << "   " << events_Zjets << " +- " << events_Zjets_er << ", " << sf_Zjets << endl << endl;
+      cout << "   Other: " << "   " << events_othr << " +- " << events_othr_er << endl << endl;
+      cout << "------------------------------------------------------------------" << endl << endl;
     }
 
-    
-
-
-    // Stacking with a specific order
-    // hist_Zjets->Add(hist_othr);
-    // hist_top->Add(hist_Zjets);
-    // hist_WW->Add(hist_top);
-    // hist_WZ->Add(hist_WW);
-    // hist_signal->Add(hist_WZ);
 
 
     if (directory == "SR")
     {
-       // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
+      // Stacking with a specific order
+      hist_Zjets->Add(hist_othr);
+      hist_top->Add(hist_Zjets);
+      hist_WW->Add(hist_top);
+      hist_WZ->Add(hist_WW);
+      cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
     }
     else
     {
-       // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
-       hist_signal->Add(hist_WZ);
+      // Stacking with a specific order
+      hist_Zjets->Add(hist_othr);
+      hist_top->Add(hist_Zjets);
+      hist_WW->Add(hist_top);
+      hist_WZ->Add(hist_WW);
+      hist_signal->Add(hist_WZ);
+      cout << "   DATA/MC = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
     }
 
-    if (directory != "SR")
-    {
-       cout << "   DATA/MC = " << hist_data->Integral(-3000, 3000) / hist_signal->Integral(-3000, 3000) << endl << endl;
-       cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
-       cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
-       cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
-       cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
-       cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
-       cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
-    }
+    // if (directory != "SR")
+    // {
+    //    cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
+    //    cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
+    //    cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
+    //    cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
+    //    cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
+    //    cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+    // }
 
     //----------------------------------------PLOTS----------------------------------------//
 
@@ -674,7 +672,7 @@ void zjets_single_sc()
     {
       hist_WZ->Draw("hist");
       hist_signal->Draw("histsame");
-      hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
+      hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
       hist_WZ->SetStats(0);
       hist_WZ->SetLineWidth(2);
       hist_WZ->SetLineColor(kBlue);
@@ -702,7 +700,7 @@ void zjets_single_sc()
     hist_signal->GetYaxis()->SetTitle("Events");
     hist_signal->GetXaxis()->SetTitleOffset(1.1);
     hist_signal->GetYaxis()->SetTitleFont(42);
-    hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
+    hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
     hist_signal->SetStats(0);
 
     pad1->RedrawAxis();
@@ -836,7 +834,7 @@ void zjets_single_sc()
       numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg.}");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/plots/stjj_SR.png");
+      c1->SaveAs("../cro/zjets_single_sc/stjj_SR_single_sc.png");
     }
     else if (directory == "3lCR")
     {
@@ -852,7 +850,7 @@ void zjets_single_sc()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/plots/stjj_3lCR.png");
+      c2->SaveAs("../cro/zjets_single_sc/stjj_3lCR_single_sc.png");
     }
     else if (directory == "emCR_B")
     {
@@ -868,7 +866,7 @@ void zjets_single_sc()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/plots/stjj_emCR_B.png");
+      c3->SaveAs("../cro/zjets_single_sc/stjj_emCR_B_single_sc.png");
     }
     else if (directory == "emCR_A")
     {
@@ -884,7 +882,7 @@ void zjets_single_sc()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/plots/stjj_emCR_A.png");
+      c4->SaveAs("../cro/zjets_single_sc/stjj_emCR_A_single_sc.png");
     }
     else if (directory == "Zjets")
     {
@@ -900,7 +898,7 @@ void zjets_single_sc()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/plots/stjj_Zjets.png");
+      c5->SaveAs("../cro/zjets_single_sc/stjj_Zjets_single_sc.png");
 
 
     }
