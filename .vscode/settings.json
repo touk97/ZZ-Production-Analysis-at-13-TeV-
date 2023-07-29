@@ -69,7 +69,9 @@
         "zjets_unique.C": "cpp",
         "zjets_splitter_6R.C": "cpp",
         "zjets.C": "cpp",
-        "cro.C": "cpp"
+        "cro.C": "cpp",
+        "sig_bkg_plot.C": "cpp",
+        "zjets_scaled.C": "cpp"
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"
