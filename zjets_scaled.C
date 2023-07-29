@@ -626,9 +626,6 @@ void zjets_scaled()
 
     // Zjets = Zjets_ee + Zjets_mumu
     hist_Zjets->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
-    hist_Zjets0->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
-    hist_Zjets1->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
-    hist_Zjets2->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
     hist_Zjets->SetLineColor(kBlack);
     hist_Zjets->SetLineWidth(1);
 
@@ -832,7 +829,8 @@ void zjets_scaled()
        cout << "   Other: " << "    "  << events_othr << " +- " << events_othr_er << endl << endl;
        cout << "------------------------------------------------------------------" << endl << endl;
     }
-
+    
+    //Scale histograms before adding and plotting
     if (directory == "emCR_B")
     {
        for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
@@ -908,33 +906,6 @@ void zjets_scaled()
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
     }
-    else if(directory == "Zjets0")
-    {
-      // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
-       hist_signal->Add(hist_WZ);
-    }
-    else if(directory == "Zjets1")
-    {
-      // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
-       hist_signal->Add(hist_WZ);
-    }
-    else if(directory == "Zjets2")
-    {
-      // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
-       hist_signal->Add(hist_WZ);
-    }
     else
     {
        // Stacking with a specific order
@@ -945,16 +916,26 @@ void zjets_scaled()
        hist_signal->Add(hist_WZ);
     }
 
-    // if (directory != "SR")
-    // {
-    //    cout << "   DATA/MC = " << hist_data->Integral(-3000, 3000) / hist_signal->Integral(-3000, 3000) << endl << endl;
-    //    cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
-    //    cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
-    //    cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
-    //    cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
-    //    cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
-    //    cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
-    // }
+    if (directory == "SR")
+    {
+       cout << "   SIGNAL/BKG (Integral) = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
+      //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
+      //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
+      //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
+      //  cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
+      //  cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
+      //  cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+    }
+    else
+    {
+      cout << "   DATA/MC (Integral) = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
+      //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
+      //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
+      //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
+      //  cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
+      //  cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
+      //  cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+    }
 
     //----------------------------------------PLOTS----------------------------------------//
 
@@ -1061,7 +1042,7 @@ void zjets_scaled()
       leg->AddEntry(hist_signal, "Signal", "f");
       leg->AddEntry(hist_WZ, "WZ", "f");
       leg->AddEntry(hist_WW, "WW", "f");
-      leg->AddEntry(hist_Zjets2, "Z+jets2", "f");
+      leg->AddEntry(hist_Zjets, "Z+jets", "f");
       leg->AddEntry(hist_top, "top", "f");
       leg->AddEntry(hist_othr, "othr", "f");
       leg->Draw("same");
@@ -1238,11 +1219,6 @@ void zjets_scaled()
       c7->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets2_sc.png");
 
     }
-
-
-
-
-    
 
 
     //To avoid memory leak

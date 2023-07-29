@@ -221,19 +221,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
         {
           signal0 = signal0 + weight;
           signaler0 = signaler0 + weight * weight;
-          hist0->Fill(Z_pT, weight);
+          hist0->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
         }
         else if (n_jets > 0 && n_jets < 2)
         {
           signal1 = signal1 + weight;
           signaler1 = signaler1 + weight * weight;
-          hist1->Fill(Z_pT, weight);
+          hist1->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
         }
         else if (n_jets > 1)
         {
           signal2 = signal2 + weight;
           signaler2 = signaler2 + weight * weight;
-          hist2->Fill(Z_pT, weight);
+          hist2->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
         }
       }
     }
@@ -244,19 +244,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
       {
         signal0 = signal0 + weight;
         signaler0 = signaler0 + weight * weight;
-        hist0->Fill(Z_pT, weight);
+        hist0->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
       }
       else if (n_jets > 0 && n_jets < 2)
       {
         signal1 = signal1 + weight;
         signaler1 = signaler1 + weight * weight;
-        hist1->Fill(Z_pT, weight);
+        hist1->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
       }
       else if (n_jets > 1)
       {
         signal2 = signal2 + weight;
         signaler2 = signaler2 + weight * weight;
-        hist2->Fill(Z_pT, weight);
+        hist2->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
       }
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -340,15 +340,15 @@ private:
 //
 //
 // MAIN
-void zjets()
+void zjets_unscaled()
 {
 
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/plots/zjets_splitted.txt");
-  // ofstream logFile("../cro/plots/demo_log.txt");
+  ofstream logFile("../cro/zjets_splitted_unsc/zjets_splitted_unsc.txt");
+  // ofstream logFile("../cro/zjets_splitted_unsc/demo_log.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -547,7 +547,9 @@ void zjets()
     TCanvas *c2 = new TCanvas("c2", "pTZ_3lCR", 1400, 600, 700, 700);
     TCanvas *c3 = new TCanvas("c3", "pTZ_emuB", 1400, 600, 700, 700);
     TCanvas *c4 = new TCanvas("c4", "pTZ_emuA", 1400, 600, 700, 700);
-    TCanvas *c5 = new TCanvas("c5", "pTZ_Zjets", 1400, 600, 700, 700);
+    TCanvas *c5 = new TCanvas("c5", "pTZ_Zjets0", 1400, 600, 700, 700);
+    TCanvas *c6 = new TCanvas("c6", "pTZ_Zjets1", 1400, 600, 700, 700);
+    TCanvas *c7 = new TCanvas("c7", "pTZ_Zjets2", 1400, 600, 700, 700);
 
     if (directory == "SR")
     {
@@ -565,9 +567,17 @@ void zjets()
     {
       c4->cd();
     }
-    else if (directory == "Zjets")
+    else if (directory == "Zjets0")
     {
       c5->cd();
+    }
+    else if (directory == "Zjets1")
+    {
+      c6->cd();
+    }
+    else if (directory == "Zjets2")
+    {
+      c7->cd();
     }
 
     TPad *pad1 = new TPad("pad1", "pad1", 0.01, 0.23, 1., 1.);
@@ -820,7 +830,7 @@ void zjets()
        cout << "   Other: " << "    "  << events_othr << " +- " << events_othr_er << endl << endl;
        cout << "------------------------------------------------------------------" << endl << endl;
     }
-
+    
 
     //Merge Zjets before start plotting
     hist_Zjets->Add(hist_Zjets0);
@@ -852,16 +862,26 @@ void zjets()
        hist_signal->Add(hist_WZ);
     }
 
-    // if (directory != "SR")
-    // {
-    //    cout << "   DATA/MC = " << hist_data->Integral(-3000, 3000) / hist_signal->Integral(-3000, 3000) << endl << endl;
-    //    cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
-    //    cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
-    //    cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
-    //    cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
-    //    cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
-    //    cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
-    // }
+    if (directory == "SR")
+    {
+       cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
+      //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
+      //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
+      //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
+      //  cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
+      //  cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
+      //  cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+    }
+    else
+    {
+      cout << "   DATA/MC = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
+      //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
+      //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
+      //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
+      //  cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
+      //  cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
+      //  cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
+    }
 
     //----------------------------------------PLOTS----------------------------------------//
 
@@ -1044,7 +1064,7 @@ void zjets()
       numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg.}");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/plots/stjj_SR.png");
+      c1->SaveAs("../cro/zjets_splitted_unsc/stjj_SR_unsc.png");
     }
     else if (directory == "3lCR")
     {
@@ -1060,7 +1080,7 @@ void zjets()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/plots/stjj_3lCR.png");
+      c2->SaveAs("../cro/zjets_splitted_unsc/stjj_3lCR_unsc.png");
     }
     else if (directory == "emCR_B")
     {
@@ -1076,7 +1096,7 @@ void zjets()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/plots/stjj_emCR_B.png");
+      c3->SaveAs("../cro/zjets_splitted_unsc/stjj_emCR_B_unsc.png");
     }
     else if (directory == "emCR_A")
     {
@@ -1092,9 +1112,9 @@ void zjets()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/plots/stjj_emCR_A.png");
+      c4->SaveAs("../cro/zjets_splitted_unsc/stjj_emCR_A_unsc.png");
     }
-    else if (directory == "Zjets")
+    else if (directory == "Zjets0")
     {
       pad1->cd();
       // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets Control Region");
@@ -1108,15 +1128,43 @@ void zjets()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/plots/stjj_Zjets.png");
-
+      c5->SaveAs("../cro/zjets_splitted_unsc/stjj_Zjets_unsc.png");
 
     }
+    else if (directory == "Zjets1")
+    {
+      pad1->cd();
+      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets1 Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets1 Control Region");
+      tex3->SetNDC();
+      tex3->SetTextFont(1);
+      tex3->SetTextSize(0.04);
+      tex3->SetLineWidth(1);
+      tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
 
+      pad1->Update();
+      c6->Update();
+      c6->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets1_unsc.png");
 
+    }
+    else if (directory == "Zjets2")
+    {
+      pad1->cd();
+      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets2 Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets2 Control Region");
+      tex3->SetNDC();
+      tex3->SetTextFont(1);
+      tex3->SetTextSize(0.04);
+      tex3->SetLineWidth(1);
+      tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
 
+      pad1->Update();
+      c7->Update();
+      c7->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets2_unsc.png");
 
-    
+    }
 
 
     //To avoid memory leak
