@@ -626,6 +626,9 @@ void zjets_scaled()
 
     // Zjets = Zjets_ee + Zjets_mumu
     hist_Zjets->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
+    hist_Zjets0->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
+    hist_Zjets1->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
+    hist_Zjets2->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
     hist_Zjets->SetLineColor(kBlack);
     hist_Zjets->SetLineWidth(1);
 
@@ -830,6 +833,63 @@ void zjets_scaled()
        cout << "------------------------------------------------------------------" << endl << endl;
     }
 
+    if (directory == "emCR_B")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+       }
+    }
+    if (directory == "emCR_A")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
+       }
+    }
+    if (directory == "Zjets0")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
+        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
+       }
+    }
+    if (directory == "Zjets1")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
+        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
+        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
+       }
+    }
+    else if (directory == "Zjets2")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
+        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
+        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
+        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
+       }
+    }
+    else if (directory == "SR")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
+        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
+        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
+        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
+        hist_Zjets2->SetBinContent(bin, hist_Zjets2->GetBinContent(bin) * sf_Zjets2);
+       }
+    }
 
     //Merge Zjets before start plotting
     hist_Zjets->Add(hist_Zjets0);
