@@ -68,7 +68,8 @@
         "zjets_splitter.C": "cpp",
         "zjets_unique.C": "cpp",
         "zjets_splitter_6R.C": "cpp",
-        "zjets.C": "cpp"
+        "zjets.C": "cpp",
+        "zjets_scaled.C": "cpp"
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"
