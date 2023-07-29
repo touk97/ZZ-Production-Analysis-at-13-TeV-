@@ -99,7 +99,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
         // Inclusive
         signal = signal + weight;
         signaler = signaler + weight * weight;
-        hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+        hist->Fill(Z_pT);
       }
       // {
         // // Exclusive
@@ -118,7 +118,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
       //Inclusive
       signal = signal + weight;
       signaler = signaler + weight * weight;
-      hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+      hist->Fill(Z_pT);
 
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -340,7 +340,7 @@ private:
 //
 //
 // MAIN
-void zjets()
+void zjets_scaled()
 {
 
   // Timer start
