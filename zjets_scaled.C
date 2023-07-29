@@ -347,8 +347,8 @@ void zjets_scaled()
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/plots/zjets_splitted.txt");
-  // ofstream logFile("../cro/plots/demo_log.txt");
+  ofstream logFile("../cro/zjets_splitted_sc/zjets_splitted.txt");
+  // ofstream logFile("../cro/zjets_splitted_sc/demo_log.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -1044,7 +1044,7 @@ void zjets_scaled()
       numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg.}");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/plots/stjj_SR.png");
+      c1->SaveAs("../cro/zjets_splitted_sc/stjj_SR_sc.png");
     }
     else if (directory == "3lCR")
     {
@@ -1060,7 +1060,7 @@ void zjets_scaled()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/plots/stjj_3lCR.png");
+      c2->SaveAs("../cro/zjets_splitted_sc/stjj_3lCR_sc.png");
     }
     else if (directory == "emCR_B")
     {
@@ -1076,7 +1076,7 @@ void zjets_scaled()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/plots/stjj_emCR_B.png");
+      c3->SaveAs("../cro/zjets_splitted_sc/stjj_emCR_B_sc.png");
     }
     else if (directory == "emCR_A")
     {
@@ -1092,7 +1092,7 @@ void zjets_scaled()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/plots/stjj_emCR_A.png");
+      c4->SaveAs("../cro/zjets_splitted_sc/stjj_emCR_A_sc.png");
     }
     else if (directory == "Zjets")
     {
@@ -1108,7 +1108,7 @@ void zjets_scaled()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/plots/stjj_Zjets.png");
+      c5->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets_sc.png");
 
 
     }
