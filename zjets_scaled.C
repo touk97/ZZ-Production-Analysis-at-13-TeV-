@@ -99,7 +99,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
         // Inclusive
         signal = signal + weight;
         signaler = signaler + weight * weight;
-        hist->Fill(Z_pT);
+        hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
       }
       // {
         // // Exclusive
@@ -118,7 +118,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
       //Inclusive
       signal = signal + weight;
       signaler = signaler + weight * weight;
-      hist->Fill(Z_pT);
+      hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
 
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -347,8 +347,7 @@ void zjets_scaled()
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/zjets_splitted_sc/zjets_splitted.txt");
-  // ofstream logFile("../cro/zjets_splitted_sc/demo_log.txt");
+  ofstream logFile("../cro/zjets_splitted_sc/zjets_splitted_sc.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -547,7 +546,9 @@ void zjets_scaled()
     TCanvas *c2 = new TCanvas("c2", "pTZ_3lCR", 1400, 600, 700, 700);
     TCanvas *c3 = new TCanvas("c3", "pTZ_emuB", 1400, 600, 700, 700);
     TCanvas *c4 = new TCanvas("c4", "pTZ_emuA", 1400, 600, 700, 700);
-    TCanvas *c5 = new TCanvas("c5", "pTZ_Zjets", 1400, 600, 700, 700);
+    TCanvas *c5 = new TCanvas("c5", "pTZ_Zjets0", 1400, 600, 700, 700);
+    TCanvas *c6 = new TCanvas("c6", "pTZ_Zjets1", 1400, 600, 700, 700);
+    TCanvas *c7 = new TCanvas("c7", "pTZ_Zjets2", 1400, 600, 700, 700);
 
     if (directory == "SR")
     {
@@ -565,9 +566,17 @@ void zjets_scaled()
     {
       c4->cd();
     }
-    else if (directory == "Zjets")
+    else if (directory == "Zjets0")
     {
       c5->cd();
+    }
+    else if (directory == "Zjets1")
+    {
+      c6->cd();
+    }
+    else if (directory == "Zjets2")
+    {
+      c7->cd();
     }
 
     TPad *pad1 = new TPad("pad1", "pad1", 0.01, 0.23, 1., 1.);
@@ -842,6 +851,33 @@ void zjets_scaled()
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
     }
+    else if(directory == "Zjets0")
+    {
+      // Stacking with a specific order
+       hist_Zjets0->Add(hist_othr);
+       hist_top->Add(hist_Zjets);
+       hist_WW->Add(hist_top);
+       hist_WZ->Add(hist_WW);
+       hist_signal->Add(hist_WZ);
+    }
+    else if(directory == "Zjets1")
+    {
+      // Stacking with a specific order
+       hist_Zjets1->Add(hist_othr);
+       hist_top->Add(hist_Zjets);
+       hist_WW->Add(hist_top);
+       hist_WZ->Add(hist_WW);
+       hist_signal->Add(hist_WZ);
+    }
+    else if(directory == "Zjets2")
+    {
+      // Stacking with a specific order
+       hist_Zjets2->Add(hist_othr);
+       hist_top->Add(hist_Zjets);
+       hist_WW->Add(hist_top);
+       hist_WZ->Add(hist_WW);
+       hist_signal->Add(hist_WZ);
+    }
     else
     {
        // Stacking with a specific order
@@ -893,6 +929,36 @@ void zjets_scaled()
       hist_signal->SetFillColorAlpha(TColor::GetColor("#DE3163"), 0.8);
       hist_signal->SetLineWidth(2);
       hist_signal->SetFillStyle(3244);
+    }
+    else if (directory == "Zjets0")
+    {
+      hist_signal->Draw("hist");
+      hist_WZ->Draw("histsame");
+      hist_WW->Draw("histsame");
+      hist_top->Draw("histsame");
+      hist_Zjets0->Draw("histsame");
+      hist_othr->Draw("histsame");
+      hist_data->Draw("same");
+    }
+    else if (directory == "Zjets1")
+    {
+      hist_signal->Draw("hist");
+      hist_WZ->Draw("histsame");
+      hist_WW->Draw("histsame");
+      hist_top->Draw("histsame");
+      hist_Zjets1->Draw("histsame");
+      hist_othr->Draw("histsame");
+      hist_data->Draw("same");
+    }
+    else if (directory == "Zjets2")
+    {
+      hist_signal->Draw("hist");
+      hist_WZ->Draw("histsame");
+      hist_WW->Draw("histsame");
+      hist_top->Draw("histsame");
+      hist_Zjets2->Draw("histsame");
+      hist_othr->Draw("histsame");
+      hist_data->Draw("same");
     }
     else
     {
@@ -968,7 +1034,18 @@ void zjets_scaled()
       leg->AddEntry(hist_signal, "Signal", "f");
       leg->AddEntry(hist_WZ, "WZ", "f");
       leg->AddEntry(hist_WW, "WW", "f");
-      leg->AddEntry(hist_Zjets, "Z+jets", "f");
+      if (directory == "Zjets0")
+      {
+        leg->AddEntry(hist_Zjets0, "Z+jets0", "f");
+      }
+      else if (directory == "Zjets1")
+      {
+        leg->AddEntry(hist_Zjets1, "Z+jets1", "f");
+      }
+      else if (directory == "Zjets2")
+      {
+        leg->AddEntry(hist_Zjets2, "Z+jets2", "f");
+      }
       leg->AddEntry(hist_top, "top", "f");
       leg->AddEntry(hist_othr, "othr", "f");
       leg->Draw("same");
@@ -1094,11 +1171,11 @@ void zjets_scaled()
       c4->Update();
       c4->SaveAs("../cro/zjets_splitted_sc/stjj_emCR_A_sc.png");
     }
-    else if (directory == "Zjets")
+    else if (directory == "Zjets0")
     {
       pad1->cd();
-      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets Control Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets Control Region");
+      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets0 Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets0 Control Region");
       tex3->SetNDC();
       tex3->SetTextFont(1);
       tex3->SetTextSize(0.04);
@@ -1108,8 +1185,41 @@ void zjets_scaled()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets_sc.png");
+      c5->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets0_sc.png");
 
+    }
+    else if (directory == "Zjets1")
+    {
+      pad1->cd();
+      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets1 Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets1 Control Region");
+      tex3->SetNDC();
+      tex3->SetTextFont(1);
+      tex3->SetTextSize(0.04);
+      tex3->SetLineWidth(1);
+      tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
+      pad1->Update();
+      c6->Update();
+      c6->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets1_sc.png");
+
+    }
+    else if (directory == "Zjets2")
+    {
+      pad1->cd();
+      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets2 Control Region");
+      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets2 Control Region");
+      tex3->SetNDC();
+      tex3->SetTextFont(1);
+      tex3->SetTextSize(0.04);
+      tex3->SetLineWidth(1);
+      tex3->Draw();
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
+
+      pad1->Update();
+      c7->Update();
+      c7->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets2_sc.png");
 
     }
 
