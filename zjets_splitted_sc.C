@@ -340,7 +340,7 @@ private:
 //
 //
 // MAIN
-void zjets_sc()
+void zjets_splitted_sc()
 {
 
   // Timer start
