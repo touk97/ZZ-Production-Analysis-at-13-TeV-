@@ -25,7 +25,7 @@ using namespace std;
 
 // Method to fill hitograms (MET and MET_significance) with events properly weighted
 //
-std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t dLepR_value, Float_t dMetZPhi_value, Float_t met_tst_value, FLoat_t MetOHT_value)
+std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t dLepR_value, Float_t dMetZPhi_value, Float_t met_tst_value, Float_t MetOHT_value)
 {
 
   TH1::SetDefaultSumw2(kTRUE);
@@ -107,7 +107,7 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t d
     }
   }
 
-  cout << "N=" << signal << "+-" << sqrt(signaler) << endl; // signal yield and error on this yield
+  cout << "   N=" << signal << "+-" << sqrt(signaler) << endl; // signal yield and error on this yield
 
   events.push_back(signal);
   events.push_back(sqrt(signaler));
@@ -121,12 +121,17 @@ int bro_plot()
 
   gStyle->SetLegendFont(42);
   gStyle->SetPalette(1);
-  Int_t metritiri = 0;
+  Int_t dLepR_max = -1;
+  Int_t dMetZphi_max = -1;
+  Int_t met_tst_max = -1;
+  Int_t MetOHT_max = -1;
+  Float_t Z_max = -1;
+  Int_t iteration  = 1;
 
-  Float_t dLepR_value[4] = {1.8, 2.0, 2.2, 2.5};
-  Float_t dMetZphi_value[4] = {2.2, 2.5, 2.7, 3.0};
+  Float_t dLepR_value[2] = {1.8, 2.0};
+  Float_t dMetZphi_value[2] = {2.2, 2.5};
   Float_t met_tst_value[1] = {90};
-  Float_t MetOHT_value[4] = {0.5, 0.6, 0.65, 0.7};
+  Float_t MetOHT_value[2] = {0.5, 0.6};
   // TString sample = "/Results/trial2.root";
   // ---convert TString to string
   // std::string sample_string(sample.Data());
@@ -168,16 +173,19 @@ int bro_plot()
   // Other
   TFile *file_othr = new TFile("../data/mc16ade_ttV_ttVV_MET90.root");
   TTree *tree_othr = file_othr->Get<TTree>("tree_PFLOW");
-
-  for (int i = 0; i < sizeof(dLepR_value) / sizeof(dLepR_value[0]); i++)
+  
+  for (Int_t i = 0; i < sizeof(dLepR_value) / sizeof(dLepR_value[0]); i++)
   {
-    for (int j = 0; j < sizeof(dLepR_value) / sizeof(dLepR_value[0]); j++)
+    for (Int_t j = 0; j < sizeof(dMetZphi_value) / sizeof(dMetZphi_value[0]); j++)
     {
-      for (int k = 0; k < sizeof(dLepR_value) / sizeof(dLepR_value[0]); k++)
+      for (Int_t k = 0; k < sizeof(met_tst_value) / sizeof(met_tst_value[0]); k++)
       {
-        for (int l = 0; l < sizeof(dLepR_value) / sizeof(dLepR_value[0]); l++)
+        for (Int_t l = 0; l < sizeof(MetOHT_value) / sizeof(MetOHT_value[0]); l++)
         {
-          /* code */
+          
+          cout << endl << endl << "   --------------------------------------   " << endl;
+          cout << "              ITERATION #:  " << iteration << endl;
+          cout << "   --------------------------------------   " << endl << endl;
 
           TH1::SetDefaultSumw2(kTRUE);
 
@@ -185,7 +193,7 @@ int bro_plot()
           Float_t binmin = 80;
           Float_t binmax = 500;
 
-          TH1F *hist_sigQCD = new TH1F("N_bjets", "N_{bjets}", 20, xbins);
+          TH1F *hist_sigQCD = new TH1F("met_tst", "E^{T}_{miss}", 20, xbins);
           TH1F *hist_sigEWK = new TH1F("hist_sigEWK", "hist_sigEWK", 20, xbins);
           TH1F *hist_data = new TH1F("hist_data ", "hist_data ", 20, xbins);
           TH1F *hist_Zjets = new TH1F("hist_Zjets ", "hist_Zjets ", 20, xbins);
@@ -224,26 +232,26 @@ int bro_plot()
           std::vector<float> events_other;
 
           // Event Yields
-          cout << "===Data===" << endl;
+          cout << "   ================== Data ==================" << endl;
           events_data = Counter(tree_data, hist_data, hist_signif_data, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]); // Counter Fills the vectors
-          cout << "===Signal QCD ZZ===" << endl;
+          cout << "   ==================Signal QCD ZZ==================" << endl;
           events_sigQCD = Counter(tree_signalQCD, hist_sigQCD, hist_signif_sigQCD, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "===Signal EWK ZZ===" << endl;
+          cout << "   ==================Signal EWK ZZ==================" << endl;
           events_sigEWK = Counter(tree_signalEWK, hist_sigEWK, hist_signif_sigEWK, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "===Background===" << endl;
-          cout << "Zjets" << endl;
+          cout << "   ==================Background==================" << endl;
+          cout << "   Zjets" << endl;
           events_Zjets = Counter(tree_Zjets, hist_Zjets, hist_signif_Zjets, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "WZ" << endl;
+          cout << "   WZ" << endl;
           events_WZ = Counter(tree_WZ, hist_WZ, hist_signif_WZ, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "tt" << endl;
+          cout << "   tt" << endl;
           events_tt = Counter(tree_tt, hist_tt, hist_signif_tt, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "WW" << endl;
+          cout << "   WW" << endl;
           events_WW = Counter(tree_WW, hist_WW, hist_signif_WW, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "Wt" << endl;
+          cout << "   Wt" << endl;
           events_Wt = Counter(tree_Wt, hist_Wt, hist_signif_Wt, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "trib" << endl;
+          cout << "   trib" << endl;
           events_trib = Counter(tree_trib, hist_trib, hist_signif_trib, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "othr" << endl;
+          cout << "   othr" << endl;
           events_other = Counter(tree_othr, hist_othr, hist_signif_othr, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
 
           // Some useful outputs
@@ -255,7 +263,19 @@ int bro_plot()
           Double_t S = (events_sigQCD.at(0) + events_sigEWK.at(0));
           Double_t B = totalBKG;
           Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
-          cout << " Significance = " << Z << endl;
+          cout << "   Significance = " << Z << endl;
+
+          if (Z > Z_max)
+          {
+            dLepR_max = dLepR_value[i];
+            dMetZphi_max = dMetZphi_value[j];
+            met_tst_max = met_tst_value[k];
+            MetOHT_max = MetOHT_value[l];
+            cout << "   New optimal set of values is:  dLepR = " << dLepR_max << ",  dMetZphi = " << dMetZphi_max << ",  met_tst = " << met_tst_max << ",  MetOHT = " << MetOHT_max << endl << endl;
+            cout << "   Maximum significance = " << Z_max << endl << endl;
+
+          }
+          
 
           // Plotting
 
@@ -389,7 +409,7 @@ int bro_plot()
           // line->Draw("same");
 
           h01->GetXaxis()->SetTitleSize(0.15);
-          h01->GetXaxis()->SetTitle("N_{bjets}");
+          h01->GetXaxis()->SetTitle("E^{T}_{miss}");
           h01->GetXaxis()->SetTitleOffset(1.1);
           h01->GetXaxis()->SetLabelSize(0.13);
 
@@ -530,9 +550,12 @@ int bro_plot()
           h01->GetYaxis()->SetTitle("#frac{Data}{MC}");
           // h01->GetYaxis()->SetTitle("Sig. Significance");
 
-          c1->SaveAs("./MET.png");
-          c2->SaveAs("./MET_S.png");
+          c1->SaveAs("../parameter_estimation/MET.png");
+          c2->SaveAs("../parameter_estimation/MET_S.png");
 
+
+          delete c1;
+          delete c2;
           delete hist_sigQCD;
           delete hist_sigEWK;
           delete hist_data;
@@ -559,14 +582,12 @@ int bro_plot()
           delete hist_signif_signal_sig;
           delete hist_signif_signal_pur;
           
-          metritiri += 1;
-          Printf("TO METRITIRIIIIII # %d #\n", metritiri);
+          iteration += 1;
+
         }
       }
     }
   }
 
-  printf("Maximum significance is %f and found for combination of i = %d, j = %d, k = %d, l = %d \n", maxsig, a, b, c, z);
-  printf("The best cuts that can be applied are: DLepR < %f, DMetZPhi > %f, met_tst > %f, MetOHT > %f \n", testDLepR[a], testdMetZPhi[b], testmet_tst[c], testMetOHT[z]);
   return 0;
 }
