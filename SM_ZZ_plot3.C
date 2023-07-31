@@ -25,14 +25,13 @@ using namespace std;
 
 // Method to fill hitograms (MET and MET_significance) with events properly weighted
 //
-std::vector<float> DoReco(TTree *tree, TH1F *hist, TH1F *hist_signif, int MC)
-{
+std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
 
   TH1::SetDefaultSumw2(kTRUE);
 
   Int_t nentries = (Int_t)tree->GetEntries();
 
-  Float_t M2Lep = 0.; // Defines the flags needed
+  Float_t M2Lep = 0.; 
   Float_t M2Lep_signif;
   Float_t met_tst = 0.;
   Float_t met_signif = 0.;
@@ -52,12 +51,12 @@ std::vector<float> DoReco(TTree *tree, TH1F *hist, TH1F *hist_signif, int MC)
   Float_t second_jet_pt = 0;
   Int_t event_3CR = 0.;
   Int_t event_type = 0.;
-  Float_t weight = 1.;
+
 
   std::vector<float> events;
   events.clear();
 
-  // For all available variables see https://twiki.cern.ch/twiki/bin/view/AtlasProtected/HZZllvvMinitreeFullRun2
+
   tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
   tree->SetBranchAddress("met_signif", &met_signif);
@@ -73,8 +72,7 @@ std::vector<float> DoReco(TTree *tree, TH1F *hist, TH1F *hist_signif, int MC)
   tree->SetBranchAddress("detajj", &detajj);
   tree->SetBranchAddress("mjj", &mjj);
   tree->SetBranchAddress("leading_jet_pt", &leading_jet_pt);
-  tree->SetBranchAddress("second_jet_pt", &second_jet_pt);
-  //
+  tree->SetBranchAddress("second_jet_pt", &second_jet_pt); 
   tree->SetBranchAddress("event_3CR", &event_3CR);
   tree->SetBranchAddress("event_type", &event_type);
 
@@ -82,16 +80,9 @@ std::vector<float> DoReco(TTree *tree, TH1F *hist, TH1F *hist_signif, int MC)
   double signaler = 0.;
   double Norm = 1;
 
-  // give each event the appropriate weight (data events should have weight = 1)
-  // global_weight=weight_pileup*weight_gen*weight_exp*weight_trig*weight_jets*weight_jvt + normalization to the MC cross section and L=139 fb^-1
-  if (MC == 1)
-  {
-    tree->SetBranchAddress("global_weight", &weight);
-  }
 
-  // Loop over events
-  for (Int_t i = 0; i < nentries; i++)
-  {
+  //Loop over events
+  for (Int_t i=0; i<nentries; i++) {
     tree->GetEntry(i);
 
     // ----- Define signal region -----  Change as needed:

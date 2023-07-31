@@ -1,4 +1,4 @@
-// For more details see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ZZjj2l2vRun2#Data_and_MC_samples
+		// For more details see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ZZjj2l2vRun2#Data_and_MC_samples
 // Script for plotting 15/06/20 Dimitrii Krasnopevtsev
 #include <TRandom3.h>
 #include <TROOT.h>
@@ -10,11 +10,12 @@
 #include "TProfile.h"
 #include "TMath.h"
 #include "TStyle.h"
-#include<TLatex.h>
-#include<TPad.h>
-#include<TLegend.h>
-#include<TCanvas.h>
-#include<TLine.h>
+#include "TPad.h"
+#include "TCanvas.h"
+#include "TLatex.h"
+#include "TLegend.h"
+#include "TLine.h"
+#include "TLegendEntry.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -27,15 +28,15 @@ using namespace std;
 
 // Method to fill hitograms (MET and MET_significance) with events properly weighted
 //
-std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
+std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif, int MC) {
 
   TH1::SetDefaultSumw2(kTRUE);
 
   Int_t nentries = (Int_t)tree->GetEntries();
-
-  Float_t M2Lep=0.;             //Mass of 2 leptons                     
-  Float_t met_tst=0.;           //Missing ET                                        
-  Float_t met_signif=0.;        //Missing ET over the sum of all ETs existing
+  
+  Float_t M2Lep=0.;
+  Float_t met_tst=0.;                                        
+  Float_t met_signif=0.;
   Float_t dMetZPhi=0.; 
   Float_t frac_pT=0.; 
   Float_t MetOHT=0.; 
@@ -48,38 +49,42 @@ std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
   Float_t detajj=0;
   Float_t mjj=0;
   Float_t leading_jet_pt=0;
-  Float_t second_jet_pt=0;      
-  Int_t event_3CR=0.;           //Event with 3 leptons
-  Int_t event_type=0.;          //Electron or muon
-  Float_t weight; 
+  Float_t second_jet_pt=0;
+  Int_t event_3CR=0.; 
+  Int_t event_type=0.;
+  Float_t weight=1.; 
 
-  std::vector<float> events;
+  std::vector<float>events;
   events.clear();
 
+  //For all available variables see https://twiki.cern.ch/twiki/bin/view/AtlasProtected/HZZllvvMinitreeFullRun2
+  tree->SetBranchAddress("M2Lep",&M2Lep);
+  tree->SetBranchAddress("met_tst",&met_tst);
+  tree->SetBranchAddress("met_signif",&met_signif);
+  tree->SetBranchAddress("dMetZPhi",&dMetZPhi);
+  tree->SetBranchAddress("frac_pT",&frac_pT);
+  tree->SetBranchAddress("MetOHT",&MetOHT);
+  tree->SetBranchAddress("dPhiJ100met",&dPhiJ100met);
+  tree->SetBranchAddress("dLepR",&dLepR);
+  tree->SetBranchAddress("leading_pT_lepton",&leading_pT_lepton);
+  tree->SetBranchAddress("subleading_pT_lepton",&subleading_pT_lepton);
+  tree->SetBranchAddress("n_jets",&n_jets);
+  tree->SetBranchAddress("n_bjets",&n_bjets);
+  tree->SetBranchAddress("detajj",&detajj);
+  tree->SetBranchAddress("mjj",&mjj);
+  tree->SetBranchAddress("leading_jet_pt",&leading_jet_pt);
+  tree->SetBranchAddress("second_jet_pt",&second_jet_pt);  
+  //
+  tree->SetBranchAddress("event_3CR",&event_3CR);
+  tree->SetBranchAddress("event_type",&event_type);
 
-  tree->SetBranchAddress("M2Lep", &M2Lep);
-  tree->SetBranchAddress("met_tst", &met_tst);
-  tree->SetBranchAddress("met_signif", &met_signif);
-  tree->SetBranchAddress("dMetZPhi", &dMetZPhi);
-  tree->SetBranchAddress("frac_pT", &frac_pT);
-  tree->SetBranchAddress("MetOHT", &MetOHT);
-  tree->SetBranchAddress("dPhiJ100met", &dPhiJ100met);
-  tree->SetBranchAddress("dLepR", &dLepR);
-  tree->SetBranchAddress("leading_pT_lepton", &leading_pT_lepton);
-  tree->SetBranchAddress("subleading_pT_lepton", &subleading_pT_lepton);
-  tree->SetBranchAddress("n_jets", &n_jets);
-  tree->SetBranchAddress("n_bjets", &n_bjets);
-  tree->SetBranchAddress("detajj", &detajj);
-  tree->SetBranchAddress("mjj", &mjj);
-  tree->SetBranchAddress("leading_jet_pt", &leading_jet_pt);
-  tree->SetBranchAddress("second_jet_pt", &second_jet_pt); 
-  tree->SetBranchAddress("event_3CR", &event_3CR);
-  tree->SetBranchAddress("event_type", &event_type);
-  tree->SetBranchAddress("global_weight", &weight);
+  double signal=0.;
+  double signaler=0.;
+  double Norm=1;
 
-  double signal = 0.;
-  double signaler = 0.;
-  double Norm = 1;
+  // give each event the appropriate weight (data events should have weight = 1)
+  //global_weight=weight_pileup*weight_gen*weight_exp*weight_trig*weight_jets*weight_jvt + normalization to the MC cross section and L=139 fb^-1
+  if (MC==1) { tree->SetBranchAddress("global_weight",&weight); }
 
 
   //Loop over events
@@ -96,7 +101,7 @@ std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
     // if (event_3CR==0 && (event_type==0 || event_type==1) &&  leading_pT_lepton>30 && subleading_pT_lepton>20 && M2Lep>80 && M2Lep<100 && n_bjets<1 && dLepR<1.8 && dMetZPhi>2.7 && met_tst > 110 && MetOHT>0.65 && met_signif>0) // met_tst/sqrt(met_tst/MetOHT)>10)
     // FIDUCIAL
     // if (event_3CR==0 && (event_type==0 || event_type==1) &&  leading_pT_lepton>30 && subleading_pT_lepton>20 && M2Lep>80 && M2Lep<100 && n_bjets<1 && dLepR<1.8 && dMetZPhi>2.7 && met_tst > 110 && MetOHT>0.65)
-    if (event_3CR==0 && (event_type==0 || event_type==1) &&  leading_pT_lepton>30 && subleading_pT_lepton>20 && M2Lep>76 && M2Lep<116 && n_bjets<1 && dLepR<1.9 && dMetZPhi>2.6 && met_tst >  90 && MetOHT>0.6) 
+    if (event_3CR==0 && (event_type==0 || event_type==1) &&  leading_pT_lepton>30 && subleading_pT_lepton>20 && M2Lep>76 && M2Lep<116 && n_bjets<1 && dLepR<1.9 && dMetZPhi>2.6 && met_tst >  90 && MetOHT>0.6)
     // FID-BDT:
     // if (event_3CR==0 && (event_type==0 || event_type==1) &&  leading_pT_lepton>30 && subleading_pT_lepton>20 && M2Lep>76 && M2Lep<106 && n_bjets<1 && dLepR<2.2 && dMetZPhi>1.3 && met_tst > 70 && MetOHT>0.3 && met_signif>0) // met_tst/sqrt(met_tst/MetOHT)>10)
     // FID-DNN:
@@ -116,10 +121,10 @@ std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
     // if (event_3CR==0 && (event_type==0 || event_type==1) &&  leading_pT_lepton>30  && subleading_pT_lepton>20 && M2Lep>80 && M2Lep<100 && n_jets>1 && n_bjets<1 && leading_jet_pt>30 && second_jet_pt>30 && detajj>1  && mjj>100 && dMetZPhi>2.2 && dLepR<1.8 && met_tst>110 && MetOHT>0.65 && met_signif>0 )
       
     {
-       signal=signal+weight;  // signal yield is sum of weights
-	     signaler=signaler+weight*weight; // keep Sum(weights^2) for calculating the error on the signal yield
-	     Hmet_pt->Fill(met_tst,weight);  //Fills histogram but with wieght 
-	     Hmet_pt_signif->Fill(met_signif,weight);
+   	signal=signal+weight;  // signal yield is sum of weights
+	signaler=signaler+weight*weight; // keep Sum(weights^2) for calculating the error on the signal yield
+	Hmet_pt->Fill(met_tst,weight);
+	Hmet_pt_signif->Fill(met_signif,weight);
     }
 
   }
@@ -134,7 +139,7 @@ std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
 
 // the main method
 // 
-int SM_ZZ_plot2() {
+int SM_ZZ_plot() {
 
   gStyle->SetLegendFont(42);
   gStyle->SetPalette(1);
@@ -146,55 +151,52 @@ int SM_ZZ_plot2() {
   // TString sample_TString(sample_string)
 
   //Preliminary minitrees for ZZllvvjj analysis
-  TFile *file_data= new TFile("data/data_fullRun2_MET90.root");
+  TFile *file_data= new TFile("./data_fullRun2_MET90.root");
   TTree *tree_data = file_data->Get<TTree>("tree_PFLOW");
 
-  TFile *file_signalQCD= new TFile("data/mc16ade_QCD_EWKcor_ZZllvv_MET90.root"); //QCD signal with EWK corrections 
+  TFile *file_signalQCD= new TFile("./mc16ade_QCD_EWKcor_ZZllvv_MET90.root"); //QCD signal with EWK corrections 
   TTree *tree_signalQCD = file_signalQCD->Get<TTree>("tree_PFLOW");
 
-  TFile *file_signalEWK= new TFile("data/mc16ade_EWK_ZZllvvjj_MET90.root"); // EW signal
+  TFile *file_signalEWK= new TFile("./mc16ade_EWK_ZZllvvjj_MET90.root"); // EW signal
   TTree *tree_signalEWK = file_signalEWK->Get<TTree>("tree_PFLOW");
 
-  TFile *file_Zjets= new TFile("data/mc16ade_Zjets_MET90.root"); 
+  TFile *file_Zjets= new TFile("./mc16ade_Zjets_MET90.root"); 
   TTree *tree_Zjets = file_Zjets->Get<TTree>("tree_PFLOW");
 
-  TFile *file_WZ= new TFile("data/mc16ade_WZ_MET90.root");
+  TFile *file_WZ= new TFile("./mc16ade_WZ_MET90.root");
   TTree *tree_WZ = file_WZ->Get<TTree>("tree_PFLOW");
 
-
-  TFile *file_WW= new TFile("data/mc16ade_WW_Pow_MET90.root");
+  TFile *file_WW= new TFile("./mc16ade_WW_Pow_MET90.root");
   TTree *tree_WW = file_WW->Get<TTree>("tree_PFLOW");
 
-  TFile *file_Wt = new TFile("data/mc16ade_Wt_MET90.root"); //Single top EW process
+  TFile *file_Wt = new TFile("./mc16ade_Wt_MET90.root");
   TTree *tree_Wt = file_Wt->Get<TTree>("tree_PFLOW");
 
-  TFile *file_tt = new TFile("data/mc16ade_TOP_MET90.root");
+  TFile *file_tt = new TFile("./mc16ade_TOP_MET90.root");
   TTree *tree_tt = file_tt->Get<TTree>("tree_PFLOW");
 
-  TFile *file_trib = new TFile("data/mc16ade_VVV_MET90.root");
+  TFile *file_trib = new TFile("./mc16ade_VVV_MET90.root");
   TTree *tree_trib = file_trib->Get<TTree>("tree_PFLOW");
 
-  TFile *file_othr = new TFile("data/mc16ade_ttV_ttVV_MET90.root");
+  TFile *file_othr = new TFile("./mc16ade_ttV_ttVV_MET90.root");
   TTree *tree_othr = file_othr->Get<TTree>("tree_PFLOW");
 
 
   TH1::SetDefaultSumw2(kTRUE);
 
-  Float_t xbins[21] = {90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 580, 700, 1000}; //Unequal bins
+  Float_t xbins[21] = {90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 580, 700, 1000};
 
   TH1F *Hmet_pt_sigQCD  = new TH1F("Hmet_pt_sigQCD","Hmet_pt_sigQCD",20,xbins);
   TH1F *Hmet_pt_sigEWK  = new TH1F("Hmet_pt_sigEWK","Hmet_pt_sigEWK",20,xbins);
-  TH1F *Hmet_pt_data  = new TH1F("Hmet_pt_data","Hmet_pt_data ",20,xbins);
-  TH1F *Hmet_pt_Zjets  = new TH1F("Hmet_pt_Zjets","Hmet_pt_Zjets ",20,xbins);
-  TH1F *Hmet_pt_WZ  = new TH1F("Hmet_pt_WZ","Hmet_pt_WZ ",20,xbins);
-  TH1F *Hmet_pt_WW  = new TH1F("Hmet_pt_WW","Hmet_pt_WW ",20,xbins);
-  TH1F *Hmet_pt_Wt  = new TH1F("Hmet_pt_Wt","Hmet_pt_Wt ",20,xbins);
-  TH1F *Hmet_pt_tt  = new TH1F("Hmet_pt_tt","Hmet_pt_tt ",20,xbins);
-  TH1F *Hmet_pt_trib  = new TH1F("Hmet_pt_trib","Hmet_pt_trib ",20,xbins);
-  TH1F *Hmet_pt_othr  = new TH1F("Hmet_pt_othr","Hmet_pt_othr ",20,xbins);
+  TH1F *Hmet_pt_data  = new TH1F("Hmet_pt_data","Hmet_pt_data",20,xbins);
+  TH1F *Hmet_pt_Zjets  = new TH1F("Hmet_pt_Zjets","Hmet_pt_Zjets",20,xbins);
+  TH1F *Hmet_pt_WZ  = new TH1F("Hmet_pt_WZ","Hmet_pt_WZ",20,xbins);
+  TH1F *Hmet_pt_WW  = new TH1F("Hmet_pt_WW","Hmet_pt_WW",20,xbins);
+  TH1F *Hmet_pt_Wt  = new TH1F("Hmet_pt_Wt","Hmet_pt_Wt",20,xbins);
+  TH1F *Hmet_pt_tt  = new TH1F("Hmet_pt_tt","Hmet_pt_tt",20,xbins);
+  TH1F *Hmet_pt_trib  = new TH1F("Hmet_pt_trib","Hmet_pt_trib",20,xbins);
+  TH1F *Hmet_pt_othr  = new TH1F("Hmet_pt_othr","Hmet_pt_othr",20,xbins);
   TH1F *Hmet_pt_signal_sing  = new TH1F("Hmet_pt_signal_sing","Hmet_pt_signal_sing",20,xbins);
-
-//Significance histograms
 
   TH1F *Hmet_pt_signif_sigQCD  = new TH1F("Hmet_pt_signif_sigQCD","Hmet_pt_signif_sigQCD",35,0,35);
   TH1F *Hmet_pt_signif_sigEWK  = new TH1F("Hmet_pt_signif_sigEWK","Hmet_pt_signif_sigEWK",35,0,35);
@@ -224,7 +226,7 @@ int SM_ZZ_plot2() {
 
   //Event Yields 
   cout << "===Data===" << endl;
-  events_data=DoReco(tree_data, Hmet_pt_data,Hmet_pt_signif_data,0);                //DoReco Fills the vectors 
+  events_data=DoReco(tree_data, Hmet_pt_data,Hmet_pt_signif_data,0);
   cout << "===Signal QCD ZZ===" << endl;
   events_NsigQCD=DoReco(tree_signalQCD, Hmet_pt_sigQCD,Hmet_pt_signif_sigQCD,1); 
   cout << "===Signal EWK ZZ===" << endl;
@@ -262,7 +264,7 @@ int SM_ZZ_plot2() {
   TH1F*Hmet_pt_sigQCD_new=(TH1F*)Hmet_pt_sigQCD->Clone("Hmet_pt_sigQCD_new");
   TH1F*Hmet_pt_sigEWK_new=(TH1F*)Hmet_pt_sigEWK->Clone("Hmet_pt_sigEWK_new");
 
-  TCanvas *c1 = new TCanvas ("c1", "MET",1400.,600.,600,600);
+  TCanvas *c1 = new TCanvas ("c1", "MET",0.,0.,600,600);
 
   TPad *pad_met = new TPad("pad_met","This is pad_met",0.01,0.30,1.,1.); 
   TPad *pad_met2 = new TPad("pad_met2","This is pad_met2",0.01,0.01,1.,0.30); 
@@ -317,14 +319,13 @@ int SM_ZZ_plot2() {
   Hmet_pt_sigQCD->GetYaxis()->SetTitle("Events");
 
 
-  TLatex *tex = new TLatex(0.2,0.8,"#intL dt = 138.9 fb^{-1}, #sqrt{s} = 13 TeV, ee+#mu#mu, mc16ade"); //TeX format
+  TLatex *tex = new TLatex(0.2,0.8,"#intL dt = 138.9 fb^{-1}, #sqrt{s} = 13 TeV, ee+#mu#mu, mc16ade");
   tex->SetNDC();
   tex->SetTextFont(42);
   tex->SetLineWidth(2);
   tex->Draw();
 
-  
-  TLegend *leg = new TLegend(1, 0.3, 0.9, 0.75, NULL,"brNDC");
+  TLegend *leg = new TLegend(0.6, 0.3, 0.9, 0.75, NULL,"brNDC");
   TLegendEntry  * leg_entry;
   leg_entry= leg->AddEntry(Hmet_pt_data,"Data","lp");   
   leg_entry= leg->AddEntry(Hmet_pt_sigQCD,"ZZQCD","f");    
@@ -365,18 +366,19 @@ int SM_ZZ_plot2() {
   h01->Draw("E0X0");
 
   // do plot Data/MC
+  /*
+    TH1F*h00=(TH1F*)Hmet_pt_sigQCD->Clone("h00");
+    TH1F*h01=(TH1F*)Hmet_pt_data->Clone("h01");
+    h00->Sumw2(1);
+    h01->Sumw2(1);
+    h01->Divide(h00);
+    h01->Draw("E0X0");
 
-  // TH1F*h00=(TH1F*)Hmet_pt_sigQCD->Clone("h00");
-  // TH1F*h01=(TH1F*)Hmet_pt_data->Clone("h01");
-  // h00->Sumw2(1);
-  // h01->Sumw2(1);
-  // h01->Divide(h00);
-  // h01->Draw("E0X0");
-  // TLine *line=new TLine(90,1,1000,1);
-  // line->SetLineStyle(2);
-  // line->SetLineWidth(2);
-  // line->Draw("same");
-
+    TLine *line=new TLine(90,1,1000,1);
+    line->SetLineStyle(2);
+    line->SetLineWidth(2);
+    line->Draw("same");
+  */
 
 
   h01->GetXaxis()->SetTitleSize(0.15);
@@ -396,7 +398,7 @@ int SM_ZZ_plot2() {
   TH1F*Hmet_pt_signif_sigQCD_new=(TH1F*)Hmet_pt_signif_sigQCD->Clone("Hmet_pt_signif_sigQCD_new");
   TH1F*Hmet_pt_signif_sigEWK_new=(TH1F*)Hmet_pt_signif_sigEWK->Clone("Hmet_pt_signif_sigEWK_new");
 
-  TCanvas *c2 = new TCanvas ("c2", "MET significance",1400.,600.,600,600);
+  TCanvas *c2 = new TCanvas ("c2", "MET significance",0.,0.,600,600);
 
   TPad *pad_met_signif = new TPad("pad_met_signif","This is pad_met_signif",0.01,0.30,1.,1.); 
   TPad *pad_met_signif2 = new TPad("pad_met_signif2","This is pad_met_signif2",0.01,0.01,1.,0.30); 
@@ -508,9 +510,8 @@ int SM_ZZ_plot2() {
   line->SetLineStyle(2);
   line->SetLineWidth(2);
   line->Draw("same");
-
 	
-  
+
 
   h01->GetXaxis()->SetTitleSize(0.15);
   h01->GetXaxis()->SetTitle("E_{T}^{miss} significance");
