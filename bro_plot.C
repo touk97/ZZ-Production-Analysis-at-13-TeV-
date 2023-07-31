@@ -107,7 +107,7 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t d
     }
   }
 
-  cout << "   N=" << signal << "+-" << sqrt(signaler) << endl; // signal yield and error on this yield
+  cout << "   N = " << signal << " +- " << sqrt(signaler) << endl << endl; // signal yield and error on this yield
 
   events.push_back(signal);
   events.push_back(sqrt(signaler));
@@ -232,34 +232,34 @@ int bro_plot()
           std::vector<float> events_other;
 
           // Event Yields
-          cout << "   ================== Data ==================" << endl;
+          cout << "   ==== Data ====" << endl << endl;
           events_data = Counter(tree_data, hist_data, hist_signif_data, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]); // Counter Fills the vectors
-          cout << "   ==================Signal QCD ZZ==================" << endl;
+          cout << endl << "   ==== Signal QCD ZZ ====" << endl << endl;
           events_sigQCD = Counter(tree_signalQCD, hist_sigQCD, hist_signif_sigQCD, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   ==================Signal EWK ZZ==================" << endl;
+          cout << endl << "   ==== Signal EWK ZZ ====" << endl << endl;
           events_sigEWK = Counter(tree_signalEWK, hist_sigEWK, hist_signif_sigEWK, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   ==================Background==================" << endl;
-          cout << "   Zjets" << endl;
+          cout << endl << "   ==== Background ====" << endl << endl;
+          cout << "   ---Zjets---" << endl;
           events_Zjets = Counter(tree_Zjets, hist_Zjets, hist_signif_Zjets, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   WZ" << endl;
+          cout << "   ---WZ---" << endl;
           events_WZ = Counter(tree_WZ, hist_WZ, hist_signif_WZ, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   tt" << endl;
+          cout << "   ---tt---" << endl;
           events_tt = Counter(tree_tt, hist_tt, hist_signif_tt, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   WW" << endl;
+          cout << "   ---WW---" << endl;
           events_WW = Counter(tree_WW, hist_WW, hist_signif_WW, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   Wt" << endl;
+          cout << "   ---Wt---" << endl;
           events_Wt = Counter(tree_Wt, hist_Wt, hist_signif_Wt, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   trib" << endl;
+          cout << "   ---trib---" << endl;
           events_trib = Counter(tree_trib, hist_trib, hist_signif_trib, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   othr" << endl;
+          cout << "   ---othr---" << endl;
           events_other = Counter(tree_othr, hist_othr, hist_signif_othr, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
 
           // Some useful outputs
           double totalBKG = events_Zjets.at(0) + events_tt.at(0) + events_Wt.at(0) + events_WW.at(0) + events_WZ.at(0) + events_trib.at(0) + events_other.at(0);
           double totalBKG_er = sqrt(pow(events_Zjets.at(1), 2) + pow(events_tt.at(1), 2) + pow(events_Wt.at(1), 2) + pow(events_WW.at(1), 2) +
                                     pow(events_WZ.at(1), 2) + pow(events_trib.at(1), 2) + pow(events_other.at(1), 2));
-          cout << "total Bkg=" << totalBKG << "+-" << totalBKG_er << endl;
-          cout << "S/B=" << (events_sigQCD.at(0) + events_sigEWK.at(0)) / totalBKG << endl;
+          cout << "   total Bkg=" << totalBKG << "+-" << totalBKG_er << endl;
+          cout << "   S/B=" << (events_sigQCD.at(0) + events_sigEWK.at(0)) / totalBKG << endl;
           Double_t S = (events_sigQCD.at(0) + events_sigEWK.at(0));
           Double_t B = totalBKG;
           Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
@@ -267,6 +267,7 @@ int bro_plot()
 
           if (Z > Z_max)
           {
+            Z_max = Z;
             dLepR_max = dLepR_value[i];
             dMetZphi_max = dMetZphi_value[j];
             met_tst_max = met_tst_value[k];
