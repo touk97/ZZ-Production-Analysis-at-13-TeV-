@@ -25,13 +25,14 @@ using namespace std;
 
 // Method to fill hitograms (MET and MET_significance) with events properly weighted
 //
-std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
+std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif)
+{
 
   TH1::SetDefaultSumw2(kTRUE);
 
   Int_t nentries = (Int_t)tree->GetEntries();
 
-  Float_t M2Lep = 0.; 
+  Float_t M2Lep = 0.;
   Float_t M2Lep_signif;
   Float_t met_tst = 0.;
   Float_t met_signif = 0.;
@@ -51,11 +52,10 @@ std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
   Float_t second_jet_pt = 0;
   Int_t event_3CR = 0.;
   Int_t event_type = 0.;
-
+  Float_t weight;
 
   std::vector<float> events;
   events.clear();
-
 
   tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
@@ -72,9 +72,10 @@ std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
   tree->SetBranchAddress("detajj", &detajj);
   tree->SetBranchAddress("mjj", &mjj);
   tree->SetBranchAddress("leading_jet_pt", &leading_jet_pt);
-  tree->SetBranchAddress("second_jet_pt", &second_jet_pt); 
+  tree->SetBranchAddress("second_jet_pt", &second_jet_pt);
   tree->SetBranchAddress("event_3CR", &event_3CR);
   tree->SetBranchAddress("event_type", &event_type);
+  tree->SetBranchAddress("global_weight", &weight);
 
   double signal = 0.;
   double signaler = 0.;
@@ -82,7 +83,8 @@ std::vector<float> DoReco(TTree* tree, TH1F *Hmet_pt, TH1F *Hmet_pt_signif) {
 
 
   //Loop over events
-  for (Int_t i=0; i<nentries; i++) {
+  for (Int_t i = 0; i < nentries; i++)
+  {
     tree->GetEntry(i);
 
     // ----- Define signal region -----  Change as needed:
@@ -165,18 +167,19 @@ int SM_ZZ_plot3()
   Float_t binmin = 80;
   Float_t binmax = 500;
 
-  TH1F *hist_sigQCD = new TH1F("N_bjets", "N_{bjets}", 20, binmin, binmax);
-  TH1F *hist_sigEWK = new TH1F("hist_sigEWK", "hist_sigEWK", 20, binmin, binmax);
-  TH1F *hist_data = new TH1F("hist_data ", "hist_data ", 20, binmin, binmax);
-  TH1F *hist_Zjets = new TH1F("hist_Zjets ", "hist_Zjets ", 20, binmin, binmax);
-  TH1F *hist_WZ = new TH1F("hist_WZ ", "hist_WZ ", 20, binmin, binmax);
-  TH1F *hist_WW = new TH1F("hist_WW ", "hist_WW ", 20, binmin, binmax);
-  TH1F *hist_Wt = new TH1F("hist_Wt ", "hist_Wt ", 20, binmin, binmax);
-  TH1F *hist_tt = new TH1F("hist_tt ", "hist_tt ", 20, binmin, binmax);
-  TH1F *hist_trib = new TH1F("hist_trib ", "hist_trib ", 20, binmin, binmax);
-  TH1F *hist_othr = new TH1F("hist_othr ", "hist_othr ", 20, binmin, binmax);
-  TH1F *hist_signal_sing = new TH1F("hist_signal_sing ", "hist_signal_sing", 20, binmin, binmax);
+  TH1F *hist_sigQCD = new TH1F("N_bjets", "N_{bjets}", 20, xbins);
+  TH1F *hist_sigEWK = new TH1F("hist_sigEWK", "hist_sigEWK", 20, xbins);
+  TH1F *hist_data = new TH1F("hist_data ", "hist_data ", 20, xbins);
+  TH1F *hist_Zjets = new TH1F("hist_Zjets ", "hist_Zjets ", 20, xbins);
+  TH1F *hist_WZ = new TH1F("hist_WZ ", "hist_WZ ", 20, xbins);
+  TH1F *hist_WW = new TH1F("hist_WW ", "hist_WW ", 20, xbins);
+  TH1F *hist_Wt = new TH1F("hist_Wt ", "hist_Wt ", 20, xbins);
+  TH1F *hist_tt = new TH1F("hist_tt ", "hist_tt ", 20, xbins);
+  TH1F *hist_trib = new TH1F("hist_trib ", "hist_trib ", 20, xbins);
+  TH1F *hist_othr = new TH1F("hist_othr ", "hist_othr ", 20, xbins);
+  TH1F *hist_signal_sing = new TH1F("hist_signal_sing ", "hist_signal_sing", 20, xbins);
 
+  // Significance histograms
   TH1F *hist_signif_sigQCD = new TH1F("hist_signif_sigQCD", "hist_signif_sigQCD", 35, 0, 35);
   TH1F *hist_signif_sigEWK = new TH1F("hist_signif_sigEWK", "hist_signif_sigEWK", 35, 0, 35);
   TH1F *hist_signif_data = new TH1F("hist_signif_data ", "hist_signif_data ", 35, 0, 35);
@@ -204,26 +207,26 @@ int SM_ZZ_plot3()
 
   // Event Yields
   cout << "===Data===" << endl;
-  events_data = DoReco(tree_data, hist_data, hist_signif_data, 0); // DoReco Fills the vectors
+  events_data = Counter(tree_data, hist_data, hist_signif_data); // Counter Fills the vectors
   cout << "===Signal QCD ZZ===" << endl;
-  events_NsigQCD = DoReco(tree_signalQCD, hist_sigQCD, hist_signif_sigQCD, 1);
+  events_NsigQCD = Counter(tree_signalQCD, hist_sigQCD, hist_signif_sigQCD);
   cout << "===Signal EWK ZZ===" << endl;
-  events_NsigEWK = DoReco(tree_signalEWK, hist_sigEWK, hist_signif_sigEWK, 1);
+  events_NsigEWK = Counter(tree_signalEWK, hist_sigEWK, hist_signif_sigEWK);
   cout << "===Background===" << endl;
   cout << "Zjets" << endl;
-  events_NZjets = DoReco(tree_Zjets, hist_Zjets, hist_signif_Zjets, 1);
+  events_NZjets = Counter(tree_Zjets, hist_Zjets, hist_signif_Zjets);
   cout << "WZ" << endl;
-  events_NWZ = DoReco(tree_WZ, hist_WZ, hist_signif_WZ, 1);
+  events_NWZ = Counter(tree_WZ, hist_WZ, hist_signif_WZ);
   cout << "tt" << endl;
-  events_Ntt = DoReco(tree_tt, hist_tt, hist_signif_tt, 1);
+  events_Ntt = Counter(tree_tt, hist_tt, hist_signif_tt);
   cout << "WW" << endl;
-  events_NWW = DoReco(tree_WW, hist_WW, hist_signif_WW, 1);
+  events_NWW = Counter(tree_WW, hist_WW, hist_signif_WW);
   cout << "Wt" << endl;
-  events_NWt = DoReco(tree_Wt, hist_Wt, hist_signif_Wt, 1);
+  events_NWt = Counter(tree_Wt, hist_Wt, hist_signif_Wt);
   cout << "trib" << endl;
-  events_Ntrib = DoReco(tree_trib, hist_trib, hist_signif_trib, 1);
+  events_Ntrib = Counter(tree_trib, hist_trib, hist_signif_trib);
   cout << "othr" << endl;
-  events_Nothr = DoReco(tree_othr, hist_othr, hist_signif_othr, 1);
+  events_Nothr = Counter(tree_othr, hist_othr, hist_signif_othr);
 
   // Some useful outputs
   double totalBKG = events_NZjets.at(0) + events_Ntt.at(0) + events_NWt.at(0) + events_NWW.at(0) + events_NWZ.at(0) + events_Ntrib.at(0) + events_Nothr.at(0);
@@ -353,19 +356,17 @@ int SM_ZZ_plot3()
   h01->Draw("E0X0");
 
   // do plot Data/MC
-  /*
-    TH1F*h00=(TH1F*)hist_sigQCD->Clone("h00");
-    TH1F*h01=(TH1F*)hist_data->Clone("h01");
-    h00->Sumw2(1);
-    h01->Sumw2(1);
-    h01->Divide(h00);
-    h01->Draw("E0X0");
 
-    TLine *line=new TLine(90,1,1000,1);
-    line->SetLineStyle(2);
-    line->SetLineWidth(2);
-    line->Draw("same");
-  */
+  // TH1F*h00=(TH1F*)hist_sigQCD->Clone("h00");
+  // TH1F*h01=(TH1F*)hist_data->Clone("h01");
+  // h00->Sumw2(1);
+  // h01->Sumw2(1);
+  // h01->Divide(h00);
+  // h01->Draw("E0X0");
+  // TLine *line=new TLine(90,1,1000,1);
+  // line->SetLineStyle(2);
+  // line->SetLineWidth(2);
+  // line->Draw("same");
 
   h01->GetXaxis()->SetTitleSize(0.15);
   h01->GetXaxis()->SetTitle("N_{bjets}");
