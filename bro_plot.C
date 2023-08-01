@@ -18,7 +18,36 @@
 #include <fstream>
 #include <vector>
 #include <math.h>
+#include <chrono> //Timer
 using namespace std;
+
+// CUSTOM STREAM BUFFER CLASS FOR OUTPUT LOG FILE
+class DualStreamBuffer : public std::streambuf
+{
+public:
+  // Constructor
+  DualStreamBuffer(std::streambuf *primaryBuffer, std::streambuf *secondaryBuffer)
+      : primaryBuffer(primaryBuffer), secondaryBuffer(secondaryBuffer) {}
+
+
+  int_type overflow(int_type c) override
+  {
+    if (c != EOF)
+    {
+      if (primaryBuffer != nullptr)
+        primaryBuffer->sputc(c);
+
+      if (secondaryBuffer != nullptr)
+        secondaryBuffer->sputc(c);
+    }
+    return c;
+  }
+
+private:
+  std::streambuf *primaryBuffer;   // Primary stream buffer (std::cout)
+  std::streambuf *secondaryBuffer; // Secondary stream buffer (log file)
+};
+// END OF LOG FILE CLASS
 
 // gStyle->SetLegendFont(42);
 // gStyle->SetPalette(1);
@@ -119,19 +148,29 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t d
 int bro_plot()
 {
 
+  // Timer start
+  auto start = std::chrono::high_resolution_clock::now();
+
+  //Output log file
+  ofstream logFile("../parameter_estimation/bro_plot.txt");
+
+  DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
+
+  std::streambuf *oldBuffer = std::cout.rdbuf(&dualBuffer);
+
   gStyle->SetLegendFont(42);
   gStyle->SetPalette(1);
-  Int_t dLepR_max = -1;
-  Int_t dMetZphi_max = -1;
-  Int_t met_tst_max = -1;
-  Int_t MetOHT_max = -1;
-  Float_t Z_max = -1;
-  Int_t iteration  = 1;
+  Float_t dLepR_max = -1.0;
+  Float_t dMetZphi_max = -1.0;
+  Float_t met_tst_max = -1.0;
+  Float_t MetOHT_max = -1.0;
+  Float_t Z_max = -1.0;
+  Float_t iteration  = 1;
 
-  Float_t dLepR_value[2] = {1.8, 2.0};
-  Float_t dMetZphi_value[2] = {2.2, 2.5};
+  Float_t dLepR_value[4] = {1.8, 2.0, 2.2, 2.5};
+  Float_t dMetZphi_value[4] = {2.2, 2.5, 2.7, 3.0};
   Float_t met_tst_value[1] = {90};
-  Float_t MetOHT_value[2] = {0.5, 0.6};
+  Float_t MetOHT_value[4] = {0.5, 0.6, 0.65, 0.7};
   // TString sample = "/Results/trial2.root";
   // ---convert TString to string
   // std::string sample_string(sample.Data());
@@ -239,31 +278,31 @@ int bro_plot()
           cout << endl << "   ==== Signal EWK ZZ ====" << endl << endl;
           events_sigEWK = Counter(tree_signalEWK, hist_sigEWK, hist_signif_sigEWK, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
           cout << endl << "   ==== Background ====" << endl << endl;
-          cout << "   ---Zjets---" << endl;
+          cout << "   ---Zjets---" << endl << endl;
           events_Zjets = Counter(tree_Zjets, hist_Zjets, hist_signif_Zjets, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   ---WZ---" << endl;
+          cout << "   ---WZ---" << endl << endl;
           events_WZ = Counter(tree_WZ, hist_WZ, hist_signif_WZ, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   ---tt---" << endl;
+          cout << "   ---tt---" << endl << endl;
           events_tt = Counter(tree_tt, hist_tt, hist_signif_tt, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   ---WW---" << endl;
+          cout << "   ---WW---" << endl << endl;
           events_WW = Counter(tree_WW, hist_WW, hist_signif_WW, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   ---Wt---" << endl;
+          cout << "   ---Wt---" << endl << endl;
           events_Wt = Counter(tree_Wt, hist_Wt, hist_signif_Wt, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   ---trib---" << endl;
+          cout << "   ---trib---" << endl << endl;
           events_trib = Counter(tree_trib, hist_trib, hist_signif_trib, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
-          cout << "   ---othr---" << endl;
+          cout << "   ---othr---" << endl << endl;
           events_other = Counter(tree_othr, hist_othr, hist_signif_othr, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
 
           // Some useful outputs
           double totalBKG = events_Zjets.at(0) + events_tt.at(0) + events_Wt.at(0) + events_WW.at(0) + events_WZ.at(0) + events_trib.at(0) + events_other.at(0);
           double totalBKG_er = sqrt(pow(events_Zjets.at(1), 2) + pow(events_tt.at(1), 2) + pow(events_Wt.at(1), 2) + pow(events_WW.at(1), 2) +
                                     pow(events_WZ.at(1), 2) + pow(events_trib.at(1), 2) + pow(events_other.at(1), 2));
-          cout << "   total Bkg=" << totalBKG << "+-" << totalBKG_er << endl;
-          cout << "   S/B=" << (events_sigQCD.at(0) + events_sigEWK.at(0)) / totalBKG << endl;
+          cout << "   Bkg = " << totalBKG << " +- " << totalBKG_er << endl;
+          cout << "   S/B = " << (events_sigQCD.at(0) + events_sigEWK.at(0)) / totalBKG << endl;
           Double_t S = (events_sigQCD.at(0) + events_sigEWK.at(0));
           Double_t B = totalBKG;
           Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
-          cout << "   Significance = " << Z << endl;
+          cout << "   Significance = " << Z << endl << endl;
 
           if (Z > Z_max)
           {
@@ -589,6 +628,17 @@ int bro_plot()
       }
     }
   }
+
+  cout << endl << "   The optimal set of values is:  dLepR = " << dLepR_max << ",  dMetZphi = " << dMetZphi_max << ",  met_tst = " << met_tst_max << ",  MetOHT = " << MetOHT_max << endl << endl;
+
+  // Timer stop
+  auto end = chrono::high_resolution_clock::now();
+  chrono::duration<float> duration = end - start;
+  cout << endl << "   Script executed in: " << int(duration.count() / 60.0) << " minutes" << " and " << int((duration.count() / 60.0 - int(duration.count() / 60.0))*60) << " s" <<  endl << endl;
+
+  // For the log file
+  std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
+  logFile.close(); // Close the log file
 
   return 0;
 }
