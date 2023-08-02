@@ -827,6 +827,7 @@ void zjets_single_unsc()
 
 
     //To avoid memory leak
+    delete c1, c2, c3, c4, c5;
     delete file_data;
     delete file_llvv;
     delete file_llvvjj;

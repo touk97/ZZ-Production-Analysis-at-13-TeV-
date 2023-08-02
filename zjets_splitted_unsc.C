@@ -1026,6 +1026,7 @@ void zjets_splitted_unsc()
 
 
     //To avoid memory leak
+    delete c1, c2, c3, c4, c5, c6, c7;
     delete file_data;
     delete file_llvv;
     delete file_llvvjj;
