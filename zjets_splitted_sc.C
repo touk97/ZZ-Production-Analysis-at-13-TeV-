@@ -1242,16 +1242,14 @@ void zjets_splitted_sc()
           
           
   // Timer stop
-    auto end = chrono::high_resolution_clock::now();
+  auto end = chrono::high_resolution_clock::now();
+  chrono::duration<float> duration = end - start;
+  cout << endl << "   Script executed in: " << int(duration.count() / 60.0) << " minutes" << " and " << int((duration.count() / 60.0 - int(duration.count() / 60.0))*60) << " s" <<  endl << endl;
 
-    chrono::duration<float> duration = end - start;
+  // For the log file
+  std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
+  logFile.close(); // Close the log file
 
-    cout << endl << "   Script executed in: " << int(duration.count() / 60.0) << " minutes" << " and " << int((duration.count() / 60.0 - int(duration.count() / 60.0))*60) << " s" <<  endl << endl;
-
-    // For the log file
-    std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
-
-    logFile.close(); // Close the log file
-
-    return;
+  return;
+  
 }

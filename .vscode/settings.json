@@ -82,7 +82,9 @@
         "zjets_splitted_unsc.C": "cpp",
         "bro_plot.C": "cpp",
         "bro_plot copy.C": "cpp",
-        "bro_plot2.C": "cpp"
+        "bro_plot2.C": "cpp",
+        "demo.C": "cpp",
+        "test_demo.C": "cpp"
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"

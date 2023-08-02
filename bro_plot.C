@@ -328,14 +328,23 @@ int bro_plot()
           hist_othr->Draw("histsame");
           hist_data->Draw("sameE0X0");
           
-          // Histogram colors#5EF38C
-          hist_sigQCD->SetFillColor(TColor::GetColor("#FFBF00")); // BRIGHT ORANGE
-          hist_sigEWK->SetFillColor(TColor::GetColor("#DFFF00")); // BRIGHT YELLOW
+          // Histogram colors
+          hist_sigQCD->SetFillColor(TColor::GetColor("#DFFF00")); // BRIGHT YELLOW
+          hist_sigQCD->SetLineColor(kBlack);
+          hist_sigEWK->SetFillColor(TColor::GetColor("#FF00FF")); // FUCHSIA
+          hist_sigEWK->SetLineColor(kBlack);
           hist_Zjets->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
+          hist_Zjets->SetLineColor(kBlack);
           hist_WZ->SetFillColor(TColor::GetColor("#FFBF00")); // MUSTARD
+          hist_WZ->SetLineColor(kBlack);
           hist_WW->SetFillColor(TColor::GetColor("#40E0D0")); // TURQUAZ
+          hist_WW->SetLineColor(kBlack);
           hist_top->SetFillColor(TColor::GetColor("#6495ED")); // LIGHT BLUE     
+          hist_top->SetLineColor(kBlack);
           hist_othr->SetFillColor(TColor::GetColor("#50C878")); // KHAKI
+          hist_othr->SetLineColor(kBlack);
+
+          
 
           hist_sigQCD->GetYaxis()->SetTitleSize(0.06);
           hist_sigQCD->GetYaxis()->SetTitleOffset(0.85);
@@ -400,8 +409,8 @@ int bro_plot()
                 dMetZphi_max = dMetZphi_value[j];
                 MetOHT_max = MetOHT_value[k];
                 met_tst_max = hist_signal_sig->GetBinLowEdge(bin);
-                cout << "   New optimal set of values are:  dLepR = " << dLepR_max << ",  dMetZphi = " << dMetZphi_max << ",  met_tst = " << met_tst_max << ",  MetOHT = " << MetOHT_max << endl << endl;
-                cout << "   Maximum significance = " << Z_max << endl << endl;
+                cout << "   New maximum significance = " << Z_max << endl << endl;
+                cout << "   New optimal set of values are:  dLepR = " << dLepR_max << ",  dMetZphi = " << dMetZphi_max << ",  met_tst = " << met_tst_max << ",  MetOHT = " << MetOHT_max << endl << endl;                
               }
             }
           }
@@ -443,8 +452,9 @@ int bro_plot()
         }
     }
   }
-
+  
   cout << endl << "   The optimal set of values is:  dLepR = " << dLepR_max << ",  dMetZphi = " << dMetZphi_max << ",  met_tst = " << met_tst_max << ",  MetOHT = " << MetOHT_max << endl << endl;
+  cout << endl << "   The maximum significance is:   " << Z_max << endl << endl;
 
   // Timer stop
   auto end = chrono::high_resolution_clock::now();
