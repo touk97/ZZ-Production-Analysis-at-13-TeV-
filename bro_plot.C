@@ -8,11 +8,12 @@
 #include "TProfile.h"
 #include "TMath.h"
 #include "TStyle.h"
-#include <TLatex.h>
-#include <TPad.h>
-#include <TLegend.h>
-#include <TCanvas.h>
-#include <TLine.h>
+#include "TPad.h"
+#include "TCanvas.h"
+#include "TLatex.h"
+#include "TLegend.h"
+#include "TLine.h"
+#include "TLegendEntry.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -147,7 +148,7 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t d
 //
 //
 //
-int demo()
+int bro_plot()
 {
 
   // Timer start
@@ -324,23 +325,19 @@ int demo()
           hist_top->Add(hist_trib);
           hist_top->Add(hist_tt);
 
-          hist_trib->Add(hist_othr);
-          hist_Wt->Add(hist_trib);
-          hist_WW->Add(hist_Wt);
+          hist_Zjets->Add(hist_othr);
+          hist_top->Add(hist_Zjets);
+          hist_WW->Add(hist_top);
           hist_WZ->Add(hist_WW);
-          hist_tt->Add(hist_WZ);
-          hist_Zjets->Add(hist_tt);
-          hist_sigEWK->Add(hist_Zjets);
+          hist_sigEWK->Add(hist_WZ);
           hist_sigQCD->Add(hist_sigEWK);
           
           hist_sigQCD->Draw("hist");
           hist_sigEWK->Draw("histsame");
-          hist_Zjets->Draw("histsame");
-          hist_tt->Draw("histsame");
           hist_WZ->Draw("histsame");
           hist_WW->Draw("histsame");
-          hist_Wt->Draw("histsame");
-          hist_trib->Draw("histsame");
+          hist_top->Draw("histsame");
+          hist_Zjets->Draw("histsame");
           hist_othr->Draw("histsame");
           hist_data->Draw("sameE0X0");
           
@@ -400,9 +397,9 @@ int demo()
 
           Double_t Z_bin;
           
-          for (int bin = 1; bin < hist_Zjets->GetSize(); ++bin)
+          for (int bin = 1; bin < hist_WZ->GetSize(); ++bin)
           {
-            Double_t B = hist_Zjets->Integral(bin, hist_Zjets->GetSize());
+            Double_t B = hist_WZ->Integral(bin, hist_WZ->GetSize());
             Double_t S = hist_sigQCD_new->Integral(bin, hist_sigQCD_new->GetSize()) + hist_sigEWK_new->Integral(bin, hist_sigEWK_new->GetSize());
      
             if (B > 0 && S > 0)
