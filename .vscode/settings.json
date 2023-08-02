@@ -84,7 +84,8 @@
         "bro_plot copy.C": "cpp",
         "bro_plot2.C": "cpp",
         "demo.C": "cpp",
-        "test_demo.C": "cpp"
+        "test_demo.C": "cpp",
+        "tlorentzvector.h": "c"
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"

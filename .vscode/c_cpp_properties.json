@@ -4,7 +4,6 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/home/touk/pythia/pythia8309/include/Pythia8",
                 "/home/touk/cern-root/root_build/include"
             ],
             "defines": [],
