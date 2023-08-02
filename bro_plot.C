@@ -53,7 +53,7 @@ private:
 // gStyle->SetPalette(1);
 
 
-std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t dLepR_value, Float_t dMetZPhi_value, Float_t MetOHT_value)
+std::vector<float> Counter(TTree *tree, TH1F *hist, Float_t dLepR_value, Float_t dMetZPhi_value, Float_t MetOHT_value)
 {
 
   TH1::SetDefaultSumw2(kTRUE);
@@ -113,10 +113,7 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t d
   for (Int_t i = 0; i < nentries; i++)
   {
     tree->GetEntry(i);
-    //
-    // inclusive selection:
-    //---------------------
-    // RECO cut-based:
+
 
     if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
         leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 76 && M2Lep < 116 && n_bjets < 1 &&
@@ -130,7 +127,6 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t d
       signal = signal + weight;              // signal yield is sum of weights
       signaler = signaler + weight * weight; // keep Sum(weights^2) for calculating the error on the signal yield
       hist->Fill(met_tst, weight);           // Fills histogram but with wieght
-      hist_signif->Fill(met_tst, weight);
     }
   }
 
@@ -241,18 +237,6 @@ int bro_plot()
           TH1F *hist_othr = new TH1F("hist_othr ", "hist_othr ", 20, xbins);
           TH1F *hist_signal_sig = new TH1F("hist_signal_sig ", "hist_signal_sig", 20, xbins);
 
-          // Significance histograms
-          TH1F *hist_signif_sigQCD = new TH1F("hist_signif_sigQCD", "hist_signif_sigQCD", 35, 0, 35);
-          TH1F *hist_signif_sigEWK = new TH1F("hist_signif_sigEWK", "hist_signif_sigEWK", 35, 0, 35);
-          TH1F *hist_signif_data = new TH1F("hist_signif_data ", "hist_signif_data ", 35, 0, 35);
-          TH1F *hist_signif_Zjets = new TH1F("hist_signif_Zjets ", "hist_signif_Zjets ", 35, 0, 35);
-          TH1F *hist_signif_WZ = new TH1F("hist_signif_WZ ", "hist_signif_WZ ", 35, 0, 35);
-          TH1F *hist_signif_WW = new TH1F("hist_signif_WW ", "hist_signif_WW ", 35, 0, 35);
-          TH1F *hist_signif_Wt = new TH1F("hist_signif_Wt ", "hist_signif_Wt ", 35, 0, 35);
-          TH1F *hist_signif_tt = new TH1F("hist_signif_tt ", "hist_signif_tt ", 35, 0, 35);
-          TH1F *hist_signif_trib = new TH1F("hist_signif_trib ", "hist_signif_trib", 35, 0, 35);
-          TH1F *hist_signif_othr = new TH1F("hist_signif_othr ", "hist_signif_othr", 35, 0, 35);
-
           std::vector<float> events_data;
           std::vector<float> events_sigQCD;
           std::vector<float> events_sigEWK;
@@ -266,26 +250,26 @@ int bro_plot()
 
           // Event Yields
           cout << "   ==== Data ====" << endl << endl;
-          events_data = Counter(tree_data, hist_data, hist_signif_data, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]); // Counter Fills the vectors
+          events_data = Counter(tree_data, hist_data, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]); // Counter Fills the vectors
           cout << endl << "   ==== Signal QCD ZZ ====" << endl << endl;
-          events_sigQCD = Counter(tree_signalQCD, hist_sigQCD, hist_signif_sigQCD, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_sigQCD = Counter(tree_signalQCD, hist_sigQCD, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
           cout << endl << "   ==== Signal EWK ZZ ====" << endl << endl;
-          events_sigEWK = Counter(tree_signalEWK, hist_sigEWK, hist_signif_sigEWK, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_sigEWK = Counter(tree_signalEWK, hist_sigEWK, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
           cout << endl << "   ==== Background ====" << endl << endl;
           cout << "   ---Zjets---" << endl << endl;
-          events_Zjets = Counter(tree_Zjets, hist_Zjets, hist_signif_Zjets, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_Zjets = Counter(tree_Zjets, hist_Zjets, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
           cout << "   ---WZ---" << endl << endl;
-          events_WZ = Counter(tree_WZ, hist_WZ, hist_signif_WZ, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_WZ = Counter(tree_WZ, hist_WZ, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
           cout << "   ---tt---" << endl << endl;
-          events_tt = Counter(tree_tt, hist_tt, hist_signif_tt, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_tt = Counter(tree_tt, hist_tt, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
           cout << "   ---WW---" << endl << endl;
-          events_WW = Counter(tree_WW, hist_WW, hist_signif_WW, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_WW = Counter(tree_WW, hist_WW, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
           cout << "   ---Wt---" << endl << endl;
-          events_Wt = Counter(tree_Wt, hist_Wt, hist_signif_Wt, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_Wt = Counter(tree_Wt, hist_Wt, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
           cout << "   ---trib---" << endl << endl;
-          events_trib = Counter(tree_trib, hist_trib, hist_signif_trib, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_trib = Counter(tree_trib, hist_trib, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
           cout << "   ---othr---" << endl << endl;
-          events_other = Counter(tree_othr, hist_othr, hist_signif_othr, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
+          events_other = Counter(tree_othr, hist_othr, dLepR_value[i], dMetZphi_value[j], MetOHT_value[k]);
 
           //Significance calculation
           Double_t bkg = events_Zjets.at(0) + events_tt.at(0) + events_Wt.at(0) + events_WW.at(0) + events_WZ.at(0) + events_trib.at(0) + events_other.at(0);
@@ -305,10 +289,11 @@ int bro_plot()
 
           gROOT->SetBatch(kTRUE); //Disables plots from popping up during execution
           TCanvas *c1 = new TCanvas("c1", "MET", 1400., 600., 600, 600);
-          TCanvas *c2 = new TCanvas("c2", "MET significance", 1400., 600., 600, 600);
 
           TPad *pad1 = new TPad("pad1", "pad1", 0.01, 0.30, 1., 1.);
           TPad *pad2 = new TPad("pad2", "pad2", 0.01, 0.01, 1., 0.30);
+
+          c1->cd();
 
           pad1->SetBorderSize(0);
           pad1->SetBottomMargin(0.02);
@@ -320,11 +305,12 @@ int bro_plot()
           pad2->Draw();
           pad1->cd();
           
-          //Merging top contributions
+          //Merge top contributions
           hist_top->Add(hist_Wt);
           hist_top->Add(hist_trib);
           hist_top->Add(hist_tt);
-
+          
+          //Stack with specific order
           hist_Zjets->Add(hist_othr);
           hist_top->Add(hist_Zjets);
           hist_WW->Add(hist_top);
@@ -332,6 +318,7 @@ int bro_plot()
           hist_sigEWK->Add(hist_WZ);
           hist_sigQCD->Add(hist_sigEWK);
           
+          //Draw according to stacking order
           hist_sigQCD->Draw("hist");
           hist_sigEWK->Draw("histsame");
           hist_WZ->Draw("histsame");
@@ -380,20 +367,19 @@ int bro_plot()
           leg_entry = leg->AddEntry(hist_sigQCD, "ZZQCD", "f");
           leg_entry = leg->AddEntry(hist_sigEWK, "ZZEWK", "f");
           leg_entry = leg->AddEntry(hist_Zjets, "Zjets", "f");
-          leg_entry = leg->AddEntry(hist_tt, "TOP", "f");
+          leg_entry = leg->AddEntry(hist_top, "Top", "f");
           leg_entry = leg->AddEntry(hist_WZ, "WZ", "f");
           leg_entry = leg->AddEntry(hist_WW, "WW", "f");
-          leg_entry = leg->AddEntry(hist_Wt, "Wt", "f");
-          leg_entry = leg->AddEntry(hist_trib, "VVV", "f");
           leg_entry = leg->AddEntry(hist_othr, "other", "f");
           leg->SetLineColor(0);
           leg->SetBorderSize(0);
           leg->Draw();
 
           pad1->RedrawAxis();
-          pad2->cd();
+          
 
           //Significance plot
+          pad2->cd();
 
           Double_t Z_bin;
           
@@ -406,7 +392,6 @@ int bro_plot()
             {
               Z_bin = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
               hist_signal_sig->SetBinContent(bin, Z_bin);
-              cout << "Zbin   " << Z_bin << endl << endl;
               
               if (Z_bin > Z_max)
               {
@@ -415,14 +400,14 @@ int bro_plot()
                 dMetZphi_max = dMetZphi_value[j];
                 MetOHT_max = MetOHT_value[k];
                 met_tst_max = hist_signal_sig->GetBinLowEdge(bin);
-                cout << "   New optimal set of values is:  dLepR = " << dLepR_max << ",  dMetZphi = " << dMetZphi_max << ",  met_tst = " << met_tst_max << ",  MetOHT = " << MetOHT_max << endl << endl;
+                cout << "   New optimal set of values are:  dLepR = " << dLepR_max << ",  dMetZphi = " << dMetZphi_max << ",  met_tst = " << met_tst_max << ",  MetOHT = " << MetOHT_max << endl << endl;
                 cout << "   Maximum significance = " << Z_max << endl << endl;
               }
             }
           }
           
-          hist_signal_sig->SetLineColor(4);
-          hist_signal_sig->SetMarkerColor(4);
+          hist_signal_sig->SetLineColor(1);
+          hist_signal_sig->SetMarkerColor(1);
           hist_signal_sig->Draw("E0X0");
 
           hist_signal_sig->GetXaxis()->SetTitleSize(0.15);
@@ -434,15 +419,12 @@ int bro_plot()
           hist_signal_sig->GetYaxis()->SetTitleSize(0.110);
           hist_signal_sig->GetYaxis()->SetLabelSize(0.08);
           hist_signal_sig->GetYaxis()->SetTitle("Sig. Significance");
-            
 
 
           c1->SaveAs("../parameter_estimation/MET.png");
-          c2->SaveAs("../parameter_estimation/MET_S.png");
 
 
           delete c1;
-          delete c2;
           delete hist_sigQCD;
           delete hist_sigEWK;
           delete hist_data;
@@ -455,17 +437,6 @@ int bro_plot()
           delete hist_top;
           delete hist_othr;
           delete hist_signal_sig;
-
-          delete hist_signif_sigQCD;
-          delete hist_signif_sigEWK;
-          delete hist_signif_data;
-          delete hist_signif_Zjets;
-          delete hist_signif_WZ;
-          delete hist_signif_WW;
-          delete hist_signif_Wt;
-          delete hist_signif_tt;
-          delete hist_signif_trib;
-          delete hist_signif_othr;
           
           iteration += 1;
 
