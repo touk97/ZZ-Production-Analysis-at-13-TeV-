@@ -305,7 +305,13 @@ int bro_plot()
           pad2->SetBorderSize(0);
           pad2->Draw();
           pad1->cd();
-          
+
+          // Data
+          hist_data->SetMarkerStyle(20);
+          hist_data->SetMarkerSize(0.5);
+          hist_data->SetMarkerColor(kBlack);
+          hist_data->SetLineColor(kBlack);
+
           //Merge signal contributions 
           hist_signal->Add(hist_sigEWK);
           hist_signal->Add(hist_sigQCD);
@@ -353,6 +359,7 @@ int bro_plot()
           hist_signal->GetYaxis()->SetTitleOffset(0.85);
           hist_signal->GetYaxis()->SetLabelSize(0.04);
           hist_signal->GetXaxis()->SetLabelSize(0.00);
+          hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.3);
           hist_signal->GetYaxis()->SetTitle("Events");
 
           TLatex *tex1 = new TLatex(0.15, 0.8, "#intL dt = 138.9 fb^{-1}");
