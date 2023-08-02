@@ -224,7 +224,8 @@ int bro_plot()
           Float_t binmin = 80;
           Float_t binmax = 500;
 
-          TH1F *hist_sigQCD = new TH1F("met_tst", "E^{T}_{miss}", 20, xbins);
+          TH1F *hist_signal = new TH1F("hist_signal", "E^{T}_{miss}", 20, xbins);
+          TH1F *hist_sigQCD = new TH1F("hist_sigQCD", "E^{T}_{miss}", 20, xbins);
           TH1F *hist_sigEWK = new TH1F("hist_sigEWK", "hist_sigEWK", 20, xbins);
           TH1F *hist_data = new TH1F("hist_data ", "hist_data ", 20, xbins);
           TH1F *hist_Zjets = new TH1F("hist_Zjets ", "hist_Zjets ", 20, xbins);
@@ -284,8 +285,7 @@ int bro_plot()
 
           // Plotting
 
-          TH1F *hist_sigQCD_new = (TH1F *)hist_sigQCD->Clone("hist_sigQCD_new");
-          TH1F *hist_sigEWK_new = (TH1F *)hist_sigEWK->Clone("hist_sigEWK_new");
+          TH1F *hist_signal_new = (TH1F *)hist_signal->Clone("hist_sigQCD_new");
 
           gROOT->SetBatch(kTRUE); //Disables plots from popping up during execution
           TCanvas *c1 = new TCanvas("c1", "MET", 1400., 600., 600, 600);
@@ -305,6 +305,10 @@ int bro_plot()
           pad2->Draw();
           pad1->cd();
           
+          //Merge signal contributions 
+          hist_signal->Add(hist_sigEWK);
+          hist_signal->Add(hist_sigQCD);
+
           //Merge top contributions
           hist_top->Add(hist_Wt);
           hist_top->Add(hist_trib);
@@ -315,12 +319,11 @@ int bro_plot()
           hist_top->Add(hist_Zjets);
           hist_WW->Add(hist_top);
           hist_WZ->Add(hist_WW);
-          hist_sigEWK->Add(hist_WZ);
-          hist_sigQCD->Add(hist_sigEWK);
+          hist_signal->Add(hist_WZ);
+          
           
           //Draw according to stacking order
-          hist_sigQCD->Draw("hist");
-          hist_sigEWK->Draw("histsame");
+          hist_signal->Draw("hist");
           hist_WZ->Draw("histsame");
           hist_WW->Draw("histsame");
           hist_top->Draw("histsame");
@@ -329,10 +332,8 @@ int bro_plot()
           hist_data->Draw("sameE0X0");
           
           // Histogram colors
-          hist_sigQCD->SetFillColor(TColor::GetColor("#DFFF00")); // BRIGHT YELLOW
-          hist_sigQCD->SetLineColor(kBlack);
-          hist_sigEWK->SetFillColor(TColor::GetColor("#FF00FF")); // FUCHSIA
-          hist_sigEWK->SetLineColor(kBlack);
+          hist_signal->SetFillColor(TColor::GetColor("#DFFF00")); // BRIGHT YELLOW
+          hist_signal->SetLineColor(kBlack);
           hist_Zjets->SetFillColor(TColor::GetColor("#DE3163")); // DARK PINK
           hist_Zjets->SetLineColor(kBlack);
           hist_WZ->SetFillColor(TColor::GetColor("#FFBF00")); // MUSTARD
@@ -346,11 +347,11 @@ int bro_plot()
 
           
 
-          hist_sigQCD->GetYaxis()->SetTitleSize(0.06);
-          hist_sigQCD->GetYaxis()->SetTitleOffset(0.85);
-          hist_sigQCD->GetYaxis()->SetLabelSize(0.04);
-          hist_sigQCD->GetXaxis()->SetLabelSize(0.00);
-          hist_sigQCD->GetYaxis()->SetTitle("Events");
+          hist_signal->GetYaxis()->SetTitleSize(0.06);
+          hist_signal->GetYaxis()->SetTitleOffset(0.85);
+          hist_signal->GetYaxis()->SetLabelSize(0.04);
+          hist_signal->GetXaxis()->SetLabelSize(0.00);
+          hist_signal->GetYaxis()->SetTitle("Events");
 
           TLatex *tex1 = new TLatex(0.15, 0.8, "#intL dt = 138.9 fb^{-1}");
           tex1->SetNDC();
@@ -373,8 +374,7 @@ int bro_plot()
           TLegend *leg = new TLegend(0.6, 0.3, 0.7, 0.75, NULL, "brNDC");
           TLegendEntry *leg_entry;
           leg_entry = leg->AddEntry(hist_data, "Data", "lp");
-          leg_entry = leg->AddEntry(hist_sigQCD, "ZZQCD", "f");
-          leg_entry = leg->AddEntry(hist_sigEWK, "ZZEWK", "f");
+          leg_entry = leg->AddEntry(hist_signal, "Signal", "f");
           leg_entry = leg->AddEntry(hist_Zjets, "Zjets", "f");
           leg_entry = leg->AddEntry(hist_top, "Top", "f");
           leg_entry = leg->AddEntry(hist_WZ, "WZ", "f");
@@ -395,7 +395,7 @@ int bro_plot()
           for (int bin = 1; bin < hist_WZ->GetSize(); ++bin)
           {
             Double_t B = hist_WZ->Integral(bin, hist_WZ->GetSize());
-            Double_t S = hist_sigQCD_new->Integral(bin, hist_sigQCD_new->GetSize()) + hist_sigEWK_new->Integral(bin, hist_sigEWK_new->GetSize());
+            Double_t S = hist_signal_new->Integral(bin, hist_signal_new->GetSize());
      
             if (B > 0 && S > 0)
             {
@@ -434,6 +434,7 @@ int bro_plot()
 
 
           delete c1;
+          delete hist_signal;
           delete hist_sigQCD;
           delete hist_sigEWK;
           delete hist_data;
