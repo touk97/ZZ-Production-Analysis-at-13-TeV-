@@ -52,8 +52,7 @@ private:
 // gStyle->SetLegendFont(42);
 // gStyle->SetPalette(1);
 
-// Method to fill hitograms (MET and MET_significance) with events properly weighted
-//
+
 std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t dLepR_value, Float_t dMetZPhi_value, Float_t met_tst_value, Float_t MetOHT_value)
 {
 
@@ -114,7 +113,6 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t d
   for (Int_t i = 0; i < nentries; i++)
   {
     tree->GetEntry(i);
-    // ----- Define signal region -----  Change as needed:
     //
     // inclusive selection:
     //---------------------
@@ -142,8 +140,13 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, TH1F *hist_signif, Float_t d
   events.push_back(sqrt(signaler));
   return events;
 }
-
-// the main method
+//
+//
+//
+//
+//
+//
+//
 //
 int bro_plot()
 {
@@ -171,13 +174,8 @@ int bro_plot()
   Float_t dMetZphi_value[4] = {2.2, 2.5, 2.7, 3.0};
   Float_t met_tst_value[1] = {90};
   Float_t MetOHT_value[4] = {0.5, 0.6, 0.65, 0.7};
-  // TString sample = "/Results/trial2.root";
-  // ---convert TString to string
-  // std::string sample_string(sample.Data());
-  // ---convert string to TString
-  // TString sample_TString(sample_string)
 
-  // Preliminary minitrees for ZZllvvjj analysis
+  // Data File 
   TFile *file_data = new TFile("../data/data_fullRun2_MET90.root");
   TTree *tree_data = file_data->Get<TTree>("tree_PFLOW");
 
@@ -217,8 +215,6 @@ int bro_plot()
   {
     for (Int_t j = 0; j < sizeof(dMetZphi_value) / sizeof(dMetZphi_value[0]); j++)
     {
-      for (Int_t k = 0; k < sizeof(met_tst_value) / sizeof(met_tst_value[0]); k++)
-      {
         for (Int_t l = 0; l < sizeof(MetOHT_value) / sizeof(MetOHT_value[0]); l++)
         {
           
@@ -228,7 +224,7 @@ int bro_plot()
 
           TH1::SetDefaultSumw2(kTRUE);
 
-          Float_t xbins[21] = {90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 580, 700, 1000}; // Unequal bins
+          Float_t xbins[21] = {70, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 580, 700, 1000}; // Unequal bins
           Float_t binmin = 80;
           Float_t binmax = 500;
 
@@ -237,6 +233,7 @@ int bro_plot()
           TH1F *hist_data = new TH1F("hist_data ", "hist_data ", 20, xbins);
           TH1F *hist_Zjets = new TH1F("hist_Zjets ", "hist_Zjets ", 20, xbins);
           TH1F *hist_WZ = new TH1F("hist_WZ ", "hist_WZ ", 20, xbins);
+          TH1F *hist_top = new TH1F("hist_top ", "hist_top ", 20, xbins);
           TH1F *hist_WW = new TH1F("hist_WW ", "hist_WW ", 20, xbins);
           TH1F *hist_Wt = new TH1F("hist_Wt ", "hist_Wt ", 20, xbins);
           TH1F *hist_tt = new TH1F("hist_tt ", "hist_tt ", 20, xbins);
@@ -293,14 +290,14 @@ int bro_plot()
           cout << "   ---othr---" << endl << endl;
           events_other = Counter(tree_othr, hist_othr, hist_signif_othr, dLepR_value[i], dMetZphi_value[j], met_tst_value[k], MetOHT_value[l]);
 
-          // Some useful outputs
-          double totalBKG = events_Zjets.at(0) + events_tt.at(0) + events_Wt.at(0) + events_WW.at(0) + events_WZ.at(0) + events_trib.at(0) + events_other.at(0);
-          double totalBKG_er = sqrt(pow(events_Zjets.at(1), 2) + pow(events_tt.at(1), 2) + pow(events_Wt.at(1), 2) + pow(events_WW.at(1), 2) +
+          //Significance calculation
+          Double_t bkg = events_Zjets.at(0) + events_tt.at(0) + events_Wt.at(0) + events_WW.at(0) + events_WZ.at(0) + events_trib.at(0) + events_other.at(0);
+          Double_t bkg_er = sqrt(pow(events_Zjets.at(1), 2) + pow(events_tt.at(1), 2) + pow(events_Wt.at(1), 2) + pow(events_WW.at(1), 2) +
                                     pow(events_WZ.at(1), 2) + pow(events_trib.at(1), 2) + pow(events_other.at(1), 2));
-          cout << "   Bkg = " << totalBKG << " +- " << totalBKG_er << endl;
-          cout << "   S/B = " << (events_sigQCD.at(0) + events_sigEWK.at(0)) / totalBKG << endl;
+          cout << "   Bkg = " << bkg << " +- " << bkg_er << endl;
+          cout << "   S/B = " << (events_sigQCD.at(0) + events_sigEWK.at(0)) / bkg << endl;
           Double_t S = (events_sigQCD.at(0) + events_sigEWK.at(0));
-          Double_t B = totalBKG;
+          Double_t B = bkg;
           Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
           cout << "   Significance = " << Z << endl << endl;
 
@@ -322,25 +319,39 @@ int bro_plot()
           TH1F *hist_sigQCD_new = (TH1F *)hist_sigQCD->Clone("hist_sigQCD_new");
           TH1F *hist_sigEWK_new = (TH1F *)hist_sigEWK->Clone("hist_sigEWK_new");
 
-          gROOT->SetBatch(kTRUE); // gia na min emfanizei tipota apo ta istogrammata
+          gROOT->SetBatch(kTRUE); //Disables plots from popping up during execution
           TCanvas *c1 = new TCanvas("c1", "MET", 1400., 600., 600, 600);
+          TCanvas *c2 = new TCanvas("c2", "MET significance", 1400., 600., 600, 600);
 
+          TPad *pad1 = new TPad("pad1", "pad1", 0.01, 0.30, 1., 1.);
+          TPad *pad2 = new TPad("pad2", "pad2", 0.01, 0.01, 1., 0.30);
 
-          TPad *pad_met = new TPad("pad_met", "This is pad_met", 0.01, 0.30, 1., 1.);
-          TPad *pad_met2 = new TPad("pad_met2", "This is pad_met2", 0.01, 0.01, 1., 0.30);
+          pad1->SetBorderSize(0);
+          pad1->SetBottomMargin(0.02);
+          pad1->Draw();
+          pad2->SetBottomMargin(0.35);
+          pad2->SetGrid();
+          pad2->SetTopMargin(0.0);
+          pad2->SetBorderSize(0);
+          pad2->Draw();
+          pad1->cd();
+          
+          //Merging top contributions
+          hist_top->Add(hist_Wt);
+          hist_top->Add(hist_trib);
+          hist_top->Add(hist_tt);
 
-          pad_met->SetBorderSize(0);
-          pad_met->SetBottomMargin(0.02);
-          pad_met->Draw();
-          pad_met2->SetBottomMargin(0.35);
-          pad_met2->SetGrid();
-          pad_met2->SetTopMargin(0.0);
-          pad_met2->SetBorderSize(0);
-          pad_met2->Draw();
-          pad_met->cd();
-
-          // Draw contributions in stacked histogtams
-          //
+          // Stacking with a specific order
+          hist_trib->Add(hist_othr);
+          hist_Wt->Add(hist_trib);
+          hist_WW->Add(hist_Wt);
+          hist_WZ->Add(hist_WW);
+          hist_tt->Add(hist_WZ);
+          hist_Zjets->Add(hist_tt);
+          hist_sigEWK->Add(hist_Zjets);
+          hist_sigQCD->Add(hist_sigEWK);
+          
+          // Histogram colors
           hist_sigQCD->SetFillColor(38);
           hist_sigEWK->SetFillColor(6);
           hist_Zjets->SetFillColor(8);
@@ -350,15 +361,6 @@ int bro_plot()
           hist_tt->SetFillColor(42);
           hist_othr->SetFillColor(30);
           hist_trib->SetFillColor(46);
-
-          hist_trib->Add(hist_othr);
-          hist_Wt->Add(hist_trib);
-          hist_WW->Add(hist_Wt);
-          hist_WZ->Add(hist_WW);
-          hist_tt->Add(hist_WZ);
-          hist_Zjets->Add(hist_tt);
-          hist_sigEWK->Add(hist_Zjets);
-          hist_sigQCD->Add(hist_sigEWK);
 
           hist_sigQCD->Draw("hist");
           hist_sigEWK->Draw("histsame");
@@ -411,12 +413,12 @@ int bro_plot()
           leg->SetBorderSize(0);
           leg->Draw();
 
-          pad_met->RedrawAxis();
-          pad_met2->cd();
+          pad1->RedrawAxis();
+          pad2->cd();
 
           // to plot significance
 
-          Double_t Z_bin = 0;
+          // Double_t Z_bin = 0;
           for (int bin = 1; bin < hist_Zjets->GetSize(); ++bin)
           {
             Double_t B = hist_Zjets->GetBinContent(bin);
@@ -427,8 +429,10 @@ int bro_plot()
               Double_t Z_bin = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
               // cout << "B=" << B << ", S=" << S << ", Z_bin=" << Z_bin << endl;
               hist_signal_sig->SetBinContent(bin, Z_bin);
+              cout << Z_bin << endl << endl;
             }
           }
+          cout << Z << endl << endl;
 
           TH1F *h01 = (TH1F *)hist_signal_sig->Clone("h01");
           h01->SetLineColor(4);
@@ -462,19 +466,17 @@ int bro_plot()
           TH1F *hist_signif_sigQCD_new = (TH1F *)hist_signif_sigQCD->Clone("hist_signif_sigQCD_new");
           TH1F *hist_signif_sigEWK_new = (TH1F *)hist_signif_sigEWK->Clone("hist_signif_sigEWK_new");
 
-          TCanvas *c2 = new TCanvas("c2", "MET significance", 1400., 600., 600, 600);
+          TPad *pad_signif = new TPad("pad_signif", "This is pad_signif", 0.01, 0.30, 1., 1.);
+          TPad *pad_signif2 = new TPad("pad_signif2", "This is pad_signif2", 0.01, 0.01, 1., 0.30);
 
-          TPad *pad_met_signif = new TPad("pad_met_signif", "This is pad_met_signif", 0.01, 0.30, 1., 1.);
-          TPad *pad_met_signif2 = new TPad("pad_met_signif2", "This is pad_met_signif2", 0.01, 0.01, 1., 0.30);
-
-          pad_met_signif->SetBorderSize(0);
-          pad_met_signif->SetBottomMargin(0.02);
-          pad_met_signif->Draw();
-          pad_met_signif2->SetBottomMargin(0.35);
-          pad_met_signif2->SetTopMargin(0.0);
-          pad_met_signif2->SetBorderSize(0);
-          pad_met_signif2->Draw();
-          pad_met_signif->cd();
+          pad_signif->SetBorderSize(0);
+          pad_signif->SetBottomMargin(0.02);
+          pad_signif->Draw();
+          pad_signif2->SetBottomMargin(0.35);
+          pad_signif2->SetTopMargin(0.0);
+          pad_signif2->SetBorderSize(0);
+          pad_signif2->Draw();
+          pad_signif->cd();
 
           // Draw contributions in stacked histogtams
           //
@@ -542,8 +544,8 @@ int bro_plot()
           leg->SetBorderSize(0);
           leg->Draw();
 
-          pad_met_signif->RedrawAxis();
-          pad_met_signif2->cd();
+          pad_signif->RedrawAxis();
+          pad_signif2->cd();
 
           // to plot significance
           /*
@@ -625,7 +627,6 @@ int bro_plot()
           iteration += 1;
 
         }
-      }
     }
   }
 
