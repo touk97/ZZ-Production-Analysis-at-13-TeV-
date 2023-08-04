@@ -368,8 +368,8 @@ void zjets_splitted_sc()
                               "WZ_jj"};
 
 
-  // Float_t xbins[36] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700, 730, 760, 790, 820, 850, 880, 910, 940, 970, 1000, 1030, 1060, 1090, 1120}; 
-  Float_t xbins[22] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700}; //pTZ
+  Float_t xbins[22] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700}; 
+  // Float_t xbins[36] = {70, 80, 90, 100, 110, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700}; //pTZ
   // Float_t xbins[29] = {0, 30, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 580, 700, 800, 1000, 1200};  //sTZ
   // Float_t xbins[27] = {100, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1100, 1200, 1300, 1400, 1500};  //STjj
   // Float_t xbins[21] = {100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100};  //mjj
@@ -485,6 +485,8 @@ void zjets_splitted_sc()
     TH1F *hist_WZ_jj = new TH1F("Hist_WZ_jj", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_lllljj = new TH1F("Hist_lllljj", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_llvvjj_WW = new TH1F("Hist_llvvjj_WW", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
+
+    TH1F *hist_signal_sig = new TH1F("hist_signal_sig ", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
  
  
@@ -816,22 +818,6 @@ void zjets_splitted_sc()
       events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       events_signal = events_data - events_bkg;
       events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_bkg_er, 2));
-
-      //Print calculated events for every region
-      
-       cout << "------------------------------------------------------------------" << endl << endl;
-       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
-       cout << "   SIGNAL/BKG = " << events_signal/events_bkg << endl << endl;
-       cout << "_________________________________" << endl << endl;
-       cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
-       cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << "   |   mu_WZ = " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
-       cout << "   Top: " << "      " << events_top << " +- " << events_top_er << "   |   mu_top = " << sf_emuB << " +- " << sf_emuB_er << endl << endl;
-       cout << "   WW: " << "       " << events_WW << " +- " << events_WW_er << "   |   mu_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl;
-       cout << "   Zjets0: " << "   " << events_Zjets0 << " +- " << events_Zjets0_er << "   |   mu_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl;
-       cout << "   Zjets1: " << "   " << events_Zjets1 << " +- " << events_Zjets1_er << "   |   mu_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
-       cout << "   Zjets2: " << "   " << events_Zjets2 << " +- " << events_Zjets2_er << "   |   mu_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
-       cout << "   Other: " << "    "  << events_othr << " +- " << events_othr_er << endl << endl;
-       cout << "------------------------------------------------------------------" << endl << endl;
     }
     
     //Scale histograms before adding and plotting
@@ -897,15 +883,56 @@ void zjets_splitted_sc()
     hist_Zjets->Add(hist_Zjets0);
     hist_Zjets->Add(hist_Zjets1);
     hist_Zjets->Add(hist_Zjets2);
-
+    
+    Double_t Z_max;
+    Double_t Bin_max;
     if (directory == "SR")
     {
-      // Stacking with a specific order
-      hist_Zjets->Add(hist_othr);
-      hist_top->Add(hist_Zjets);
-      hist_WW->Add(hist_top);
-      hist_WZ->Add(hist_WW);
-      cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
+       // Stacking with a specific order
+       hist_Zjets->Add(hist_othr);
+       hist_top->Add(hist_Zjets);
+       hist_WW->Add(hist_top);
+       hist_WZ->Add(hist_WW);
+       cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
+
+       for (int bin = 1; bin < hist_signal->GetSize(); ++bin)
+       {
+        Double_t B = hist_WZ->GetBinContent(bin);
+        Double_t S = hist_signal->GetBinContent(bin);
+
+        if (B > 0 && S > 0)
+        {
+          Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+          // cout << "B=" << B << ", S=" << S << ", Z_bin=" << Z_bin << endl;
+          hist_signal_sig->SetBinContent(bin, Z);
+
+          if (Z > Z_max)
+          {
+            Z_max = Z;
+            Bin_max = hist_signal_sig->GetBinLowEdge(bin);
+          }
+         
+        }
+       }
+
+
+             //Print calculated events for every region
+      
+       cout << "------------------------------------------------------------------" << endl << endl;
+       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
+       cout << "   SIGNAL/BKG = " << events_signal/events_bkg << endl;
+       cout << "   Maximum significance is:  " << Z_max << "   for bin:   " << Bin_max << endl << endl;
+       cout << "_________________________________" << endl << endl;
+       cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
+       cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << "   |   mu_WZ = " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
+       cout << "   Top: " << "      " << events_top << " +- " << events_top_er << "   |   mu_top = " << sf_emuB << " +- " << sf_emuB_er << endl << endl;
+       cout << "   WW: " << "       " << events_WW << " +- " << events_WW_er << "   |   mu_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl;
+       cout << "   Zjets0: " << "   " << events_Zjets0 << " +- " << events_Zjets0_er << "   |   mu_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl;
+       cout << "   Zjets1: " << "   " << events_Zjets1 << " +- " << events_Zjets1_er << "   |   mu_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
+       cout << "   Zjets2: " << "   " << events_Zjets2 << " +- " << events_Zjets2_er << "   |   mu_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
+       cout << "   Other: " << "    "  << events_othr << " +- " << events_othr_er << endl << endl;
+       cout << "------------------------------------------------------------------" << endl << endl;
+
     }
     else
     {
@@ -1046,9 +1073,19 @@ void zjets_splitted_sc()
 
     if (directory == "SR")
     {
-      numerator->Add(hist_signal);
-      denominator->Add(hist_WZ);
-      numerator->GetYaxis()->SetRangeUser(-1, 5);
+      hist_signal_sig->Draw("E0X0");
+      hist_signal_sig->SetLineColor(kBlack);
+      hist_signal_sig->SetMarkerStyle(20);
+      hist_signal_sig->GetXaxis()->SetTitle("");
+      hist_signal_sig->GetXaxis()->SetTitleSize(0.15);
+      hist_signal_sig->GetXaxis()->SetTitleOffset(1.1);
+      hist_signal_sig->GetXaxis()->SetLabelSize(0.14);
+
+      hist_signal_sig->GetYaxis()->SetTitleOffset(0.4);
+      hist_signal_sig->GetYaxis()->SetTitleSize(0.12);
+      hist_signal_sig->GetYaxis()->SetLabelSize(0.10);
+      hist_signal_sig->SetStats(0);
+      pad2->SetGrid();
     }
     else if (directory == "Zjets0" || directory == "Zjets1" || directory == "Zjets2")
     {
@@ -1063,31 +1100,40 @@ void zjets_splitted_sc()
       denominator->Add(hist_signal);
       // pad2->SetLogy();
     }
-    pad2->Update();
+    
 
-    // numerator->Sumw2(1);
-    // denominator->Sumw2(1);
-    numerator->Divide(denominator);
+    if (directory != "SR")
+    {
+      // numerator->Sumw2(1);
+      // denominator->Sumw2(1);
+      TLine *line = new TLine(xbins[0], 1, xbins[sizeof(xbins) / sizeof(xbins[0]) - 1], 1);
+      line->SetLineStyle(2);
+      line->SetLineWidth(2);
+      line->Draw("same");
+      pad2->RedrawAxis();
 
-    numerator->SetMarkerStyle(20);
-    numerator->GetXaxis()->SetTitle("");
-    numerator->GetXaxis()->SetTitleSize(0.15);
-    numerator->GetXaxis()->SetTitle("P^{Z}_{T} [GeV]");
-    numerator->GetXaxis()->SetTitleOffset(1.1);
-    numerator->GetXaxis()->SetLabelSize(0.14);
+      numerator->SetMarkerStyle(20);
+      numerator->GetXaxis()->SetTitle("");
+      numerator->GetXaxis()->SetTitleSize(0.15);
+      numerator->GetXaxis()->SetTitle("P^{Z}_{T} [GeV]");
+      numerator->GetXaxis()->SetTitleOffset(1.1);
+      numerator->GetXaxis()->SetLabelSize(0.14);
 
-    numerator->GetYaxis()->SetTitleOffset(0.4);
-    numerator->GetYaxis()->SetTitleSize(0.12);
-    numerator->GetYaxis()->SetLabelSize(0.10);
-    numerator->SetStats(0);
+      numerator->GetYaxis()->SetTitleOffset(0.4);
+      numerator->GetYaxis()->SetTitleSize(0.12);
+      numerator->GetYaxis()->SetLabelSize(0.10);
+      numerator->SetStats(0);
 
-    // numerator->GetYaxis()->SetLabelSize(0.12);
-    // numerator->GetYaxis()->SetTitle("Events");
-    // numerator->GetYaxis()->SetTitleSize(0.05);
+      // numerator->GetYaxis()->SetLabelSize(0.12);
+      // numerator->GetYaxis()->SetTitle("Events");
+      // numerator->GetYaxis()->SetTitleSize(0.05);
 
-    numerator->SetTitle(" ");
-    numerator->SetLineColor(kBlack);
-    numerator->Draw();
+      numerator->SetTitle(" ");
+      numerator->SetLineColor(kBlack);
+      numerator->Divide(denominator);
+
+      numerator->Draw();
+    }
 
     TLine *line = new TLine(xbins[0], 1, xbins[sizeof(xbins) / sizeof(xbins[0]) - 1], 1);
     line->SetLineStyle(2);
@@ -1106,10 +1152,11 @@ void zjets_splitted_sc()
       tex3->SetTextSize(0.04);
       tex3->SetLineWidth(1);
       tex3->Draw();
-      numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg.}");
+      hist_signal_sig->GetYaxis()->SetTitle("Significance");
+      hist_signal_sig->GetXaxis()->SetTitle("P^{Z}_{T} [GeV]");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/zjets_splitted_sc/stjj_SR_splitted_sc.png");
+      c1->SaveAs("../cro/zjets_splitted_sc/ptz_SR_splitted_sc.png");
     }
     else if (directory == "3lCR")
     {
@@ -1125,7 +1172,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/zjets_splitted_sc/stjj_3lCR_splitted_sc.png");
+      c2->SaveAs("../cro/zjets_splitted_sc/ptz_3lCR_splitted_sc.png");
     }
     else if (directory == "emCR_B")
     {
@@ -1141,7 +1188,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/zjets_splitted_sc/stjj_emCR_B_splitted_sc.png");
+      c3->SaveAs("../cro/zjets_splitted_sc/ptz_emCR_B_splitted_sc.png");
     }
     else if (directory == "emCR_A")
     {
@@ -1157,7 +1204,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/zjets_splitted_sc/stjj_emCR_A_splitted_sc.png");
+      c4->SaveAs("../cro/zjets_splitted_sc/ptz_emCR_A_splitted_sc.png");
     }
     else if (directory == "Zjets0")
     {
@@ -1173,7 +1220,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets0_splitted_sc.png");
+      c5->SaveAs("../cro/zjets_splitted_sc/ptz_Zjets0_splitted_sc.png");
 
     }
     else if (directory == "Zjets1")
@@ -1190,7 +1237,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c6->Update();
-      c6->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets1_splitted_sc.png");
+      c6->SaveAs("../cro/zjets_splitted_sc/ptz_Zjets1_splitted_sc.png");
 
     }
     else if (directory == "Zjets2")
@@ -1207,7 +1254,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c7->Update();
-      c7->SaveAs("../cro/zjets_splitted_sc/stjj_Zjets2_splitted_sc.png");
+      c7->SaveAs("../cro/zjets_splitted_sc/ptz_Zjets2_splitted_sc.png");
 
     }
 
