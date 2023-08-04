@@ -70,7 +70,7 @@ vector<Float_t> Counter(string category, string index1, string index2)
   
 
   Double_t signal = 0.;
-  Double_t signaler = 0.;
+  Double_t signal_var = 0.;
 
   string filepath = "/home/touk/Desktop/touk/master/thesis/data/SR_nocut_aggelos/" + category + index1 + index2;
   TFile *file = new TFile((string(filepath)).c_str());
@@ -84,15 +84,15 @@ vector<Float_t> Counter(string category, string index1, string index2)
   {
       tree->GetEntry(i);
       signal = signal + weight;
-      signaler = signaler + weight*weight;
+      signal_var = signal_var + weight*weight;
   }
 
   cout << "    ENTRIES = " << tree->GetEntries() << endl << endl; 
-  cout << "    N = " << signal << "+-" << sqrt(signaler) << endl << endl; 
+  cout << "    N = " << signal << "+-" << sqrt(signal_var) << endl << endl; 
 
 
   events.push_back(signal);
-  events.push_back(sqrt(signaler));
+  events.push_back(signal_var);
 
 
   return events;
@@ -120,6 +120,8 @@ void truth()
   Float_t signal_gg_er = 0.;
   Float_t signal_EWK = 0.;
   Float_t signal_EWK_er = 0.;
+  Float_t signal_tot = 0.;
+  Float_t signal_tot_er = 0.;
 
   vector<Float_t> signal_qq1;
   vector<Float_t> signal_qq2;
@@ -207,17 +209,21 @@ void truth()
     }
 
     signal_qq = signal_qq1[0] + signal_qq2[0] +  signal_qq3[0];
-    signal_qq_er = signal_qq1[1] + signal_qq2[1] +  signal_qq3[1];
+    signal_qq_er = sqrt(signal_qq1[1] + signal_qq2[1] +  signal_qq3[1]);
     signal_gg = signal_gg1[0] + signal_gg2[0] +  signal_gg3[0];
-    signal_gg_er = signal_gg1[1] + signal_gg2[1] + signal_gg3[1];
+    signal_gg_er = sqrt(signal_gg1[1] + signal_gg2[1] + signal_gg3[1]);
     signal_EWK = signal_EWK1[0] + signal_EWK2[0] + signal_EWK3[0];
-    signal_EWK_er = signal_EWK1[1] + signal_EWK2[1] + signal_EWK3[1];
+    signal_EWK_er = sqrt(signal_EWK1[1] + signal_EWK2[1] + signal_EWK3[1]);
+
+    signal_tot = signal_qq + signal_gg + signal_EWK;
+    signal_tot_er = signal_qq_er + signal_gg_er + signal_EWK_er;
 
     printf("    --------------------------------------\n");
-    printf("    Signal QCD qq:  %.2f +- %.2f\n\n", signal_qq, signal_qq_er);
-    printf("    Signal QCD gg:  %.2f +- %.2f\n\n", signal_gg, signal_gg_er);
-    printf("    Signal EWK:     %.2f +- %.2f\n\n", signal_EWK, signal_EWK_er);
-
+    printf("    Signal QCD qq:   %.2f +- %.2f\n\n", signal_qq, signal_qq_er);
+    printf("    Signal QCD gg:   %.2f +- %.2f\n\n", signal_gg, signal_gg_er);
+    printf("    Signal EWK:      %.2f +- %.2f\n\n", signal_EWK, signal_EWK_er);
+    printf("    Signal Total:    %.2f +- %.2f\n\n", signal_tot, signal_tot_er);
+  
     // For the log file
     std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
     logFile.close();            // Close the log file
