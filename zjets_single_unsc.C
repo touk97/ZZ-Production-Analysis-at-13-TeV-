@@ -687,9 +687,7 @@ void zjets_single_unsc()
 
     TH1F *numerator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *denominator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
-
-    numerator->Add(hist_data);
-    denominator->Add(hist_signal);
+    
 
     if (directory == "SR")
     {

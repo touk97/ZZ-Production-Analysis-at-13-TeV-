@@ -99,7 +99,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
         // Inclusive
         signal = signal + weight;
         signaler = signaler + weight * weight;
-        hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+        hist->Fill(Z_pT, weight);
       }
       // {
         // // Exclusive
@@ -108,7 +108,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
         // {
         //   signal = signal + weight;
         //   signaler = signaler + weight * weight;
-        //   hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_ptt, weight);
+        //   hist->Fill(Z_pTt, weight);
         // }
       // }
     }
@@ -118,7 +118,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
       //Inclusive
       signal = signal + weight;
       signaler = signaler + weight * weight;
-      hist->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+      hist->Fill(Z_pT, weight);
 
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -126,7 +126,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
       // {
       //   signal = signal + weight;
       //   signaler = signaler + weight * weight;
-      //   hist->Fill(Z_pT + met_tst + leading_jet_\pt + second_jet_ptt, weight);
+      //   hist->Fill(Z_pT, weight);
       // }
     }
   }
@@ -221,19 +221,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
         {
           signal0 = signal0 + weight;
           signaler0 = signaler0 + weight * weight;
-          hist0->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+          hist0->Fill(Z_pT, weight);
         }
         else if (n_jets > 0 && n_jets < 2)
         {
           signal1 = signal1 + weight;
           signaler1 = signaler1 + weight * weight;
-          hist1->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+          hist1->Fill(Z_pT, weight);
         }
         else if (n_jets > 1)
         {
           signal2 = signal2 + weight;
           signaler2 = signaler2 + weight * weight;
-          hist2->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+          hist2->Fill(Z_pT, weight);
         }
       }
     }
@@ -244,19 +244,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
       {
         signal0 = signal0 + weight;
         signaler0 = signaler0 + weight * weight;
-        hist0->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+        hist0->Fill(Z_pT, weight);
       }
       else if (n_jets > 0 && n_jets < 2)
       {
         signal1 = signal1 + weight;
         signaler1 = signaler1 + weight * weight;
-        hist1->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+        hist1->Fill(Z_pT, weight);
       }
       else if (n_jets > 1)
       {
         signal2 = signal2 + weight;
         signaler2 = signaler2 + weight * weight;
-        hist2->Fill(Z_pT + met_tst + leading_jet_pt + second_jet_pt, weight);
+        hist2->Fill(Z_pT, weight);
       }
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -264,7 +264,7 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
       // {
       //   signal = signal + weight;
       //   signaler = signaler + weight * weight;
-      //   hist->Fill(Z_pT + met_tst + leading_jet_\pt + second_jet_ptt, weight);
+      //   hist->Fill(Z_pT, weight);
       // }
     }
   }
@@ -368,7 +368,8 @@ void zjets_splitted_unsc()
                               "WZ_jj"};
 
 
-  Float_t xbins[36] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700, 730, 760, 790, 820, 850, 880, 910, 940, 970, 1000, 1030, 1060, 1090, 1120}; //pTZ
+  // Float_t xbins[36] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700, 730, 760, 790, 820, 850, 880, 910, 940, 970, 1000, 1030, 1060, 1090, 1120}; 
+  Float_t xbins[22] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700}; //pTZ
   // Float_t xbins[29] = {0, 30, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 580, 700, 800, 1000, 1200};  //sTZ
   // Float_t xbins[27] = {100, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1100, 1200, 1300, 1400, 1500};  //STjj
   // Float_t xbins[21] = {100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000, 1050, 1100};  //mjj
@@ -860,34 +861,28 @@ void zjets_splitted_unsc()
     TH1F *numerator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *denominator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
-    numerator->Add(hist_data);
-    denominator->Add(hist_signal);
-
     if (directory == "SR")
     {
       numerator->Add(hist_signal);
       denominator->Add(hist_WZ);
+      numerator->GetYaxis()->SetRangeUser(-1, 5);
     }
     else
     {
       numerator->Add(hist_data);
       denominator->Add(hist_signal);
-      pad2->SetLogy();
+      // pad2->SetLogy();
       pad2->Update();
     }
 
     numerator->Sumw2(1);
     denominator->Sumw2(1);
     numerator->Divide(denominator);
-    if (directory == "SR")
-    {
-      numerator->GetYaxis()->SetRangeUser(-1, 5);
-    }
 
     numerator->SetMarkerStyle(20);
     numerator->GetXaxis()->SetTitle("");
     numerator->GetXaxis()->SetTitleSize(0.15);
-    numerator->GetXaxis()->SetTitle("S^{jj}_{T} [GeV]");
+    numerator->GetXaxis()->SetTitle("P^{Z}_{T} [GeV]");
     numerator->GetXaxis()->SetTitleOffset(1.1);
     numerator->GetXaxis()->SetLabelSize(0.14);
 

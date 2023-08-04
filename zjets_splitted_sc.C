@@ -1044,9 +1044,6 @@ void zjets_splitted_sc()
     TH1F *numerator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *denominator = new TH1F("Numerator", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
-    numerator->Add(hist_data);
-    denominator->Add(hist_signal);
-
     if (directory == "SR")
     {
       numerator->Add(hist_signal);
@@ -1055,6 +1052,8 @@ void zjets_splitted_sc()
     }
     else if (directory == "Zjets0" || directory == "Zjets1" || directory == "Zjets2")
     {
+      numerator->Add(hist_data);
+      denominator->Add(hist_signal);
       numerator->GetYaxis()->SetRangeUser(-1, 4);
     }
     
@@ -1063,11 +1062,11 @@ void zjets_splitted_sc()
       numerator->Add(hist_data);
       denominator->Add(hist_signal);
       // pad2->SetLogy();
-      pad2->Update();
     }
+    pad2->Update();
 
-    numerator->Sumw2(1);
-    denominator->Sumw2(1);
+    // numerator->Sumw2(1);
+    // denominator->Sumw2(1);
     numerator->Divide(denominator);
 
     numerator->SetMarkerStyle(20);
