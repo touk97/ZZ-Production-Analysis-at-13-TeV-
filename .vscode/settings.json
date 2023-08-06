@@ -87,7 +87,8 @@
         "test_demo.C": "cpp",
         "tlorentzvector.h": "c",
         "truth.C": "cpp",
-        "zjets_splitted_sc_demo.C": "cpp"
+        "zjets_splitted_sc_demo.C": "cpp",
+        "PSO.C": "cpp"
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.autopep8"
