@@ -184,11 +184,11 @@ void PSO()
   mt19937 gen(rd());
 
 
-
+  std::vector<particle> swarm(n_particles); //Define the swarm
   for (int i = 0; i < n_particles; i++)
   {
     
-    particle particle;      //Create particle structure 
+    particle particle;      //Define the particle 
 
     //Initialize position
     particle.dLepR = dist_uni(gen);
@@ -209,6 +209,8 @@ void PSO()
     particle.velocity[1] = particle.dMetZPhi;
     particle.velocity[2] = particle.met_tst;
     particle.velocity[3] = particle.metOHT;
+
+    swarm.push_back(particle);
 
     
 
@@ -267,7 +269,7 @@ void PSO()
     vector<Float_t> n_lllljj = Counter(particle, tree_lllljj);
     cout << "   llvvjj_WW:";
     vector<Float_t> n_llvvjj_WW = Counter(particle, tree_llvvjj_WW);
-    
+
 
     Float_t events_data = n_data[0];
     Float_t events_data_er = n_data[1];
