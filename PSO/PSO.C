@@ -27,6 +27,8 @@ struct particle
 };
 
 
+
+
 void print_particle(const particle& p) {
     cout << "    dLepR: " << p.dLepR << endl;
     cout << "    dMetZPhi: " << p.dMetZPhi << endl;
@@ -169,8 +171,16 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int n_particles = 10;
-  int iterations = 10;
+  int n_particles = 5;
+  int iterations = 2;
+
+  double search_space_max_significance = - 1;
+  double gbest[4];
+
+  for (int i = 0; i < 4; i++) 
+  {
+    gbest[i] = -1;
+  }
 
   float_t w = 0.8;
   float_t c1 = 0.5;
@@ -185,12 +195,16 @@ void PSO()
   random_device rd;
   mt19937 gen(rd());
 
+  
 
-  std::vector<particle> swarm(n_particles); //Define the swarm
-  for (int i = 0; i < n_particles; i++)
+  
+  std::vector<vector<particle>> swarm(iterations, vector<particle>(n_particles)); //Define the swarm
+
+  //Initialize the swarm
+  for (int j = 0; j < n_particles; j++)
   {
 
-    particle &particle = swarm[i]; // Define the particle
+    particle &particle = swarm[0][j]; // Define the particle
 
     // Initialize position
     particle.dLepR = uni_dist(gen) * (2.5 - 1.5);
@@ -201,10 +215,6 @@ void PSO()
     particle.position[1] = particle.dMetZPhi;
     particle.position[2] = particle.met_tst;
     particle.position[3] = particle.metOHT;
-    for (int i = 0; i < 4; ++i)
-    {
-      particle.pbest[i] = particle.position[i];
-    }
 
     // Initialize velocity
     particle.dLepR = uni_dist2(gen) * (2.5 - 1.5);
@@ -215,121 +225,148 @@ void PSO()
     particle.velocity[1] = particle.dMetZPhi;
     particle.velocity[2] = particle.met_tst;
     particle.velocity[3] = particle.metOHT;
-    if (i == 0)
-    {
-      cout << particle.position[0] << endl << endl;
-    }
-    else if (i == 1)
-    {
-      cout << particle.position[2] << endl << endl;
-    }
-    
-    
 
-    // particle.max_significance
+    particle.significance = -1.;
+    particle.max_significance = -1.;
 
     // swarm.push_back(particle);
   }
 
-  for (int i = 0; i < n_particles; i++)
+  for (int i = 0; i < iterations; i++)
   {
+    cout << "   ITERATION:  #"  << i << "   " << endl;
+    cout << "   -------------------" << endl << endl;
+    for (int j = 0; j < n_particles; j++)
+    {
+  
+      particle &particle = swarm[i][j]; // Define the particle
+  
+      // cout << "   SWARM:  "  << swarm[i] << endl << endl;
+      cout << "   PARTICLE:  "  << j << "   " << endl << endl;
+      
+  
+      cout << "   ================== DATA ==================    " << endl << endl;
+      cout << "   DATA:";
+      vector<Float_t> n_data = Counter(particle, tree_data);
 
-    particle &particle = swarm[i]; // Define the particle
-
-    // cout << "   SWARM:  "  << swarm[i] << endl << endl;
-    cout << "   PARTICLE:  "  << i << "   " << endl << endl;
-
-   cout << particle.position[0] << endl << endl;
-   cout << particle.position[2] << endl << endl;
+      if (n_data[0] < 1)
+      {
+        continue; 
+      }
     
+      cout << "   ================== SIGNAL ==================    " << endl << endl;
+      cout << "   llvv:";
+      vector<Float_t> n_llvv = Counter(particle, tree_llvv);
+      cout << "   llvvjj:";
+      vector<Float_t> n_llvvjj = Counter(particle, tree_llvvjj);
+  
+      cout << "   ================== WZ ==================    " << endl << endl;
+      cout << "   WZ:";
+      vector<Float_t> n_WZ = Counter(particle, tree_WZ);
+  
+      cout << "   ================== Zjets ==================    " << endl << endl;
+      cout << "   Z_jets_ee:";
+      vector<Float_t> n_Zjets_ee = Counter(particle, tree_Z_jets_ee);
+      cout << "   Z_jets_mumu:";
+      vector<Float_t> n_Zjets_mumu = Counter(particle, tree_Z_jets_mumu);
+  
+      cout << "   ================== top ==================    " << endl << endl;
+      cout << "   Top:";
+      vector<Float_t> n_top = Counter(particle, tree_top);
+      cout << "   ttbarV_ttbarVV:";
+      vector<Float_t> n_ttbarV_ttbarVV = Counter(particle, tree_ttbarV_ttbarVV);
+      cout << "   Wt:";
+      vector<Float_t> n_Wt = Counter(particle, tree_Wt);
+  
+      cout << "   ================== WW ==================    " << endl << endl;
+      cout << "   WW:";
+      vector<Float_t> n_WW = Counter(particle, tree_WW);
+  
+      cout << "   ================== Othr ==================    " << endl << endl;
+      cout << "   llll:";
+      vector<Float_t> n_llll = Counter(particle, tree_llll);
+      cout << "   llqq:";
+      vector<Float_t> n_llqq = Counter(particle, tree_llqq);
+      cout << "   VVV:";
+      vector<Float_t> n_VVV = Counter(particle, tree_VVV);
+      cout << "   W_jets:";
+      vector<Float_t> n_Wjets = Counter(particle, tree_W_jets);
+      cout << "   Ztt:";
+      vector<Float_t> n_Ztt = Counter(particle, tree_Ztt);
+      cout << "   WZ_jj:";
+      vector<Float_t> n_WZjj = Counter(particle, tree_WZ_jj);
+      cout << "   lllljj:";
+      vector<Float_t> n_lllljj = Counter(particle, tree_lllljj);
+      cout << "   llvvjj_WW:";
+      vector<Float_t> n_llvvjj_WW = Counter(particle, tree_llvvjj_WW);
+  
+  
+      Float_t events_data = n_data[0];
+      Float_t events_data_er = n_data[1];
+      Float_t events_signal = n_llvv[0] + n_llvvjj[0];
+      Float_t events_signal_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
+      Float_t events_bkg;
+      Float_t events_bkg_er;
+      Float_t events_WZ = n_WZ[0];
+      Float_t events_WZ_er = n_WZ[1];
+      Float_t events_Zjets = n_Zjets_ee[0] + n_Zjets_mumu[0];
+      Float_t events_Zjets_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
+      Float_t events_top = n_top[0] + n_ttbarV_ttbarVV[0] + n_Wt[0];
+      Float_t events_top_er = sqrt(pow(n_top[1],2) + pow(n_ttbarV_ttbarVV[1], 2) + pow(n_Wt[1], 2));
+      Float_t events_WW = n_WW[0];
+      Float_t events_WW_er = n_WW[1];
+      Float_t events_othr = n_llll[0] + n_llqq[0] + n_VVV[0] + n_Wjets[0] + n_Ztt[0] + n_WZjj[0] + n_lllljj[0] + n_llvvjj_WW[0];
+      Float_t events_othr_er = sqrt(pow(n_llll[1], 2) + pow(n_llqq[1], 2) + pow(n_VVV[1], 2) + pow(n_Wjets[1], 2) + pow(n_Ztt[1], 2) + pow(n_WZjj[1], 2) + pow(n_lllljj[1], 2) + pow(n_llvvjj_WW[1], 2));
+  
+      events_bkg = events_WZ + events_top + events_WW + events_Zjets + events_othr;
+      events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets, 2) + pow(events_othr_er, 2));
+  
+  
+      Float_t S = events_signal;
+      Float_t B = events_bkg;
+      particle.significance = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+      
+      if (particle.significance > particle.max_significance)
+      {
+        particle.max_significance = particle.significance;
+      }
+      
 
-    cout << "   ================== DATA ==================    " << endl << endl;
-    cout << "   DATA:";
-    vector<Float_t> n_data = Counter(particle, tree_data);
+      Z.push_back(particle.significance);
+  
+      cout << endl << "   SIGNAL:  " << events_signal << "+-" << events_signal_er << endl;
+      cout << "   Z:   " << swarm[i][j].significance << endl;
+      cout << "   ------------------------------------" << endl;
+    }
 
-    cout << "   ================== SIGNAL ==================    " << endl << endl;
-    cout << "   llvv:";
-    vector<Float_t> n_llvv = Counter(particle, tree_llvv);
-    cout << "   llvvjj:";
-    vector<Float_t> n_llvvjj = Counter(particle, tree_llvvjj);
-
-    cout << "   ================== WZ ==================    " << endl << endl;
-    cout << "   WZ:";
-    vector<Float_t> n_WZ = Counter(particle, tree_WZ);
-
-    cout << "   ================== Zjets ==================    " << endl << endl;
-    cout << "   Z_jets_ee:";
-    vector<Float_t> n_Zjets_ee = Counter(particle, tree_Z_jets_ee);
-    cout << "   Z_jets_mumu:";
-    vector<Float_t> n_Zjets_mumu = Counter(particle, tree_Z_jets_mumu);
-
-    cout << "   ================== top ==================    " << endl << endl;
-    cout << "   Top:";
-    vector<Float_t> n_top = Counter(particle, tree_top);
-    cout << "   ttbarV_ttbarVV:";
-    vector<Float_t> n_ttbarV_ttbarVV = Counter(particle, tree_ttbarV_ttbarVV);
-    cout << "   Wt:";
-    vector<Float_t> n_Wt = Counter(particle, tree_Wt);
-
-    cout << "   ================== WW ==================    " << endl << endl;
-    cout << "   WW:";
-    vector<Float_t> n_WW = Counter(particle, tree_WW);
-
-    cout << "   ================== Othr ==================    " << endl << endl;
-    cout << "   llll:";
-    vector<Float_t> n_llll = Counter(particle, tree_llll);
-    cout << "   llqq:";
-    vector<Float_t> n_llqq = Counter(particle, tree_llqq);
-    cout << "   VVV:";
-    vector<Float_t> n_VVV = Counter(particle, tree_VVV);
-    cout << "   W_jets:";
-    vector<Float_t> n_Wjets = Counter(particle, tree_W_jets);
-    cout << "   Ztt:";
-    vector<Float_t> n_Ztt = Counter(particle, tree_Ztt);
-    cout << "   WZ_jj:";
-    vector<Float_t> n_WZjj = Counter(particle, tree_WZ_jj);
-    cout << "   lllljj:";
-    vector<Float_t> n_lllljj = Counter(particle, tree_lllljj);
-    cout << "   llvvjj_WW:";
-    vector<Float_t> n_llvvjj_WW = Counter(particle, tree_llvvjj_WW);
-
-
-    Float_t events_data = n_data[0];
-    Float_t events_data_er = n_data[1];
-    Float_t events_signal = n_llvv[0] + n_llvvjj[0];
-    Float_t events_signal_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
-    Float_t events_bkg;
-    Float_t events_bkg_er;
-    Float_t events_WZ = n_WZ[0];
-    Float_t events_WZ_er = n_WZ[1];
-    Float_t events_Zjets = n_Zjets_ee[0] + n_Zjets_mumu[0];
-    Float_t events_Zjets_er = sqrt(pow(n_Zjets_ee[1], 2) + pow(n_Zjets_mumu[1], 2));
-    Float_t events_top = n_top[0] + n_ttbarV_ttbarVV[0] + n_Wt[0];
-    Float_t events_top_er = sqrt(pow(n_top[1],2) + pow(n_ttbarV_ttbarVV[1], 2) + pow(n_Wt[1], 2));
-    Float_t events_WW = n_WW[0];
-    Float_t events_WW_er = n_WW[1];
-    Float_t events_othr = n_llll[0] + n_llqq[0] + n_VVV[0] + n_Wjets[0] + n_Ztt[0] + n_WZjj[0] + n_lllljj[0] + n_llvvjj_WW[0];
-    Float_t events_othr_er = sqrt(pow(n_llll[1], 2) + pow(n_llqq[1], 2) + pow(n_VVV[1], 2) + pow(n_Wjets[1], 2) + pow(n_Ztt[1], 2) + pow(n_WZjj[1], 2) + pow(n_lllljj[1], 2) + pow(n_llvvjj_WW[1], 2));
-
-    events_bkg = events_WZ + events_top + events_WW + events_Zjets + events_othr;
-    events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets, 2) + pow(events_othr_er, 2));
-
-
-    Float_t S = events_signal;
-    Float_t B = events_bkg;
-    particle.significance = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
-
-    // if (particle.significance > )
+    // //Update global best significance
+    // for (int j = 0; j < n_particles; j++)
     // {
-    //   /* code */
+    //   cout << swarm[i][j].significance << endl;
+
+    // }
+    // cout << "   ------------------------------------" << endl;
+    // for (int j = 0; j < n_particles; j++)
+    // {
+    //   if (!isnan(swarm[i][j].significance) && swarm[i][j].significance > swarm[i][j].max_significance)
+    //   {
+    //     swarm[i][j].max_significance = swarm[i][j].significance;
+    //   }
+      
+    // }
+
+    // for (int j = 0; j < n_particles; j++)
+    // {
+    //   swarm[i][j].significance =    
+    // }
+
+    // for (int j = 0; j < n_particles; j++)
+    // {
+    //   cout << swarm[i][j].max_significance << endl;
+
     // }
     
-    Z.push_back(particle.significance);
     
-
-    cout << endl << "   SIGNAL:  " << events_signal << endl;
-    cout << "   Z:   " << Z.at(i) << endl;
-    cout << "   ------------------------------------" << endl;
   }
 
   return;
