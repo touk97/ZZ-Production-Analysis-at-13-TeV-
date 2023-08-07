@@ -7,10 +7,39 @@
 
 //Cpp headers
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <random>
 #include <cmath>
 using namespace std;
+
+// CUSTOM STREAM BUFFER CLASS FOR OUTPUT LOG FILE
+class DualStreamBuffer : public std::streambuf
+{
+public:
+  // Constructor
+  DualStreamBuffer(std::streambuf *primaryBuffer, std::streambuf *secondaryBuffer)
+      : primaryBuffer(primaryBuffer), secondaryBuffer(secondaryBuffer) {}
+
+
+  int_type overflow(int_type c) override
+  {
+    if (c != EOF)
+    {
+      if (primaryBuffer != nullptr)
+        primaryBuffer->sputc(c);
+
+      if (secondaryBuffer != nullptr)
+        secondaryBuffer->sputc(c);
+    }
+    return c;
+  }
+
+private:
+  std::streambuf *primaryBuffer;   // Primary stream buffer (std::cout)
+  std::streambuf *secondaryBuffer; // Secondary stream buffer (log file)
+};
+// END OF LOG FILE CLASS
 
 
 struct particle
@@ -25,8 +54,6 @@ struct particle
   double pbest[4];
   double velocity[4];
 };
-
-
 
 
 void print_particle(const particle& p) {
@@ -45,6 +72,36 @@ void print_particle(const particle& p) {
     cout << "    velocity[2]: " << p.velocity[2] << endl;
     cout << "    velocity[3]: " << p.velocity[3] << endl;
     cout << endl;
+}
+
+
+void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int iterations, int n_particles)
+{
+
+  uniform_real_distribution<> uni_dist(0., 1.);
+  random_device rd;
+  mt19937 gen(rd());
+
+  float_t w = 0.8;
+  float_t c1 = 0.5;
+  float_t c2 = 0.5;
+  float_t r1 = uni_dist(gen);
+  float_t r2 = uni_dist(gen);
+
+  for (int j = 0; j < n_particles; j++)
+  {
+    cout << swarm[i][j].max_significance << endl;
+    for (int k = 0; k < 4; k++)
+    {
+      swarm[i+1][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
+      swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i+1][j].velocity[k];
+      swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
+    }
+  }
+
+ 
+
+  return;
 }
 
 vector<Float_t> Counter(particle &particle, TTree *tree)
@@ -88,12 +145,12 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
 
   Double_t signal = 0.;
   Double_t signaler = 0.;
-
   // Loop over events
   for (Int_t i = 0; i < nentries; i++)
   {
     tree->GetEntry(i);
-    if (dLepR < particle.dLepR && dMetZPhi > particle.dMetZPhi && met_tst > particle.met_tst && MetOHT > particle.metOHT)
+     
+    if (dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     {
       signal = signal + weight;
       signaler = signaler + weight * weight;
@@ -109,9 +166,18 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   return events;
 }
 
-
 void PSO()
 {
+
+  // Timer start
+  auto start = std::chrono::high_resolution_clock::now();
+
+  // Output log file
+  ofstream logFile("./PSO.txt");
+
+  DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
+
+  std::streambuf *oldBuffer = std::cout.rdbuf(&dualBuffer);
 
   string filepath = "../../data/SAMPLES/SR/";
   cout << endl << endl << endl;
@@ -173,7 +239,7 @@ void PSO()
   //PSO ALGORITHM
 
   int n_particles = 5;
-  int iterations = 1;
+  int iterations = 10;
 
   double gbest_significance = - 1;
   double gbest[4];
@@ -183,10 +249,6 @@ void PSO()
     gbest[i] = -1;
   }
 
-  float_t w = 0.8;
-  float_t c1 = 0.5;
-  float_t c2 = 0.5;
-  vector<Float_t> Z;
 
 
   // Initialization
@@ -199,7 +261,7 @@ void PSO()
   
 
   
-  std::vector<vector<particle>> swarm(iterations, vector<particle>(n_particles)); //Define the swarm
+  vector<vector<particle>> swarm(iterations, vector<particle>(n_particles)); //Define the swarm
 
   //Initialize the swarm
   for (int j = 0; j < n_particles; j++)
@@ -243,19 +305,36 @@ void PSO()
       particle &particle = swarm[i][j]; // Define the particle
   
       // cout << "   SWARM:  "  << swarm[i] << endl << endl;
-      cout << "   PARTICLE:  "  << j << "   " << endl << endl;
+      cout<< endl << "   PARTICLE:  "  << j << "   " << endl << endl;
       
   
       cout << "   ================== DATA ==================    " << endl << endl;
       cout << "   DATA:";
       vector<Float_t> n_data = Counter(particle, tree_data);
 
-      if (n_data[0] < 1)
+      while (n_data[0] < 1)
       {
-        cout << "--- no events ---" << endl << endl;
-        cout << "-----------------" << endl << endl;
-        continue; 
+        // Initialize position
+        particle.dLepR = uni_dist(gen) * (2.5 - 1.5);
+        particle.dMetZPhi = uni_dist(gen) * (3. - 2.);
+        particle.met_tst = uni_dist(gen) * (130. - 90.);
+        particle.metOHT = uni_dist(gen) * (0.8 - 0.4);
+        particle.position[0] = particle.dLepR;
+        particle.position[1] = particle.dMetZPhi;
+        particle.position[2] = particle.met_tst;
+        particle.position[3] = particle.metOHT;
+
+        // Initialize velocity
+        particle.dLepR = uni_dist2(gen) * (2.5 - 1.5);
+        particle.dMetZPhi = uni_dist2(gen) * (3. - 2.);
+        particle.met_tst = uni_dist2(gen) * (130. - 90.);
+        particle.metOHT = uni_dist2(gen) * (0.8 - 0.4);
+        particle.velocity[0] = particle.dLepR;
+        particle.velocity[1] = particle.dMetZPhi;
+        particle.velocity[2] = particle.met_tst;
+        particle.velocity[3] = particle.metOHT;
       }
+
     
       cout << "   ================== SIGNAL ==================    " << endl << endl;
       cout << "   llvv:";
@@ -348,28 +427,52 @@ void PSO()
           cout << "New search space best position:      (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl << endl; 
         }
       }
-      
-
-      Z.push_back(particle.significance);
   
       cout << endl << "   SIGNAL:  " << events_signal << "+-" << events_signal_er << endl;
       cout << "   Z:         " << swarm[i][j].significance << endl;
       cout << "   ------------------------------------" << endl;
     }
 
-    cout << "GBEST: " << gbest_significance << endl;
-    
-  }
-  for (int i = 0; i < iterations; i++)
-  {
-    cout << "ITERATION:   #" << i << endl;
     for (int j = 0; j < n_particles; j++)
     {
-      cout << " SIG:       " << swarm[i][j].significance << endl << endl;
-      cout << " MAX SIG:   " << swarm[i][j].max_significance << endl << endl;
+      update_particle(swarm, gbest, i, iterations, n_particles);
+      
+      particle &particle = swarm[i][j]; // Define the particle
+
+      particle.position[0] = particle.dLepR;
+      particle.position[1] = particle.dMetZPhi;
+      particle.position[2] = particle.met_tst;
+      particle.position[3] = particle.metOHT;
+
+      particle.velocity[0] = particle.dLepR;
+      particle.velocity[1] = particle.dMetZPhi;
+      particle.velocity[2] = particle.met_tst;
+      particle.velocity[3] = particle.metOHT;
+
     }
-    cout << "-----------------------" << endl;
+
+    cout << "   Iteration " << i << " GBEST: " << gbest_significance << endl;
+    // cout << "   position i:    (" << swarm[i][2].position[0] << ", " << swarm[i][2].position[1] << ", " << swarm[i][2].position[2] << ", " << swarm[i][2].position[3] << ") "  << endl;
+    // cout << "   position i:    (" << swarm[i+1][2].position[0] << ", " << swarm[i+1][2].position[1] << ", " << swarm[i+1][2].position[2] << ", " << swarm[i+1][2].position[3] << ") "  << endl;
+    // cout << "-------------------" << endl;
+    // cout << "   position i:  (" << swarm[i][2].dLepR << ", " << swarm[i][2].dMetZPhi << ", " << swarm[i][2].met_tst << ", " << swarm[i][2].metOHT << ") "  << endl;
+    // cout << "   position i+1:  (" << swarm[i+1][2].dLepR << ", " << swarm[i+1][2].dMetZPhi << ", " << swarm[i+1][2].met_tst << ", " << swarm[i+1][2].metOHT << ") "  << endl;
+    
   }
+  cout << "Max significance is:  " << gbest_significance << endl;
 
   return;
+
+  // Timer stop
+  auto end = chrono::high_resolution_clock::now();
+  chrono::duration<float> duration = end - start;
+  cout << endl << "   Script executed in: " << int(duration.count() / 60.0) << " minutes" << " and " << int((duration.count() / 60.0 - int(duration.count() / 60.0))*60) << " s" <<  endl << endl;
+
+
+  // For the log file
+  std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
+  logFile.close(); // Close the log file
+
+  
+  
 }
