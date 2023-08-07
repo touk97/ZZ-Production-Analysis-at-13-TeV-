@@ -19,10 +19,10 @@ struct particle
   double dMetZPhi;
   double met_tst;
   double metOHT;
-  double pbest;
   double significance;
-  double max_signif;
+  double max_significance;
   double position[4];
+  double pbest[4];
   double velocity[4];
 };
 
@@ -33,7 +33,7 @@ void print_particle(const particle& p) {
     cout << "    met_tst: " << p.met_tst << endl;
     cout << "    metOHT: " << p.metOHT << endl;
     cout << "    significance: " << p.significance << endl;
-    cout << "    max_signif: " << p.max_signif << endl;
+    cout << "    max_signif: " << p.max_significance << endl;
     cout << "    position[0]: " << p.position[0] << endl;
     cout << "    position[1]: " << p.position[1] << endl;
     cout << "    position[2]: " << p.position[2] << endl;
@@ -169,17 +169,19 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int n_particles = 2;
+  int n_particles = 10;
   int iterations = 10;
 
   float_t w = 0.8;
   float_t c1 = 0.5;
   float_t c2 = 0.5;
+  vector<Float_t> Z;
 
 
   // Initialization
-  uniform_real_distribution<> dist_uni(0., 1.);
-  uniform_real_distribution<> dist_uni2(-1., 1.);
+  uniform_real_distribution<> uni_dist(0.1, 1.);
+  uniform_real_distribution<> uni_dist2(-0.9, 1.1);
+
   random_device rd;
   mt19937 gen(rd());
 
@@ -187,37 +189,58 @@ void PSO()
   std::vector<particle> swarm(n_particles); //Define the swarm
   for (int i = 0; i < n_particles; i++)
   {
-    
-    particle particle;      //Define the particle 
 
-    //Initialize position
-    particle.dLepR = dist_uni(gen);
-    particle.dMetZPhi = dist_uni(gen);
-    particle.met_tst = dist_uni(gen);
-    particle.metOHT = dist_uni(gen);
+    particle &particle = swarm[i]; // Define the particle
+
+    // Initialize position
+    particle.dLepR = uni_dist(gen) * (2.5 - 1.5);
+    particle.dMetZPhi = uni_dist(gen) * (3. - 2.);
+    particle.met_tst = uni_dist(gen) * (130. - 90.);
+    particle.metOHT = uni_dist(gen) * (0.8 - 0.4);
     particle.position[0] = particle.dLepR;
     particle.position[1] = particle.dMetZPhi;
     particle.position[2] = particle.met_tst;
     particle.position[3] = particle.metOHT;
-    
-    //Initialize velocity
-    particle.dLepR = dist_uni2(gen);
-    particle.dMetZPhi = dist_uni2(gen);
-    particle.met_tst = dist_uni2(gen);
-    particle.metOHT = dist_uni2(gen);
+    for (int i = 0; i < 4; ++i)
+    {
+      particle.pbest[i] = particle.position[i];
+    }
+
+    // Initialize velocity
+    particle.dLepR = uni_dist2(gen) * (2.5 - 1.5);
+    particle.dMetZPhi = uni_dist2(gen) * (3. - 2.);
+    particle.met_tst = uni_dist2(gen) * (130. - 90.);
+    particle.metOHT = uni_dist2(gen) * (0.8 - 0.4);
     particle.velocity[0] = particle.dLepR;
     particle.velocity[1] = particle.dMetZPhi;
     particle.velocity[2] = particle.met_tst;
     particle.velocity[3] = particle.metOHT;
-
-    swarm.push_back(particle);
-
+    if (i == 0)
+    {
+      cout << particle.position[0] << endl << endl;
+    }
+    else if (i == 1)
+    {
+      cout << particle.position[2] << endl << endl;
+    }
+    
     
 
+    // particle.max_significance
 
-    cout << "PARTICLE:  "  << i << "   " << endl << endl;
+    // swarm.push_back(particle);
+  }
 
-    print_particle(particle);
+  for (int i = 0; i < n_particles; i++)
+  {
+
+    particle &particle = swarm[i]; // Define the particle
+
+    // cout << "   SWARM:  "  << swarm[i] << endl << endl;
+    cout << "   PARTICLE:  "  << i << "   " << endl << endl;
+
+   cout << particle.position[0] << endl << endl;
+   cout << particle.position[2] << endl << endl;
     
 
     cout << "   ================== DATA ==================    " << endl << endl;
@@ -294,12 +317,19 @@ void PSO()
 
     Float_t S = events_signal;
     Float_t B = events_bkg;
-    Float_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+    particle.significance = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+
+    // if (particle.significance > )
+    // {
+    //   /* code */
+    // }
+    
+    Z.push_back(particle.significance);
     
 
-    cout << endl << "SIGNAL:  " << events_signal << endl << "Z:   " << Z << endl;
-
-    
+    cout << endl << "   SIGNAL:  " << events_signal << endl;
+    cout << "   Z:   " << Z.at(i) << endl;
+    cout << "   ------------------------------------" << endl;
   }
 
   return;
