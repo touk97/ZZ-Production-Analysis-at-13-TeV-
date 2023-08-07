@@ -109,6 +109,7 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   return events;
 }
 
+
 void PSO()
 {
 
@@ -172,9 +173,9 @@ void PSO()
   //PSO ALGORITHM
 
   int n_particles = 5;
-  int iterations = 2;
+  int iterations = 1;
 
-  double search_space_max_significance = - 1;
+  double gbest_significance = - 1;
   double gbest[4];
 
   for (int i = 0; i < 4; i++) 
@@ -251,6 +252,8 @@ void PSO()
 
       if (n_data[0] < 1)
       {
+        cout << "--- no events ---" << endl << endl;
+        cout << "-----------------" << endl << endl;
         continue; 
       }
     
@@ -329,49 +332,44 @@ void PSO()
       if (particle.significance > particle.max_significance)
       {
         particle.max_significance = particle.significance;
+        for (int index = 0; index < 4; ++index)
+        {
+          particle.pbest[index] = particle.position[index];
+        }
+
+        if (particle.max_significance > gbest_significance)
+        {
+          gbest_significance = particle.max_significance;
+          cout << "New search space max significance:   " << gbest_significance << endl; 
+          for (int index = 0; index < 4; ++index)
+          {
+            gbest[index] = particle.pbest[index];
+          }
+          cout << "New search space best position:      (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl << endl; 
+        }
       }
       
 
       Z.push_back(particle.significance);
   
       cout << endl << "   SIGNAL:  " << events_signal << "+-" << events_signal_er << endl;
-      cout << "   Z:   " << swarm[i][j].significance << endl;
+      cout << "   Z:         " << swarm[i][j].significance << endl;
       cout << "   ------------------------------------" << endl;
     }
 
-    // //Update global best significance
-    // for (int j = 0; j < n_particles; j++)
-    // {
-    //   cout << swarm[i][j].significance << endl;
-
-    // }
-    // cout << "   ------------------------------------" << endl;
-    // for (int j = 0; j < n_particles; j++)
-    // {
-    //   if (!isnan(swarm[i][j].significance) && swarm[i][j].significance > swarm[i][j].max_significance)
-    //   {
-    //     swarm[i][j].max_significance = swarm[i][j].significance;
-    //   }
-      
-    // }
-
-    // for (int j = 0; j < n_particles; j++)
-    // {
-    //   swarm[i][j].significance =    
-    // }
-
-    // for (int j = 0; j < n_particles; j++)
-    // {
-    //   cout << swarm[i][j].max_significance << endl;
-
-    // }
+    cout << "GBEST: " << gbest_significance << endl;
     
-    
+  }
+  for (int i = 0; i < iterations; i++)
+  {
+    cout << "ITERATION:   #" << i << endl;
+    for (int j = 0; j < n_particles; j++)
+    {
+      cout << " SIG:       " << swarm[i][j].significance << endl << endl;
+      cout << " MAX SIG:   " << swarm[i][j].max_significance << endl << endl;
+    }
+    cout << "-----------------------" << endl;
   }
 
   return;
-
 }
-
-
-
