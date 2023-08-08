@@ -222,8 +222,8 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int n_particles = 5;
-  int iterations = 10;
+  int iterations = 60;
+  int n_particles = 20;
 
   double gbest_significance = - 1;
   double gbest[4];
@@ -289,8 +289,9 @@ void PSO()
       particle &particle = swarm[i][j]; // Define the particle
   
       // cout << "   SWARM:  "  << swarm[i] << endl << endl;
-      cout<< endl << "   ITERATION:  " << i << "   PARTICLE:  "  << j << "   " << endl;
-      cout << "   -----------------------------" << endl << endl << endl;
+      cout << "   ---------------------------------------------------" << endl;
+      cout << "                  ITERATION:  " << i << "   PARTICLE:     "  << j << "   " << endl;
+      cout << "   ---------------------------------------------------" << endl << endl << endl;
     
   
       cout << "   ================== DATA ==================    " << endl << endl;
@@ -422,7 +423,6 @@ void PSO()
   
       cout << endl << "   SIGNAL:  " << events_signal << "+-" << events_signal_er << endl;
       cout << "   Z:         " << swarm[i][j].significance << endl;
-      cout << "   ------------------------------------" << endl;
     }
     if (i != iterations)
     {
@@ -447,7 +447,7 @@ void PSO()
 
   cout << "----------------------------------------------------" << endl << endl;
   cout << "   Max significance is:  " << gbest_significance << endl;
-  cout << "   Best position:       (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl;
+  cout << "   Best position:        (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl;
   cout << "----------------------------------------------------" << endl << endl;
 
 
