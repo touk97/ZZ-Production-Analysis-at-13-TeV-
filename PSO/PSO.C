@@ -65,7 +65,9 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
   random_device rd;
   mt19937 gen(rd());
 
-  float_t w = 0.8;
+  float_t w_min = 0.8;
+  float_t w_max = 1.2;
+  float_t w = w_max - (w_max - w_min) * i / iterations;
   float_t c1 = 0.5;
   float_t c2 = 0.5;
   float_t r1 = uni_dist(gen);
