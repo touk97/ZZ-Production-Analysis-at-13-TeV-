@@ -7,10 +7,11 @@
 
 //Cpp headers
 #include <iostream>
-#include <fstream>
+#include <fstream> //For log txt
 #include <vector>
 #include <random>
 #include <cmath>
+#include <chrono> //Timer
 using namespace std;
 
 // CUSTOM STREAM BUFFER CLASS FOR OUTPUT LOG FILE
@@ -56,24 +57,6 @@ struct particle
 };
 
 
-void print_particle(const particle& p) {
-    cout << "    dLepR: " << p.dLepR << endl;
-    cout << "    dMetZPhi: " << p.dMetZPhi << endl;
-    cout << "    met_tst: " << p.met_tst << endl;
-    cout << "    metOHT: " << p.metOHT << endl;
-    cout << "    significance: " << p.significance << endl;
-    cout << "    max_signif: " << p.max_significance << endl;
-    cout << "    position[0]: " << p.position[0] << endl;
-    cout << "    position[1]: " << p.position[1] << endl;
-    cout << "    position[2]: " << p.position[2] << endl;
-    cout << "    position[3]: " << p.position[3] << endl;
-    cout << "    velocity[0]: " << p.velocity[0] << endl;
-    cout << "    velocity[1]: " << p.velocity[1] << endl;
-    cout << "    velocity[2]: " << p.velocity[2] << endl;
-    cout << "    velocity[3]: " << p.velocity[3] << endl;
-    cout << endl;
-}
-
 
 void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int iterations, int n_particles)
 {
@@ -90,12 +73,12 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
 
   for (int j = 0; j < n_particles; j++)
   {
-    cout << swarm[i][j].max_significance << endl;
     for (int k = 0; k < 4; k++)
     {
-      swarm[i+1][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
-      swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i+1][j].velocity[k];
-      swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
+
+      swarm[i][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
+      swarm[i][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
+      swarm[i][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
     }
   }
 
@@ -158,7 +141,7 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   }
 
   cout << "    ENTRIES = " << tree->GetEntries() << endl << endl;
-  cout << "          N = " << signal << "+-" << sqrt(signaler) << endl << endl;
+  cout << "          N = " << signal << " +- " << sqrt(signaler) << endl << endl;
 
   events.push_back(signal);
   events.push_back(sqrt(signaler));
@@ -168,7 +151,6 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
 
 void PSO()
 {
-
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -297,7 +279,7 @@ void PSO()
 
   for (int i = 0; i < iterations; i++)
   {
-    cout << "   ITERATION:  #"  << i << "   " << endl;
+    
     cout << "   -------------------" << endl << endl;
     for (int j = 0; j < n_particles; j++)
     {
@@ -305,14 +287,15 @@ void PSO()
       particle &particle = swarm[i][j]; // Define the particle
   
       // cout << "   SWARM:  "  << swarm[i] << endl << endl;
-      cout<< endl << "   PARTICLE:  "  << j << "   " << endl << endl;
-      
+      cout<< endl << "   ITERATION:  " << i << "   PARTICLE:  "  << j << "   " << endl;
+      cout << "   -----------------------------" << endl << endl << endl;
+    
   
       cout << "   ================== DATA ==================    " << endl << endl;
       cout << "   DATA:";
       vector<Float_t> n_data = Counter(particle, tree_data);
 
-      while (n_data[0] < 1)
+      while (n_data[0] < 1)  //Re-initialize until the phase space produces non-zero events
       {
         // Initialize position
         particle.dLepR = uni_dist(gen) * (2.5 - 1.5);
@@ -333,8 +316,15 @@ void PSO()
         particle.velocity[1] = particle.dMetZPhi;
         particle.velocity[2] = particle.met_tst;
         particle.velocity[3] = particle.metOHT;
+        n_data = Counter(particle, tree_data);
       }
 
+      if (n_data[0] < 1)
+      {
+        cout << "--- no events ---" << endl << endl;
+        cout << "-----------------" << endl << endl;
+        continue; 
+      }
     
       cout << "   ================== SIGNAL ==================    " << endl << endl;
       cout << "   llvv:";
@@ -419,12 +409,12 @@ void PSO()
         if (particle.max_significance > gbest_significance)
         {
           gbest_significance = particle.max_significance;
-          cout << "New search space max significance:   " << gbest_significance << endl; 
+          cout << "   New search space max significance:   " << gbest_significance << endl; 
           for (int index = 0; index < 4; ++index)
           {
             gbest[index] = particle.pbest[index];
           }
-          cout << "New search space best position:      (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl << endl; 
+          cout << "   New search space best position:      (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl << endl; 
         }
       }
   
@@ -432,36 +422,32 @@ void PSO()
       cout << "   Z:         " << swarm[i][j].significance << endl;
       cout << "   ------------------------------------" << endl;
     }
-
-    for (int j = 0; j < n_particles; j++)
+    if (i != iterations)
     {
-      update_particle(swarm, gbest, i, iterations, n_particles);
-      
-      particle &particle = swarm[i][j]; // Define the particle
+      for (int j = 0; j < n_particles; j++)
+      {
+        update_particle(swarm, gbest, i, iterations, n_particles);
 
-      particle.position[0] = particle.dLepR;
-      particle.position[1] = particle.dMetZPhi;
-      particle.position[2] = particle.met_tst;
-      particle.position[3] = particle.metOHT;
+        particle &particle = swarm[i][j]; // Define the particle
 
-      particle.velocity[0] = particle.dLepR;
-      particle.velocity[1] = particle.dMetZPhi;
-      particle.velocity[2] = particle.met_tst;
-      particle.velocity[3] = particle.metOHT;
+        particle.position[0] = particle.dLepR;
+        particle.position[1] = particle.dMetZPhi;
+        particle.position[2] = particle.met_tst;
+        particle.position[3] = particle.metOHT;
 
+        particle.velocity[0] = particle.dLepR;
+        particle.velocity[1] = particle.dMetZPhi;
+        particle.velocity[2] = particle.met_tst;
+        particle.velocity[3] = particle.metOHT;
+      }
     }
-
-    cout << "   Iteration " << i << " GBEST: " << gbest_significance << endl;
-    // cout << "   position i:    (" << swarm[i][2].position[0] << ", " << swarm[i][2].position[1] << ", " << swarm[i][2].position[2] << ", " << swarm[i][2].position[3] << ") "  << endl;
-    // cout << "   position i:    (" << swarm[i+1][2].position[0] << ", " << swarm[i+1][2].position[1] << ", " << swarm[i+1][2].position[2] << ", " << swarm[i+1][2].position[3] << ") "  << endl;
-    // cout << "-------------------" << endl;
-    // cout << "   position i:  (" << swarm[i][2].dLepR << ", " << swarm[i][2].dMetZPhi << ", " << swarm[i][2].met_tst << ", " << swarm[i][2].metOHT << ") "  << endl;
-    // cout << "   position i+1:  (" << swarm[i+1][2].dLepR << ", " << swarm[i+1][2].dMetZPhi << ", " << swarm[i+1][2].met_tst << ", " << swarm[i+1][2].metOHT << ") "  << endl;
-    
   }
-  cout << "Max significance is:  " << gbest_significance << endl;
 
-  return;
+  cout << "----------------------------------------------------" << endl << endl;
+  cout << "   Max significance is:  " << gbest_significance << endl;
+  cout << "   Best position:       (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl;
+  cout << "----------------------------------------------------" << endl << endl;
+
 
   // Timer stop
   auto end = chrono::high_resolution_clock::now();
@@ -473,6 +459,6 @@ void PSO()
   std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
   logFile.close(); // Close the log file
 
-  
+  return;
   
 }
