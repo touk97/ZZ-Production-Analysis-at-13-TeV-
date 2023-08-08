@@ -60,7 +60,6 @@ struct particle
 
 void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int iterations, int n_particles)
 {
-
   uniform_real_distribution<> uni_dist(0., 1.);
   random_device rd;
   mt19937 gen(rd());
@@ -77,16 +76,14 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
   {
     for (int k = 0; k < 4; k++)
     {
-
-      swarm[i+1][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
-      swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
+      swarm[i][j].velocity[k] = w * swarm[i - 1][j].velocity[k] + c1 * r1 * (swarm[i - 1][j].pbest[k] - swarm[i - 1][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i - 1][j].position[k]);
+      swarm[i][j].position[k] = swarm[i - 1][j].position[k] + swarm[i][j].velocity[k];
     }
   }
-
- 
-
   return;
 }
+
+
 
 vector<Float_t> Counter(particle &particle, TTree *tree)
 {
@@ -221,8 +218,8 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int iterations = 60;
-  int n_particles = 20;
+  int iterations = 2;
+  int n_particles = 2;
 
   double gbest_significance = - 1;
   double gbest[4];
@@ -262,6 +259,12 @@ void PSO()
     particle.position[2] = particle.met_tst;
     particle.position[3] = particle.metOHT;
 
+    // Initialize pbest
+    particle.pbest[0] = particle.position[0];
+    particle.pbest[1] = particle.position[1];
+    particle.pbest[2] = particle.position[2];
+    particle.pbest[3] = particle.position[3];
+
     // Initialize velocity
     particle.dLepR = uni_dist2(gen) * (2.5 - 1.5);
     particle.dMetZPhi = uni_dist2(gen) * (3. - 2.);
@@ -280,7 +283,23 @@ void PSO()
 
   for (int i = 0; i < iterations; i++)
   {
-    
+
+    for (int j = 0; j < n_particles; j++)
+    {
+      update_particle(swarm, gbest, i, iterations, n_particles);
+
+      particle &particle = swarm[i][j]; // Define the particle
+      particle.position[0] = particle.dLepR;
+      particle.position[1] = particle.dMetZPhi;
+      particle.position[2] = particle.met_tst;
+      particle.position[3] = particle.metOHT;
+
+      particle.velocity[0] = particle.dLepR;
+      particle.velocity[1] = particle.dMetZPhi;
+      particle.velocity[2] = particle.met_tst;
+      particle.velocity[3] = particle.metOHT;
+    }
+
     cout << "   -------------------" << endl << endl;
     for (int j = 0; j < n_particles; j++)
     {
@@ -308,6 +327,12 @@ void PSO()
         particle.position[1] = particle.dMetZPhi;
         particle.position[2] = particle.met_tst;
         particle.position[3] = particle.metOHT;
+
+        //Initialize pbest
+        particle.pbest[0] = particle.position[0] ;
+        particle.pbest[1] = particle.position[1] ;
+        particle.pbest[2] = particle.position[2] ;
+        particle.pbest[3] = particle.position[3] ;
 
         // Initialize velocity
         particle.dLepR = uni_dist2(gen) * (2.5 - 1.5);
@@ -422,25 +447,6 @@ void PSO()
   
       cout << endl << "   SIGNAL:  " << events_signal << "+-" << events_signal_er << endl;
       cout << "   Z:         " << swarm[i][j].significance << endl;
-    }
-    if (i != iterations)
-    {
-      for (int j = 0; j < n_particles; j++)
-      {
-        update_particle(swarm, gbest, i, iterations, n_particles);
-
-        particle &particle = swarm[i][j]; // Define the particle
-
-        particle.position[0] = particle.dLepR;
-        particle.position[1] = particle.dMetZPhi;
-        particle.position[2] = particle.met_tst;
-        particle.position[3] = particle.metOHT;
-
-        particle.velocity[0] = particle.dLepR;
-        particle.velocity[1] = particle.dMetZPhi;
-        particle.velocity[2] = particle.met_tst;
-        particle.velocity[3] = particle.metOHT;
-      }
     }
   }
 
