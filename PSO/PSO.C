@@ -77,8 +77,10 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
   {
     for (int k = 0; k < 4; k++)
     {
+
       swarm[i][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
-      swarm[i][j].position[k] = swarm[i][j].position[k] + swarm[i + 1][j].velocity[k];
+      swarm[i][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
+      swarm[i][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
     }
   }
 
@@ -220,8 +222,8 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int iterations = 2;
-  int n_particles = 2;
+  int iterations = 60;
+  int n_particles = 20;
 
   double gbest_significance = - 1;
   double gbest[4];
@@ -271,12 +273,6 @@ void PSO()
     particle.velocity[2] = particle.met_tst;
     particle.velocity[3] = particle.metOHT;
 
-    //Initialize best position
-    particle.pbest[0] = particle.position[0];
-    particle.pbest[1] = particle.position[1];
-    particle.pbest[2] = particle.position[2];
-    particle.pbest[3] = particle.position[3];
-
     particle.significance = -1.;
     particle.max_significance = -1.;
 
@@ -313,12 +309,6 @@ void PSO()
         particle.position[1] = particle.dMetZPhi;
         particle.position[2] = particle.met_tst;
         particle.position[3] = particle.metOHT;
-
-        //Initialize pbest
-        particle.pbest[0] = particle.position[0];
-        particle.pbest[1] = particle.position[1];
-        particle.pbest[2] = particle.position[2];
-        particle.pbest[3] = particle.position[3];
 
         // Initialize velocity
         particle.dLepR = uni_dist2(gen) * (2.5 - 1.5);
@@ -434,14 +424,13 @@ void PSO()
       cout << endl << "   SIGNAL:  " << events_signal << "+-" << events_signal_er << endl;
       cout << "   Z:         " << swarm[i][j].significance << endl;
     }
-    
     if (i != iterations)
     {
       for (int j = 0; j < n_particles; j++)
       {
         update_particle(swarm, gbest, i, iterations, n_particles);
 
-        particle &particle = swarm[i+1][j]; // Define the particle
+        particle &particle = swarm[i][j]; // Define the particle
 
         particle.position[0] = particle.dLepR;
         particle.position[1] = particle.dMetZPhi;
