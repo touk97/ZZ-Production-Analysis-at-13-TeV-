@@ -78,9 +78,8 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
     for (int k = 0; k < 4; k++)
     {
 
-      swarm[i][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
-      swarm[i][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
-      swarm[i][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
+      swarm[i+1][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
+      swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i][j].velocity[k];
     }
   }
 
