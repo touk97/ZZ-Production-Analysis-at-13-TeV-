@@ -3,6 +3,8 @@
 #include <TROOT.h>
 #include <TTree.h>
 #include <TH1.h>
+#include <TCanvas.h>
+#include <TGraph.h>
 
 
 //Cpp headers
@@ -52,19 +54,20 @@ struct particle
   double significance;
 };
 
-void print_particle(const particle& p, double *gbest, double *max_significance, double *max_signal, double *max_signal_er, int i, int j)
+void print_particle(const particle& p, double *gbest, double gbest_significance, double *max_significance, double *max_signal, double *max_signal_er, int i, int j)
 {
-  cout << "    ------------------------------------------------------------------" << endl;
-  cout << "                             Particle (" << i << ", " << j << "):" << endl << endl; 
-  cout << "    Position:                 (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << ", " << p.position[3] << ")" << endl  << endl;
-  cout << "    Best Position:            (" << p.pbest[0] << ", " << p.pbest[1] << ", " << p.pbest[2] << ", " << p.pbest[3] << ")" << endl  << endl;
-  cout << "    Global Best:              (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ")" << endl  << endl;
-  cout << "    Velocity:                 (" << p.velocity[0] << ", " << p.velocity[1] << ", " << p.velocity[2] << ", " << p.velocity[3] << ")" << endl  << endl;
-  cout << "    Current Signal:           " << p.signal[0] << " +- " << p.signal[1] << endl << endl;
-  cout << "    Max Signal:               " << max_signal[j] << " +- " << max_signal_er[j] << endl << endl;
-  cout << "    Current Significance:     " << p.significance << endl << endl;
-  cout << "    Max Significance:         " << max_significance[j] << endl << endl;   
-  cout << "    ------------------------------------------------------------------" << endl << endl;
+  cout << "    --------------------------------------------------------------------------" << endl;
+  cout << "                                 Particle (" << i << ", " << j << "):" << endl << endl; 
+  cout << "    Position:                        (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << ", " << p.position[3] << ")" << endl  << endl;
+  cout << "    Best Position:                   (" << p.pbest[0] << ", " << p.pbest[1] << ", " << p.pbest[2] << ", " << p.pbest[3] << ")" << endl  << endl;
+  cout << "    Global Best:                     (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ")" << endl  << endl;
+  cout << "    Velocity:                        (" << p.velocity[0] << ", " << p.velocity[1] << ", " << p.velocity[2] << ", " << p.velocity[3] << ")" << endl  << endl;
+  cout << "    Current Signal:                  " << p.signal[0] << " +- " << p.signal[1] << endl << endl;
+  cout << "    Max Signal:                      " << max_signal[j] << " +- " << max_signal_er[j] << endl << endl;
+  cout << "    Current Significance:            " << p.significance << endl << endl;
+  cout << "    Max Significance:                " << max_significance[j] << endl << endl;   
+  cout << "    Global Max Significance:         " << gbest_significance << endl << endl;   
+  cout << "    --------------------------------------------------------------------------" << endl << endl;
 }
 
 
@@ -78,12 +81,11 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
   float_t w_min = 0.8;
   float_t w_max = 1.2;
   float_t w = w_max - (w_max - w_min) * i / iterations;
-  float_t c1 = 0.5;
-  float_t c2 = 0.5;
+  float_t c1 = 2;   
+  float_t c2 = 2;
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
-  
-
+  //Clerc p.40 - (w, c1, c2) = (0.7, 1.47, 1.47) or (0.6, 1.62, 1.62)
 
   for (int j = 0; j < n_particles; j++)
   {
@@ -91,6 +93,12 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
     {
       swarm[i][j].velocity[k] = w * swarm[i - 1][j].velocity[k] + c1 * r1 * (swarm[i - 1][j].pbest[k] - swarm[i - 1][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i - 1][j].position[k]);
       swarm[i][j].position[k] = swarm[i - 1][j].position[k] + swarm[i][j].velocity[k];
+
+      if (swarm[i][j].position[k] < 0)
+      {
+        swarm[i][j].position[k] = 0;
+      }
+      
     }
   }
   return;
@@ -145,7 +153,8 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   {
     tree->GetEntry(i);
      
-    if (dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    if (M2Lep > 80 && M2Lep < 100 &&
+          dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     {
       signal = signal + weight;
       signaler = signaler + weight * weight;
@@ -227,7 +236,7 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int iterations = 5;
+  int iterations = 2;
   int n_particles = 5;
 
   double max_signal[n_particles];
@@ -235,6 +244,7 @@ void PSO()
   double max_significance[n_particles];
   double gbest[4];
   double gbest_significance = - 1;
+  vector<double> gbest_vector;
 
   for (int index = 0; index < 4; index++) 
   {
@@ -332,6 +342,7 @@ void PSO()
         particle.velocity[1] = uni_dist2(gen) * (3. - 2.);
         particle.velocity[2] = uni_dist2(gen) * (130. - 90.);
         particle.velocity[3] = uni_dist2(gen) * (0.8 - 0.4);
+        cout << "          No entries - Re-Initialize:" << endl;
         cout << "    DATA:";
         n_data = Counter(particle, tree_data);
       }
@@ -433,17 +444,40 @@ void PSO()
           }
         }
       }
-      
-      print_particle(particle, gbest, max_significance, max_signal, max_signal_er, i, j);
-
+      else
+      {
+        for (int index = 0; index < 4; ++index)
+        {
+          swarm[i][j].pbest[index] = swarm[i-1][j].pbest[index];
+        }
+      }
+      print_particle(particle, gbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
     }
+    gbest_vector.push_back(gbest_significance);
   }
+
+
 
   cout << "----------------------------------------------------" << endl << endl;
   cout << "   Max significance is:  "  << gbest_significance << endl;
   cout << "   Best position:        (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl;
   cout << "----------------------------------------------------" << endl << endl;
 
+  //Graph significance vs iterations
+  TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
+  TGraph *graph = new TGraph();
+  graph->SetTitle("Significance vs Iterations");
+  graph->GetXaxis()->SetTitle("Iterations");
+  graph->GetYaxis()->SetTitle("Significance");
+
+  for (int i = 0; i < gbest_vector.size(); ++i)
+  {
+    graph->SetPoint(i, i + 1, gbest_vector[i]);
+  }
+
+  graph->Draw("ALP"); // ALP option to draw lines connecting points and markers
+  c->Draw();
+  c->SaveAs("significance_vs_iterations.png");
 
   // Timer stop
   auto end = chrono::high_resolution_clock::now();
