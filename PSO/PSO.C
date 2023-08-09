@@ -38,6 +38,8 @@ public:
     return c;
   }
 
+
+
 private:
   std::streambuf *primaryBuffer;   // Primary stream buffer (std::cout)
   std::streambuf *secondaryBuffer; // Secondary stream buffer (log file)
@@ -60,12 +62,12 @@ void print_particle(const particle& p, double *gbest, double gbest_significance,
   cout << "                                 Particle (" << i << ", " << j << "):" << endl << endl; 
   cout << "    Position:                        (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << ", " << p.position[3] << ")" << endl  << endl;
   cout << "    Best Position:                   (" << p.pbest[0] << ", " << p.pbest[1] << ", " << p.pbest[2] << ", " << p.pbest[3] << ")" << endl  << endl;
-  cout << "    Global Best:                     (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ")" << endl  << endl;
   cout << "    Velocity:                        (" << p.velocity[0] << ", " << p.velocity[1] << ", " << p.velocity[2] << ", " << p.velocity[3] << ")" << endl  << endl;
   cout << "    Current Signal:                  " << p.signal[0] << " +- " << p.signal[1] << endl << endl;
   cout << "    Max Signal:                      " << max_signal[j] << " +- " << max_signal_er[j] << endl << endl;
   cout << "    Current Significance:            " << p.significance << endl << endl;
   cout << "    Max Significance:                " << max_significance[j] << endl << endl;   
+  cout << "    Global Best:                     (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ")" << endl  << endl;
   cout << "    Global Max Significance:         " << gbest_significance << endl << endl;   
   cout << "    --------------------------------------------------------------------------" << endl << endl;
 }
@@ -81,8 +83,8 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
   float_t w_min = 0.8;
   float_t w_max = 1.2;
   float_t w = w_max - (w_max - w_min) * i / iterations;
-  float_t c1 = 2;   
-  float_t c2 = 2;
+  float_t c1 = 1.47;   
+  float_t c2 = 1.47;
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
   //Clerc p.40 - (w, c1, c2) = (0.7, 1.47, 1.47) or (0.6, 1.62, 1.62)
@@ -94,10 +96,7 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
       swarm[i][j].velocity[k] = w * swarm[i - 1][j].velocity[k] + c1 * r1 * (swarm[i - 1][j].pbest[k] - swarm[i - 1][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i - 1][j].position[k]);
       swarm[i][j].position[k] = swarm[i - 1][j].position[k] + swarm[i][j].velocity[k];
 
-      if (swarm[i][j].position[k] < 0)
-      {
-        swarm[i][j].position[k] = 0;
-      }
+      if (swarm[i][j].position[k] < 0) {swarm[i][j].position[k] = 0;}
       
     }
   }
@@ -152,9 +151,13 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   for (Int_t i = 0; i < nentries; i++)
   {
     tree->GetEntry(i);
+
+
+    // if (event_3CR==0 && (event_type==0 || event_type==1) && met_tst>90 && met_signif>10 && dLepR<1.8 && n_bjets==0 && dMetZPhi>2.6 &&
+    // dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    // {
      
-    if (M2Lep > 80 && M2Lep < 100 &&
-          dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    if (event_3CR==0 && (event_type==0 || event_type==1) && dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     {
       signal = signal + weight;
       signaler = signaler + weight * weight;
@@ -236,8 +239,8 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int iterations = 2;
-  int n_particles = 5;
+  int iterations = 12;
+  int n_particles = 6;
 
   double max_signal[n_particles];
   double max_signal_er[n_particles];
@@ -246,24 +249,34 @@ void PSO()
   double gbest_significance = - 1;
   vector<double> gbest_vector;
 
-  for (int index = 0; index < 4; index++) 
-  {
-    gbest[index] = -1;
-  }
-  for (int index = 0; index < n_particles; index++) 
-  {
-    max_significance[index] = -1;
-  }
-  for (int index = 0; index < n_particles; index++)
-  {
-    max_signal[index] = -1;
-    max_signal_er[index] = -1;
-  }
+  for (int index = 0; index < 4; index++) {gbest[index] = -1;}
+  for (int index = 0; index < n_particles; index++) {max_significance[index] = -1;}
+  for (int index = 0; index < n_particles; index++) {max_signal[index] = -1; max_signal_er[index] = -1;}
   
 
   // Initialization
-  uniform_real_distribution<> uni_dist(0.1, 1.);
-  uniform_real_distribution<> uni_dist2(-0.9, 1.1);
+  uniform_real_distribution<> uni_dLepR(1.5, 2.5 );
+  uniform_real_distribution<> uni_dMetZPhi(2., 3.);
+  uniform_real_distribution<> uni_met_tst(90, 130);
+  uniform_real_distribution<> uni_MetOHT(0., 1.);
+
+  uniform_real_distribution<> uni_dLepR2(-1., 4. );
+  uniform_real_distribution<> uni_dMetZPhi2(-1., 5.);
+  uniform_real_distribution<> uni_met_tst2(-40, 220);
+  uniform_real_distribution<> uni_MetOHT2(-1., 1.);
+
+  // // Initialization
+  // uniform_real_distribution<> uni_dLepR(0., 5.);
+  // uniform_real_distribution<> uni_dMetZPhi(0., 5.);
+  // uniform_real_distribution<> uni_met_tst(20, 160);
+  // uniform_real_distribution<> uni_MetOHT(0., 1.);
+
+  // uniform_real_distribution<> uni_dLepR2(-5., 5. );
+  // uniform_real_distribution<> uni_dMetZPhi2(-5., 5.);
+  // uniform_real_distribution<> uni_met_tst2(-140, 180);
+  // uniform_real_distribution<> uni_MetOHT2(-1., 1.);
+
+  
 
   random_device rd;
   mt19937 gen(rd());
@@ -273,30 +286,30 @@ void PSO()
   
   vector<vector<particle>> swarm(iterations, vector<particle>(n_particles)); //Define the swarm
 
-  //Initialize the swarm
-  for (int j = 0; j < n_particles; j++)
-  {
-    particle &particle = swarm[0][j]; // Define the particle
+  // //Initialize the swarm
+  // for (int j = 0; j < n_particles; j++)
+  // {
+  //   particle &particle = swarm[0][j]; // Define the particle
 
-    // Initialize position
-    particle.position[0] = uni_dist(gen) * (2.5 - 1.5); 
-    particle.position[1] = uni_dist(gen) * (3. - 2.);
-    particle.position[2] = uni_dist(gen) * (130. - 90.);
-    particle.position[3] = uni_dist(gen) * (0.8 - 0.4);
+  //   // Initialize position
+  //   particle.position[0] = uni_dLepR(gen); 
+  //   particle.position[1] = uni_dMetZPhi(gen); 
+  //   particle.position[2] = uni_met_tst(gen); 
+  //   particle.position[3] = uni_MetOHT(gen);
 
-    // Initialize pbest
-    particle.pbest[0] = particle.position[0];
-    particle.pbest[1] = particle.position[1];
-    particle.pbest[2] = particle.position[2];
-    particle.pbest[3] = particle.position[3];
+  //   // Initialize pbest
+  //   particle.pbest[0] = particle.position[0];
+  //   particle.pbest[1] = particle.position[1];
+  //   particle.pbest[2] = particle.position[2];
+  //   particle.pbest[3] = particle.position[3];
 
-    // Initialize velocity
-    particle.velocity[0] = uni_dist2(gen) * (2.5 - 1.5);
-    particle.velocity[1] = uni_dist2(gen) * (3. - 2.);
-    particle.velocity[2] = uni_dist2(gen) * (130. - 90.);
-    particle.velocity[3] = uni_dist2(gen) * (0.8 - 0.4);
+  //   // Initialize velocity
+  //   particle.velocity[0] = uni_dLepR2(gen);
+  //   particle.velocity[1] = uni_dMetZPhi2(gen);
+  //   particle.velocity[2] = uni_met_tst2(gen);
+  //   particle.velocity[3] = uni_MetOHT2(gen);
 
-  }
+  // }
 
   for (int i = 0; i < iterations; i++)
   {
@@ -317,8 +330,7 @@ void PSO()
       cout << "  ____________________________________________________" << endl << endl;
       cout << "              ITERATION:  " << i << "   PARTICLE:  " << j << "   " << endl;
       cout << "  ____________________________________________________" << endl << endl << endl;
-    
-  
+      
       cout << "    ================== DATA ==================    " << endl << endl;
       cout << "    DATA:";
       vector<Float_t> n_data = Counter(particle, tree_data);
@@ -326,10 +338,10 @@ void PSO()
       while (n_data[0] < 1) // Re-initialize until the phase space produces non-zero events
       {
         // Initialize position
-        particle.position[0] = uni_dist(gen) * (2.5 - 1.5);
-        particle.position[1] = uni_dist(gen) * (3. - 2.);
-        particle.position[2] = uni_dist(gen) * (130. - 90.);
-        particle.position[3] = uni_dist(gen) * (0.8 - 0.4);
+        particle.position[0] = uni_dLepR(gen);
+        particle.position[1] = uni_dMetZPhi(gen);
+        particle.position[2] = uni_met_tst(gen);
+        particle.position[3] = uni_MetOHT(gen);
 
         // Initialize pbest
         particle.pbest[0] = particle.position[0];
@@ -338,15 +350,15 @@ void PSO()
         particle.pbest[3] = particle.position[3];
 
         // Initialize velocity
-        particle.velocity[0] = uni_dist2(gen) * (2.5 - 1.5);
-        particle.velocity[1] = uni_dist2(gen) * (3. - 2.);
-        particle.velocity[2] = uni_dist2(gen) * (130. - 90.);
-        particle.velocity[3] = uni_dist2(gen) * (0.8 - 0.4);
-        cout << "          No entries - Re-Initialize:" << endl;
+        particle.velocity[0] = uni_dLepR2(gen);
+        particle.velocity[1] = uni_dMetZPhi2(gen);
+        particle.velocity[2] = uni_met_tst2(gen);
+        particle.velocity[3] = uni_MetOHT2(gen);
+        cout << "          No entries - Re-Initialize..." << endl << endl;
         cout << "    DATA:";
         n_data = Counter(particle, tree_data);
       }
-    
+
       cout << "    ================== SIGNAL ==================    " << endl << endl;
       cout << "    llvv:";
       vector<Float_t> n_llvv = Counter(particle, tree_llvv);
@@ -458,10 +470,10 @@ void PSO()
 
 
 
-  cout << "----------------------------------------------------" << endl << endl;
+  cout << "   --------------------------------------------------------------------------" << endl << endl;
   cout << "   Max significance is:  "  << gbest_significance << endl;
   cout << "   Best position:        (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl;
-  cout << "----------------------------------------------------" << endl << endl;
+  cout << "   --------------------------------------------------------------------------" << endl << endl;
 
   //Graph significance vs iterations
   TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
@@ -469,13 +481,18 @@ void PSO()
   graph->SetTitle("Significance vs Iterations");
   graph->GetXaxis()->SetTitle("Iterations");
   graph->GetYaxis()->SetTitle("Significance");
+  graph->SetMarkerStyle(20); //Bullet
+  graph->SetMarkerStyle(29); //Star
+  graph->SetMarkerSize(1.5);
+
 
   for (int i = 0; i < gbest_vector.size(); ++i)
   {
     graph->SetPoint(i, i + 1, gbest_vector[i]);
   }
 
-  graph->Draw("ALP"); // ALP option to draw lines connecting points and markers
+  graph->Draw("ALP");
+  c->SetGrid();
   c->Draw();
   c->SaveAs("significance_vs_iterations.png");
 
