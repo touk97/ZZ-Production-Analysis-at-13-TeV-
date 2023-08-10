@@ -208,7 +208,7 @@ void zjets_single_sc()
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/zjets_single_sc/zjets_single_sc.txt");
+  ofstream logFile("../../cro/zjets_single_sc/zjets_single_sc.txt");
   // ofstream logFile("../cro/zjets_single_sc/demo_log.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
@@ -244,7 +244,7 @@ void zjets_single_sc()
 
   for (string &directory : directories)
   {
-    string filepath = "../data/SAMPLES/" + directory + "/";
+    string filepath = "/home/touk/Desktop/touk/master/thesis/data/SAMPLES/" + directory + "/";
     cout << endl << endl << endl;
     cout << "   ------------------------------------------   " << endl;
     cout << "   FILEPATH:   " << filepath << endl;
@@ -832,7 +832,7 @@ void zjets_single_sc()
       numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg.}");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/zjets_single_sc/stjj_SR_single_sc.png");
+      c1->SaveAs("../../cro/zjets_single_sc/stjj_SR_single_sc.png");
     }
     else if (directory == "3lCR")
     {
@@ -848,7 +848,7 @@ void zjets_single_sc()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/zjets_single_sc/stjj_3lCR_single_sc.png");
+      c2->SaveAs("../../cro/zjets_single_sc/stjj_3lCR_single_sc.png");
     }
     else if (directory == "emCR_B")
     {
@@ -864,7 +864,7 @@ void zjets_single_sc()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/zjets_single_sc/stjj_emCR_B_single_sc.png");
+      c3->SaveAs("../../cro/zjets_single_sc/stjj_emCR_B_single_sc.png");
     }
     else if (directory == "emCR_A")
     {
@@ -880,7 +880,7 @@ void zjets_single_sc()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/zjets_single_sc/stjj_emCR_A_single_sc.png");
+      c4->SaveAs("../../cro/zjets_single_sc/stjj_emCR_A_single_sc.png");
     }
     else if (directory == "Zjets")
     {
@@ -896,7 +896,7 @@ void zjets_single_sc()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/zjets_single_sc/stjj_Zjets_single_sc.png");
+      c5->SaveAs("../../cro/zjets_single_sc/stjj_Zjets_single_sc.png");
 
 
     }

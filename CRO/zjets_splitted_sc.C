@@ -347,7 +347,7 @@ void zjets_splitted_sc()
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/zjets_splitted_sc/zjets_splitted_sc.txt");
+  ofstream logFile("../../cro/zjets_splitted_sc/zjets_splitted_sc.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -385,7 +385,8 @@ void zjets_splitted_sc()
 
   for (string &directory : directories)
   {
-    string filepath = "../data/SAMPLES/" + directory + "/";
+    string filepath = "/home/touk/Desktop/touk/master/thesis/data/SAMPLES/" + directory + "/";
+
     cout << endl << endl << endl;
     cout << "   ------------------------------------------   " << endl;
     cout << "   FILEPATH:   " << filepath << endl;
@@ -1156,7 +1157,7 @@ void zjets_splitted_sc()
       hist_signal_sig->GetXaxis()->SetTitle("P^{Z}_{T} [GeV]");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/zjets_splitted_sc/ptz_SR_splitted_sc.png");
+      c1->SaveAs("../../cro/zjets_splitted_sc/ptz_SR_splitted_sc.png");
     }
     else if (directory == "3lCR")
     {
@@ -1172,7 +1173,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/zjets_splitted_sc/ptz_3lCR_splitted_sc.png");
+      c2->SaveAs("../../cro/zjets_splitted_sc/ptz_3lCR_splitted_sc.png");
     }
     else if (directory == "emCR_B")
     {
@@ -1188,7 +1189,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/zjets_splitted_sc/ptz_emCR_B_splitted_sc.png");
+      c3->SaveAs("../../cro/zjets_splitted_sc/ptz_emCR_B_splitted_sc.png");
     }
     else if (directory == "emCR_A")
     {
@@ -1204,7 +1205,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/zjets_splitted_sc/ptz_emCR_A_splitted_sc.png");
+      c4->SaveAs("../../cro/zjets_splitted_sc/ptz_emCR_A_splitted_sc.png");
     }
     else if (directory == "Zjets0")
     {
@@ -1220,7 +1221,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/zjets_splitted_sc/ptz_Zjets0_splitted_sc.png");
+      c5->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets0_splitted_sc.png");
 
     }
     else if (directory == "Zjets1")
@@ -1237,7 +1238,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c6->Update();
-      c6->SaveAs("../cro/zjets_splitted_sc/ptz_Zjets1_splitted_sc.png");
+      c6->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets1_splitted_sc.png");
 
     }
     else if (directory == "Zjets2")
@@ -1254,7 +1255,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c7->Update();
-      c7->SaveAs("../cro/zjets_splitted_sc/ptz_Zjets2_splitted_sc.png");
+      c7->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets2_splitted_sc.png");
 
     }
 

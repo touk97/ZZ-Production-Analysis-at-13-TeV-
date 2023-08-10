@@ -92,9 +92,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
     if (directory == "SR")
     {
 
-      if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
-          leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
-          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
+      if (event_3CR == 0 && (event_type == 0 || event_type == 1) )
       {
         // Inclusive
         signal = signal + weight;
@@ -208,8 +206,8 @@ void zjets_single_unsc()
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../cro/zjets_single_unsc/zjets_single_unsc.txt");
-  // ofstream logFile("../cro/zjets_single_unsc/demo_log.txt");
+  ofstream logFile("../../cro/zjets_single_unsc/zjets_single_unsc.txt");
+  // ofstream logFile("../../cro/zjets_single_unsc/demo_log.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -239,7 +237,7 @@ void zjets_single_unsc()
 
   for (string &directory : directories)
   {
-    string filepath = "../data/SAMPLES/" + directory + "/";
+    string filepath = "/home/touk/Desktop/touk/master/thesis/data/SAMPLES/" + directory + "/";
     cout << endl << endl << endl;
     cout << "   ------------------------------------------   " << endl;
     cout << "   FILEPATH:   " << filepath << endl;
@@ -750,7 +748,7 @@ void zjets_single_unsc()
       numerator->GetYaxis()->SetTitle("#frac{Signal}{Bkg.}");
       pad1->Update();
       c1->Update();
-      c1->SaveAs("../cro/zjets_single_unsc/stjj_SR_single_unsc.png");
+      c1->SaveAs("../../cro/zjets_single_unsc/stjj_SR_single_unsc.png");
     }
     else if (directory == "3lCR")
     {
@@ -766,7 +764,7 @@ void zjets_single_unsc()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../cro/zjets_single_unsc/stjj_3lCR_single_unsc.png");
+      c2->SaveAs("../../cro/zjets_single_unsc/stjj_3lCR_single_unsc.png");
     }
     else if (directory == "emCR_B")
     {
@@ -782,7 +780,7 @@ void zjets_single_unsc()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../cro/zjets_single_unsc/stjj_emCR_B_single_unsc.png");
+      c3->SaveAs("../../cro/zjets_single_unsc/stjj_emCR_B_single_unsc.png");
     }
     else if (directory == "emCR_A")
     {
@@ -798,7 +796,7 @@ void zjets_single_unsc()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../cro/zjets_single_unsc/stjj_emCR_A_single_unsc.png");
+      c4->SaveAs("../../cro/zjets_single_unsc/stjj_emCR_A_single_unsc.png");
     }
     else if (directory == "Zjets")
     {
@@ -814,7 +812,7 @@ void zjets_single_unsc()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../cro/zjets_single_unsc/stjj_Zjets_single_unsc.png");
+      c5->SaveAs("../../cro/zjets_single_unsc/stjj_Zjets_single_unsc.png");
 
     }
 
