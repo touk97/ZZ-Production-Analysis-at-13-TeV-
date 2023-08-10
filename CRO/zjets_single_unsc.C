@@ -92,7 +92,9 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
     if (directory == "SR")
     {
 
-      if (event_3CR == 0 && (event_type == 0 || event_type == 1) )
+      if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
+          leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
+          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
       {
         // Inclusive
         signal = signal + weight;
