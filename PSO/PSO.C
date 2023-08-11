@@ -96,8 +96,43 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
       swarm[i][j].velocity[k] = w * swarm[i - 1][j].velocity[k] + c1 * r1 * (swarm[i - 1][j].pbest[k] - swarm[i - 1][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i - 1][j].position[k]);
       swarm[i][j].position[k] = swarm[i - 1][j].position[k] + swarm[i][j].velocity[k];
 
-      if (swarm[i][j].position[k] < 0) {swarm[i][j].position[k] = 0;}
-      
+      // uni_dLepR(1.5, 2.5);
+      // uni_dMetZPhi(2., 3.);
+      // uni_met_tst(90, 130);
+      // uni_MetOHT(0., 1.);
+
+      if (swarm[i][j].position[0] < 1.5) 
+      {
+        swarm[i][j].position[0] = 1.5;
+      }
+      else if (swarm[i][j].position[0] > 2.5) 
+      {
+        swarm[i][j].position[0] = 2.5;
+      }
+      else if (swarm[i][j].position[1] < 2.) 
+      {
+        swarm[i][j].position[1] = 2.;
+      }
+      else if (swarm[i][j].position[1] > 3.)
+      {
+        swarm[i][j].position[1] = 3.;
+      }
+      else if (swarm[i][j].position[2] < 90.) 
+      {
+        swarm[i][j].position[2] = 90.;
+      }
+      else if (swarm[i][j].position[2] > 130.)
+      {
+        swarm[i][j].position[2] = 130.;
+      }
+      else if (swarm[i][j].position[3] < 0.) 
+      {
+        swarm[i][j].position[3] = 0.;
+      }
+      else if (swarm[i][j].position[3] > 1.4)
+      {
+        swarm[i][j].position[3] = 1.4;
+      }
     }
   }
   return;
@@ -135,6 +170,33 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   vector<Float_t> events;
   events.clear();
 
+  vector<TString> branches = {
+      "M2Lep",
+      "met_tst",
+      "dMetZPhi",
+      "MetOHT",
+      "dLepR",
+      "M2Lep",
+      // "leading_pT_lepton",
+      // "subleading_pT_lepton",
+      // "Z_pT",
+      // "n_jets",
+      // "n_bjets",
+      // "detajj",
+      // "mjj",
+      // "leading_jet_pt",
+      // "second_jet_pt",
+      "event_3CR",
+      "event_type",
+      "global_weight"};
+
+
+  tree->SetBranchStatus("*", 0);
+
+  for (const auto& branch : branches) {
+    tree->SetBranchStatus(branch, 1);
+  }
+
   tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
   tree->SetBranchAddress("met_signif", &met_signif);
@@ -152,9 +214,8 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   {
     tree->GetEntry(i);
 
-
     // if (event_3CR==0 && (event_type==0 || event_type==1) && met_tst>90 && met_signif>10 && dLepR<1.8 && n_bjets==0 && dMetZPhi>2.6 &&
-    // dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    // dLepR < particle.position[0] && dMetZPhi > particle.po sition[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     // {
      
     if (event_3CR==0 && (event_type==0 || event_type==1) && dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
@@ -182,6 +243,8 @@ void PSO()
   ofstream logFile("./PSO.txt");
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
   std::streambuf *oldBuffer = std::cout.rdbuf(&dualBuffer);
+
+  gROOT->SetBatch(kTRUE); //Disable plot popups
   
 
   //Load root files
@@ -239,8 +302,8 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int iterations = 12;
-  int n_particles = 6;
+  int iterations = 10;
+  int n_particles = 5;
 
   double max_signal[n_particles];
   double max_signal_er[n_particles];
@@ -258,12 +321,12 @@ void PSO()
   uniform_real_distribution<> uni_dLepR(1.5, 2.5 );
   uniform_real_distribution<> uni_dMetZPhi(2., 3.);
   uniform_real_distribution<> uni_met_tst(90, 130);
-  uniform_real_distribution<> uni_MetOHT(0., 1.);
+  uniform_real_distribution<> uni_MetOHT(0., 1.4);
 
   uniform_real_distribution<> uni_dLepR2(-1., 4. );
   uniform_real_distribution<> uni_dMetZPhi2(-1., 5.);
   uniform_real_distribution<> uni_met_tst2(-40, 220);
-  uniform_real_distribution<> uni_MetOHT2(-1., 1.);
+  uniform_real_distribution<> uni_MetOHT2(-1.4, 1.4);
 
   // // Initialization
   // uniform_real_distribution<> uni_dLepR(0., 5.);
@@ -466,35 +529,34 @@ void PSO()
       print_particle(particle, gbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
     }
     gbest_vector.push_back(gbest_significance);
+
+    // Graph significance vs iterations
+    TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
+    TGraph *graph = new TGraph();
+    graph->SetTitle("Significance vs Iterations");
+    graph->GetXaxis()->SetTitle("Iterations");
+    graph->GetYaxis()->SetTitle("Significance");
+    graph->SetMarkerStyle(20); // Bullet
+    graph->SetMarkerStyle(29); // Star
+    graph->SetMarkerSize(1.5);
+
+    for (int i = 0; i < gbest_vector.size(); ++i)
+    {
+      graph->SetPoint(i, i + 1, gbest_vector[i]);
+    }
+
+    graph->Draw("ALP");
+    c->SetGrid();
+    c->Draw();
+    c->SaveAs("significance_vs_iterations.png");
   }
-
-
 
   cout << "   --------------------------------------------------------------------------" << endl << endl;
   cout << "   Max significance is:  "  << gbest_significance << endl;
   cout << "   Best position:        (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl;
   cout << "   --------------------------------------------------------------------------" << endl << endl;
 
-  //Graph significance vs iterations
-  TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
-  TGraph *graph = new TGraph();
-  graph->SetTitle("Significance vs Iterations");
-  graph->GetXaxis()->SetTitle("Iterations");
-  graph->GetYaxis()->SetTitle("Significance");
-  graph->SetMarkerStyle(20); //Bullet
-  graph->SetMarkerStyle(29); //Star
-  graph->SetMarkerSize(1.5);
-
-
-  for (int i = 0; i < gbest_vector.size(); ++i)
-  {
-    graph->SetPoint(i, i + 1, gbest_vector[i]);
-  }
-
-  graph->Draw("ALP");
-  c->SetGrid();
-  c->Draw();
-  c->SaveAs("significance_vs_iterations.png");
+  
 
   // Timer stop
   auto end = chrono::high_resolution_clock::now();
