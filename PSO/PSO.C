@@ -5,6 +5,8 @@
 #include <TH1.h>
 #include <TCanvas.h>
 #include <TGraph.h>
+#include <TLegend.h>
+#include <TF1.h>
 
 
 //Cpp headers
@@ -56,6 +58,7 @@ struct particle
   double significance;
 };
 
+
 void print_particle(const particle& p, double *gbest, double gbest_significance, double *max_significance, double *max_signal, double *max_signal_er, int i, int j)
 {
   cout << "    --------------------------------------------------------------------------" << endl;
@@ -73,16 +76,36 @@ void print_particle(const particle& p, double *gbest, double gbest_significance,
 }
 
 
+//Apply boundaries on particles 
+void apply_bounds(vector<vector<particle>> &swarm, Float_t dLepR_bounds[2], Float_t dMetZPhi_bounds[2], Float_t met_tst_bounds[2], Float_t MetOHT_bounds[2], int i, int j, int k)
+{
+  Float_t bounds[4][2] = {
+      {dLepR_bounds[0], dLepR_bounds[1]},
+      {dMetZPhi_bounds[0], dMetZPhi_bounds[1]},
+      {met_tst_bounds[0], met_tst_bounds[1]},
+      {MetOHT_bounds[0], MetOHT_bounds[1]}};
 
+  if (swarm[i][j].position[k] < bounds[k][0])
+  {
+    swarm[i][j].position[k] = bounds[k][0];
+  }
+  else if (swarm[i][j].position[k] > bounds[k][1])
+  {
+    swarm[i][j].position[k] = bounds[k][1];
+  }
+}
+
+//Update the search space particles before entering next iteration
 void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int iterations, int n_particles)
 {
   uniform_real_distribution<> uni_dist(0., 1.);
   random_device rd;
   mt19937 gen(rd());
 
-  float_t w_min = 0.8;
-  float_t w_max = 1.2;
+  float_t w_min = 0.6;
+  float_t w_max = 0.9;
   float_t w = w_max - (w_max - w_min) * i / iterations;
+  // float_t w = 0.7;
   float_t c1 = 1.47;   
   float_t c2 = 1.47;
   float_t r1 = uni_dist(gen);
@@ -96,51 +119,22 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
       swarm[i][j].velocity[k] = w * swarm[i - 1][j].velocity[k] + c1 * r1 * (swarm[i - 1][j].pbest[k] - swarm[i - 1][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i - 1][j].position[k]);
       swarm[i][j].position[k] = swarm[i - 1][j].position[k] + swarm[i][j].velocity[k];
 
-      // uni_dLepR(1.5, 2.5);
-      // uni_dMetZPhi(2., 3.);
-      // uni_met_tst(90, 130);
-      // uni_MetOHT(0., 1.);
 
-      if (swarm[i][j].position[0] < 1.5) 
-      {
-        swarm[i][j].position[0] = 1.5;
-      }
-      else if (swarm[i][j].position[0] > 2.5) 
-      {
-        swarm[i][j].position[0] = 2.5;
-      }
-      else if (swarm[i][j].position[1] < 2.) 
-      {
-        swarm[i][j].position[1] = 2.;
-      }
-      else if (swarm[i][j].position[1] > 3.)
-      {
-        swarm[i][j].position[1] = 3.;
-      }
-      else if (swarm[i][j].position[2] < 90.) 
-      {
-        swarm[i][j].position[2] = 90.;
-      }
-      else if (swarm[i][j].position[2] > 130.)
-      {
-        swarm[i][j].position[2] = 130.;
-      }
-      else if (swarm[i][j].position[3] < 0.) 
-      {
-        swarm[i][j].position[3] = 0.;
-      }
-      else if (swarm[i][j].position[3] > 1.4)
-      {
-        swarm[i][j].position[3] = 1.4;
-      }
+      //Boundaries
+      Float_t dLepR_bounds[2] = {1., 3.};
+      Float_t dMetZPhi_bounds[2] = {2., 4.};
+      Float_t met_tst_bounds[2] = {70, 130};
+      Float_t MetOHT_bounds[2] = {0.2, 1.4};
+
+      apply_bounds(swarm, dLepR_bounds, dMetZPhi_bounds, met_tst_bounds, MetOHT_bounds, i, j, k);
+
     }
   }
   return;
 }
 
 
-
-vector<Float_t> Counter(particle &particle, TTree *tree)
+vector<Float_t> event_counter(particle &particle, TTree *tree)
 {
 
   TH1::SetDefaultSumw2(kTRUE);
@@ -214,12 +208,12 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   {
     tree->GetEntry(i);
 
-    // if (event_3CR==0 && (event_type==0 || event_type==1) && met_tst>90 && met_signif>10 && dLepR<1.8 && n_bjets==0 && dMetZPhi>2.6 &&
-    // dLepR < particle.position[0] && dMetZPhi > particle.po sition[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
-    // {
-     
-    if (event_3CR==0 && (event_type==0 || event_type==1) && dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    if (event_3CR==0 && (event_type==0 || event_type==1) && met_tst>90 && dLepR<1.8 && n_bjets==0 && dMetZPhi>2.6 &&
+    dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     {
+     
+    // if (event_3CR==0 && (event_type==0 || event_type==1) && dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    // {
       signal = signal + weight;
       signaler = signaler + weight * weight;
     }
@@ -234,6 +228,8 @@ vector<Float_t> Counter(particle &particle, TTree *tree)
   return events;
 }
 
+
+//Main
 void PSO()
 {
   // Timer start
@@ -302,8 +298,8 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int iterations = 10;
-  int n_particles = 5;
+  int iterations = 30;
+  int n_particles = 3;
 
   double max_signal[n_particles];
   double max_signal_er[n_particles];
@@ -318,26 +314,15 @@ void PSO()
   
 
   // Initialization
-  uniform_real_distribution<> uni_dLepR(1.5, 2.5 );
-  uniform_real_distribution<> uni_dMetZPhi(2., 3.);
-  uniform_real_distribution<> uni_met_tst(90, 130);
-  uniform_real_distribution<> uni_MetOHT(0., 1.4);
+  uniform_real_distribution<> uni_dLepR(1., 3. );
+  uniform_real_distribution<> uni_dMetZPhi(2., 4.);
+  uniform_real_distribution<> uni_met_tst(70, 130);
+  uniform_real_distribution<> uni_MetOHT(0.2, 1.4);
 
-  uniform_real_distribution<> uni_dLepR2(-1., 4. );
-  uniform_real_distribution<> uni_dMetZPhi2(-1., 5.);
-  uniform_real_distribution<> uni_met_tst2(-40, 220);
-  uniform_real_distribution<> uni_MetOHT2(-1.4, 1.4);
-
-  // // Initialization
-  // uniform_real_distribution<> uni_dLepR(0., 5.);
-  // uniform_real_distribution<> uni_dMetZPhi(0., 5.);
-  // uniform_real_distribution<> uni_met_tst(20, 160);
-  // uniform_real_distribution<> uni_MetOHT(0., 1.);
-
-  // uniform_real_distribution<> uni_dLepR2(-5., 5. );
-  // uniform_real_distribution<> uni_dMetZPhi2(-5., 5.);
-  // uniform_real_distribution<> uni_met_tst2(-140, 180);
-  // uniform_real_distribution<> uni_MetOHT2(-1., 1.);
+  uniform_real_distribution<> uni_dLepR2(-2., 4. );
+  uniform_real_distribution<> uni_dMetZPhi2(-2., 6.);
+  uniform_real_distribution<> uni_met_tst2(-50, 200);
+  uniform_real_distribution<> uni_MetOHT2(-1.2, 1.8);
 
   
 
@@ -348,31 +333,6 @@ void PSO()
 
   
   vector<vector<particle>> swarm(iterations, vector<particle>(n_particles)); //Define the swarm
-
-  // //Initialize the swarm
-  // for (int j = 0; j < n_particles; j++)
-  // {
-  //   particle &particle = swarm[0][j]; // Define the particle
-
-  //   // Initialize position
-  //   particle.position[0] = uni_dLepR(gen); 
-  //   particle.position[1] = uni_dMetZPhi(gen); 
-  //   particle.position[2] = uni_met_tst(gen); 
-  //   particle.position[3] = uni_MetOHT(gen);
-
-  //   // Initialize pbest
-  //   particle.pbest[0] = particle.position[0];
-  //   particle.pbest[1] = particle.position[1];
-  //   particle.pbest[2] = particle.position[2];
-  //   particle.pbest[3] = particle.position[3];
-
-  //   // Initialize velocity
-  //   particle.velocity[0] = uni_dLepR2(gen);
-  //   particle.velocity[1] = uni_dMetZPhi2(gen);
-  //   particle.velocity[2] = uni_met_tst2(gen);
-  //   particle.velocity[3] = uni_MetOHT2(gen);
-
-  // }
 
   for (int i = 0; i < iterations; i++)
   {
@@ -396,7 +356,7 @@ void PSO()
       
       cout << "    ================== DATA ==================    " << endl << endl;
       cout << "    DATA:";
-      vector<Float_t> n_data = Counter(particle, tree_data);
+      vector<Float_t> n_data = event_counter(particle, tree_data);
 
       while (n_data[0] < 1) // Re-initialize until the phase space produces non-zero events
       {
@@ -419,54 +379,54 @@ void PSO()
         particle.velocity[3] = uni_MetOHT2(gen);
         cout << "          No entries - Re-Initialize..." << endl << endl;
         cout << "    DATA:";
-        n_data = Counter(particle, tree_data);
+        n_data = event_counter(particle, tree_data);
       }
 
       cout << "    ================== SIGNAL ==================    " << endl << endl;
       cout << "    llvv:";
-      vector<Float_t> n_llvv = Counter(particle, tree_llvv);
+      vector<Float_t> n_llvv = event_counter(particle, tree_llvv);
       cout << "    llvvjj:";
-      vector<Float_t> n_llvvjj = Counter(particle, tree_llvvjj);
+      vector<Float_t> n_llvvjj = event_counter(particle, tree_llvvjj);
   
       cout << "    ================== WZ ==================    " << endl << endl;
       cout << "    WZ:";
-      vector<Float_t> n_WZ = Counter(particle, tree_WZ);
+      vector<Float_t> n_WZ = event_counter(particle, tree_WZ);
   
       cout << "    ================== Zjets ==================    " << endl << endl;
       cout << "    Z_jets_ee:";
-      vector<Float_t> n_Zjets_ee = Counter(particle, tree_Z_jets_ee);
+      vector<Float_t> n_Zjets_ee = event_counter(particle, tree_Z_jets_ee);
       cout << "    Z_jets_mumu:";
-      vector<Float_t> n_Zjets_mumu = Counter(particle, tree_Z_jets_mumu);
+      vector<Float_t> n_Zjets_mumu = event_counter(particle, tree_Z_jets_mumu);
   
       cout << "    ================== top ==================    " << endl << endl;
       cout << "    Top:";
-      vector<Float_t> n_top = Counter(particle, tree_top);
+      vector<Float_t> n_top = event_counter(particle, tree_top);
       cout << "    ttbarV_ttbarVV:";
-      vector<Float_t> n_ttbarV_ttbarVV = Counter(particle, tree_ttbarV_ttbarVV);
+      vector<Float_t> n_ttbarV_ttbarVV = event_counter(particle, tree_ttbarV_ttbarVV);
       cout << "    Wt:";
-      vector<Float_t> n_Wt = Counter(particle, tree_Wt);
+      vector<Float_t> n_Wt = event_counter(particle, tree_Wt);
   
       cout << "    ================== WW ==================    " << endl << endl;
       cout << "    WW:";
-      vector<Float_t> n_WW = Counter(particle, tree_WW);
+      vector<Float_t> n_WW = event_counter(particle, tree_WW);
   
       cout << "    ================== Othr ==================    " << endl << endl;
       cout << "    llll:";
-      vector<Float_t> n_llll = Counter(particle, tree_llll);
+      vector<Float_t> n_llll = event_counter(particle, tree_llll);
       cout << "    llqq:";
-      vector<Float_t> n_llqq = Counter(particle, tree_llqq);
+      vector<Float_t> n_llqq = event_counter(particle, tree_llqq);
       cout << "    VVV:";
-      vector<Float_t> n_VVV = Counter(particle, tree_VVV);
+      vector<Float_t> n_VVV = event_counter(particle, tree_VVV);
       cout << "    W_jets:";
-      vector<Float_t> n_Wjets = Counter(particle, tree_W_jets);
+      vector<Float_t> n_Wjets = event_counter(particle, tree_W_jets);
       cout << "    Ztt:";
-      vector<Float_t> n_Ztt = Counter(particle, tree_Ztt);
+      vector<Float_t> n_Ztt = event_counter(particle, tree_Ztt);
       cout << "    WZ_jj:";
-      vector<Float_t> n_WZjj = Counter(particle, tree_WZ_jj);
+      vector<Float_t> n_WZjj = event_counter(particle, tree_WZ_jj);
       cout << "    lllljj:";
-      vector<Float_t> n_lllljj = Counter(particle, tree_lllljj);
+      vector<Float_t> n_lllljj = event_counter(particle, tree_lllljj);
       cout << "    llvvjj_WW:";
-      vector<Float_t> n_llvvjj_WW = Counter(particle, tree_llvvjj_WW);
+      vector<Float_t> n_llvvjj_WW = event_counter(particle, tree_llvvjj_WW);
   
   
       Float_t events_data = n_data[0];
@@ -523,7 +483,7 @@ void PSO()
       {
         for (int index = 0; index < 4; ++index)
         {
-          swarm[i][j].pbest[index] = swarm[i-1][j].pbest[index];
+          swarm[i][j].pbest[index] = swarm[i - 1][j].pbest[index];
         }
       }
       print_particle(particle, gbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
@@ -536,9 +496,18 @@ void PSO()
     graph->SetTitle("Significance vs Iterations");
     graph->GetXaxis()->SetTitle("Iterations");
     graph->GetYaxis()->SetTitle("Significance");
-    graph->SetMarkerStyle(20); // Bullet
-    graph->SetMarkerStyle(29); // Star
-    graph->SetMarkerSize(1.5);
+    graph->GetXaxis()->CenterTitle();
+    graph->GetYaxis()->CenterTitle();
+    graph->GetXaxis()->SetTitleOffset(1.2);
+    graph->GetYaxis()->SetTitleOffset(1.3);
+    graph->GetXaxis()->SetLabelSize(0.04);
+    graph->GetYaxis()->SetLabelSize(0.04);
+    graph->GetXaxis()->SetRangeUser(0, gbest_vector.size() + 1);
+
+    // Use a single distinctive marker style
+    graph->SetMarkerStyle(29);
+    graph->SetMarkerSize(2);
+    graph->SetLineColor(kBlack);
 
     for (int i = 0; i < gbest_vector.size(); ++i)
     {
@@ -546,6 +515,18 @@ void PSO()
     }
 
     graph->Draw("ALP");
+
+    double current_best = gbest_vector[gbest_vector.size() - 1]; 
+    double x1 = 0.12, y1 = 0.75;                      
+    double x2 = 0.37, y2 = 0.9;                         
+
+    // Adjust legend size to fit the parameter value
+    TLegend *legend = new TLegend(x1, y1, x2, y2);
+    legend->SetMargin(0.15); 
+    legend->SetTextSize(0.03);
+    legend->AddEntry((TObject *)0, Form("Current Best: %.3f", current_best), "");
+    legend->Draw();
+
     c->SetGrid();
     c->Draw();
     c->SaveAs("significance_vs_iterations.png");
