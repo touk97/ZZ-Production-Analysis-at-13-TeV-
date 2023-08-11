@@ -222,7 +222,7 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
 
   cout << "    ENTRIES = " << tree->GetEntries() << endl << endl;
   cout << "          N = " << signal << " +- " << sqrt(signaler) << endl << endl;
-
+  
   events.push_back(signal);
   events.push_back(sqrt(signaler));
 
@@ -299,8 +299,8 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int iterations = 20;
-  int n_particles = 10;
+  int iterations = 50;
+  int n_particles = 2;
 
   double max_signal[n_particles];
   double max_signal_er[n_particles];
@@ -362,15 +362,37 @@ void PSO()
         update_particle(swarm, gbest, i, iterations, n_particles);
       }
 
-      
-
       cout << "  ____________________________________________________" << endl << endl;
       cout << "              ITERATION:  " << i + 1 << "   PARTICLE:  " << j + 1 << "   " << endl;
       cout << "  ____________________________________________________" << endl << endl << endl;
       
       cout << "    ================== DATA ==================    " << endl << endl;
       cout << "    DATA:";
+
+
       vector<Float_t> n_data = event_counter(particle, tree_data);
+      while (n_data[0] == 0)
+      {
+        cout << "    No entries - Re-initialize . . . " << endl << endl;
+        // Initialize position
+        particle.position[0] = uni_dLepR(gen);
+        particle.position[1] = uni_dMetZPhi(gen);
+        particle.position[2] = uni_met_tst(gen);
+        particle.position[3] = uni_MetOHT(gen);
+        // Initialize pbest
+        particle.pbest[0] = particle.position[0];
+        particle.pbest[1] = particle.position[1];
+        particle.pbest[2] = particle.position[2];
+        particle.pbest[3] = particle.position[3];
+        // Initialize velocity
+        particle.velocity[0] = uni_dLepR2(gen);
+        particle.velocity[1] = uni_dMetZPhi2(gen);
+        particle.velocity[2] = uni_met_tst2(gen);
+        particle.velocity[3] = uni_MetOHT2(gen);
+        n_data = event_counter(particle, tree_data);
+      }
+
+
       cout << "    ================== SIGNAL ==================    " << endl << endl;
       cout << "    llvv:";
       vector<Float_t> n_llvv = event_counter(particle, tree_llvv);
@@ -441,6 +463,7 @@ void PSO()
   
       Float_t S = events_signal;
       Float_t B = events_bkg;
+      Int_t sig_is_divergent = 0;
 
       if (S != 0 && B != 0)
       {
@@ -450,7 +473,7 @@ void PSO()
       }
 
 
-      if (particle.significance > max_significance[j] )
+      if (particle.significance > max_significance[j] && particle.significance != 0)
       { 
         max_significance[j] = particle.significance;
         max_signal[j] = particle.signal[0];
@@ -471,14 +494,20 @@ void PSO()
           }
         }
       }
-      else if (particle.significance < max_significance[j] or particle.significance == 0)
+      else if (particle.significance <= max_significance[j] && particle.significance != 0)
       {
         for (int index = 0; index < 4; ++index)
         {
           swarm[i][j].pbest[index] = swarm[i - 1][j].pbest[index];
         }
       }
+      else 
+      {
+        cout << "   Unable to calculate particle significance  " << particle.significance <<  endl;
+      }
+
       print_particle(particle, gbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
+      
     }
     gbest_vector.push_back(gbest_significance);
 
@@ -508,15 +537,19 @@ void PSO()
 
     graph->Draw("ALP");
 
-    double current_best = gbest_vector[gbest_vector.size() - 1]; 
-    double x1 = 0.12, y1 = 0.75;                      
-    double x2 = 0.37, y2 = 0.9;                         
+    double current_best = gbest_vector[gbest_vector.size() - 1];
+    double x1 = 0.12, y1 = 0.78;
+    double x2 = 0.45, y2 = 0.92; 
+
+    char label[50];
+    sprintf(label, "Global Best: %.3f, %.3f, %.2f, %.3f", gbest[0], gbest[1], gbest[2], gbest[3]);
 
     // Adjust legend size to fit the parameter value
     TLegend *legend = new TLegend(x1, y1, x2, y2);
-    legend->SetMargin(0.15); 
-    legend->SetTextSize(0.03);
+    legend->SetMargin(0.15);
+    legend->SetTextSize(0.02);
     legend->AddEntry((TObject *)0, Form("Current Best: %.3f", current_best), "");
+    legend->AddEntry((TObject *)0, label, "");
     legend->Draw();
 
     c->SetGrid();
