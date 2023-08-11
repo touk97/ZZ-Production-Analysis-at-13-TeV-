@@ -58,6 +58,33 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
   vector<Float_t> events;
   events.clear();
 
+  vector<TString> branches = {
+      "M2Lep",
+      "met_tst",
+      "dMetZPhi",
+      "MetOHT",
+      "dLepR",
+      "M2Lep",
+      "leading_pT_lepton",
+      "subleading_pT_lepton",
+      "Z_pT",
+      "n_jets",
+      "n_bjets",
+      "detajj",
+      "mjj",
+      "leading_jet_pt",
+      "second_jet_pt",
+      "event_3CR",
+      "event_type",
+      "global_weight"};
+
+      
+  tree->SetBranchStatus("*", 0);
+
+  for (const auto& branch : branches) {
+    tree->SetBranchStatus(branch, 1);
+  }
+
   // tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
   // tree->SetBranchAddress("met_signif", &met_signif);
@@ -177,6 +204,33 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   Double_t weight;
   vector<Float_t> events;
   events.clear();
+
+  vector<TString> branches = {
+      "M2Lep",
+      "met_tst",
+      "dMetZPhi",
+      "MetOHT",
+      "dLepR",
+      "M2Lep",
+      "leading_pT_lepton",
+      "subleading_pT_lepton",
+      "Z_pT",
+      "n_jets",
+      "n_bjets",
+      "detajj",
+      "mjj",
+      "leading_jet_pt",
+      "second_jet_pt",
+      "event_3CR",
+      "event_type",
+      "global_weight"};
+
+
+  tree->SetBranchStatus("*", 0);
+
+  for (const auto& branch : branches) {
+    tree->SetBranchStatus(branch, 1);
+  }
 
   // tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
@@ -394,12 +448,14 @@ void zjets_splitted_sc()
 
     TFile *file_data = new TFile((string(filepath) + "DATA.root").c_str());
     TTree *tree_data = file_data->Get<TTree>("tree");
+  
 
     // Singal = SignalEWK + SignalQCD
     TFile *file_llvv = new TFile((string(filepath) + "llvv.root").c_str());
     TTree *tree_llvv = file_llvv->Get<TTree>("tree");
     TFile *file_llvvjj = new TFile((string(filepath) + "llvvjj.root").c_str());
     TTree *tree_llvvjj = file_llvvjj->Get<TTree>("tree");
+
 
     // WZ
     TFile *file_WZ = new TFile((string(filepath) + "WZ.root").c_str());

@@ -58,6 +58,33 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
   vector<Float_t> events;
   events.clear();
 
+  vector<TString> branches = {
+      "M2Lep",
+      "met_tst",
+      "dMetZPhi",
+      "MetOHT",
+      "dLepR",
+      "M2Lep",
+      "leading_pT_lepton",
+      "subleading_pT_lepton",
+      "Z_pT",
+      "n_jets",
+      "n_bjets",
+      "detajj",
+      "mjj",
+      "leading_jet_pt",
+      "second_jet_pt",
+      "event_3CR",
+      "event_type",
+      "global_weight"};
+
+      
+  tree->SetBranchStatus("*", 0);
+
+  for (const auto& branch : branches) {
+    tree->SetBranchStatus(branch, 1);
+  }
+
   // tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
   // tree->SetBranchAddress("met_signif", &met_signif);
@@ -177,6 +204,33 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   Double_t weight;
   vector<Float_t> events;
   events.clear();
+
+  vector<TString> branches = {
+      "M2Lep",
+      "met_tst",
+      "dMetZPhi",
+      "MetOHT",
+      "dLepR",
+      "M2Lep",
+      "leading_pT_lepton",
+      "subleading_pT_lepton",
+      "Z_pT",
+      "n_jets",
+      "n_bjets",
+      "detajj",
+      "mjj",
+      "leading_jet_pt",
+      "second_jet_pt",
+      "event_3CR",
+      "event_type",
+      "global_weight"};
+
+
+  tree->SetBranchStatus("*", 0);
+
+  for (const auto& branch : branches) {
+    tree->SetBranchStatus(branch, 1);
+  }
 
   // tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
