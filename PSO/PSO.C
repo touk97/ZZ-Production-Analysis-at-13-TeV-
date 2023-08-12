@@ -61,20 +61,21 @@ struct particle
 };
 
 
-void print_particle(const particle& p, double *gbest, double gbest_significance, double *max_significance, double *max_signal, double *max_signal_er, int i, int j)
+void print_particle(const particle& p, Float_t *gbest, Int_t is_new_gbest, Float_t gbest_significance, Float_t *max_significance, Float_t *max_signal, Float_t *max_signal_er, int i, int j)
 {
-  cout << "    --------------------------------------------------------------------------" << endl;
-  cout << "                                 Particle (" << i + 1 << ", " << j + 1 << "):" << endl << endl; 
-  cout << "    Position:                        (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << ", " << p.position[3] << ")" << endl  << endl;
-  cout << "    Best Position:                   (" << p.pbest[0] << ", " << p.pbest[1] << ", " << p.pbest[2] << ", " << p.pbest[3] << ")" << endl  << endl;
-  cout << "    Velocity:                        (" << p.velocity[0] << ", " << p.velocity[1] << ", " << p.velocity[2] << ", " << p.velocity[3] << ")" << endl  << endl;
-  cout << "    Current Signal:                  " << p.signal[0] << " +- " << p.signal[1] << endl << endl;
-  cout << "    Max Signal:                      " << max_signal[j] << " +- " << max_signal_er[j] << endl << endl;
-  cout << "    Current Significance:            " << p.significance << endl << endl;
-  cout << "    Max Significance:                " << max_significance[j] << endl << endl;   
-  cout << "    Global Best:                     (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ")" << endl  << endl;
-  cout << "    Global Max Significance:         " << gbest_significance << endl << endl;   
-  cout << "    --------------------------------------------------------------------------" << endl << endl;
+  cout << "    ------------------------------------------------------------------------------" << endl;
+  cout << "                                   Particle (" << i + 1 << ", " << j + 1 << "):" << endl << endl; 
+  cout << "    Position:                            (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << ", " << p.position[3] << ")" << endl  << endl;
+  cout << "    Best Position:                       (" << p.pbest[0] << ", " << p.pbest[1] << ", " << p.pbest[2] << ", " << p.pbest[3] << ")" << endl  << endl;
+  cout << "    Velocity:                            (" << p.velocity[0] << ", " << p.velocity[1] << ", " << p.velocity[2] << ", " << p.velocity[3] << ")" << endl  << endl;
+  cout << "    Current Signal:                      " << p.signal[0] << " +- " << p.signal[1] << endl << endl;
+  cout << "    Max Signal:                          " << max_signal[j] << " +- " << max_signal_er[j] << endl << endl;
+  cout << "    Current Significance:                " << p.significance << endl << endl;
+  cout << "    Max Significance:                    " << max_significance[j] << endl << endl;   
+  cout << "    Global Best:                         (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ")" << endl  << endl;
+  cout << "    Global Best has been updated:        " << is_new_gbest << endl  << endl;
+  cout << "    Global Max Significance:             " << gbest_significance << endl << endl;   
+  cout << "    ----------------------------------------------------------------------------" << endl << endl;
 }
 
 
@@ -92,7 +93,7 @@ void apply_bounds(vector<vector<particle>> &swarm, Float_t bounds[4][2], int i, 
 }
 
 //Update the search space particles before entering next iteration
-void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], double *gbest, int i, int iterations, int n_particles)
+void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], Float_t *gbest, int i, int iterations, int n_particles)
 {
   uniform_real_distribution<> uni_dist(0., 1.);
   random_device rd;
@@ -100,10 +101,10 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], double 
 
   float_t w_min = 0.6;
   float_t w_max = 0.9;
-  float_t w = w_max - (w_max - w_min) * i / iterations;
-  // float_t w = 0.7;
-  float_t c1 = 0.5;   
-  float_t c2 = 0.5;
+  // float_t w = w_max - (w_max - w_min) * i / iterations;
+  float_t w = 0.9;
+  float_t c1 = 1.5;   
+  float_t c2 = 1.5;
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
   //Clerc p.40 - (w, c1, c2) = (0.7, 1.47, 1.47) or (0.6, 1.62, 1.62)
@@ -234,17 +235,18 @@ void PSO()
   int iterations = 40;
   int n_particles = 15;
 
-  double max_signal[n_particles];
-  double max_signal_er[n_particles];
-  double max_significance[n_particles];
-  double gbest[4];
-  double gbest_significance = -1;
-  vector<double> gbest_vector;
+  Float_t max_signal[n_particles];
+  Float_t max_signal_er[n_particles];
+  Float_t max_significance[n_particles];
+  Float_t gbest[4];
+  Int_t   is_new_gbest = 0;
+  Float_t gbest_significance = -1;
+  vector<Float_t> gbest_vector;
 
   //Search space Boundaries {min, max}
   Float_t bounds[4][2] = {  
-      {1.4, 2.2},           // dLepR bounds
-      {2.5, 3.},            // dMetZPhi bounds
+      {1.2, 2.4},           // dLepR bounds
+      {2.2, 3.},            // dMetZPhi bounds
       {90.0, 120.0},        // met_tst bounds
       {0.5, 0.8}            // MetOHT bounds
   };
@@ -361,33 +363,11 @@ void PSO()
 
       vector<Float_t> n_data = event_counter(particle, tree_data);
 
-      // //Biased method
-      // while (n_data[0] == 0 )
-      // {
-      //   cout << "    No entries - Re-initialize . . . " << endl << endl;
-      //   // Initialize position
-      //   particle.position[0] = uni_dLepR(gen);
-      //   particle.position[1] = uni_dMetZPhi(gen);
-      //   particle.position[2] = uni_met_tst(gen);
-      //   particle.position[3] = uni_MetOHT(gen);
-      //   // Initialize pbest
-      //   particle.pbest[0] = particle.position[0];
-      //   particle.pbest[1] = particle.position[1];
-      //   particle.pbest[2] = particle.position[2];
-      //   particle.pbest[3] = particle.position[3];
-      //   // Initialize velocity
-      //   particle.velocity[0] = uni_dLepR2(gen);
-      //   particle.velocity[1] = uni_dMetZPhi2(gen);
-      //   particle.velocity[2] = uni_met_tst2(gen);
-      //   particle.velocity[3] = uni_MetOHT2(gen);
-      //   n_data = event_counter(particle, tree_data);
-      // }
-
 
       //Break and try to prevent events from getting to 0
       if (n_data[0] == 0)
       {
-        cout << "    No events - break " << endl;
+        cout << "    No Events - Terminate " << endl;
         return;
 
       }
@@ -485,6 +465,8 @@ void PSO()
         if (particle.significance > gbest_significance)
         {
           gbest_significance = particle.significance;
+          
+          is_new_gbest = is_new_gbest + 1;
 
           for (int index = 0; index < 4; ++index)
           {
@@ -504,68 +486,66 @@ void PSO()
         cout << "   Unable to calculate particle significance  " << particle.significance <<  endl;
       }
 
-      print_particle(particle, gbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
+      print_particle(particle, gbest, is_new_gbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
     }
 
-    //Update the swarm for the next iteration
+    // Update the swarm for the next iteration
     if (i < iterations - 1)
     {
       update_swarm(swarm, bounds, gbest, i, iterations, n_particles);
     }
-    
 
-    //Save the global best for plotting 
+    // Save the global best for plotting
     gbest_vector.push_back(gbest_significance);
 
+    // Graph significance vs iterations
 
-      // Graph significance vs iterations
+    gROOT->SetBatch(kTRUE); // Disable plot popups
 
-      gROOT->SetBatch(kTRUE); // Disable plot popups
+    TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
+    TGraph *graph = new TGraph();
+    graph->SetTitle("Significance vs Iterations");
+    graph->GetXaxis()->SetTitle("Iterations");
+    graph->GetYaxis()->SetTitle("Significance");
+    graph->GetXaxis()->CenterTitle();
+    graph->GetYaxis()->CenterTitle();
+    graph->GetXaxis()->SetTitleOffset(1.2);
+    graph->GetYaxis()->SetTitleOffset(1.3);
+    graph->GetXaxis()->SetLabelSize(0.04);
+    graph->GetYaxis()->SetLabelSize(0.04);
+    graph->GetXaxis()->SetRangeUser(0, gbest_vector.size() + 1);
 
-      TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
-      TGraph *graph = new TGraph();
-      graph->SetTitle("Significance vs Iterations");
-      graph->GetXaxis()->SetTitle("Iterations");
-      graph->GetYaxis()->SetTitle("Significance");
-      graph->GetXaxis()->CenterTitle();
-      graph->GetYaxis()->CenterTitle();
-      graph->GetXaxis()->SetTitleOffset(1.2);
-      graph->GetYaxis()->SetTitleOffset(1.3);
-      graph->GetXaxis()->SetLabelSize(0.04);
-      graph->GetYaxis()->SetLabelSize(0.04);
-      graph->GetXaxis()->SetRangeUser(0, gbest_vector.size() + 1);
+    // Use a single distinctive marker style
+    graph->SetMarkerStyle(29);
+    graph->SetMarkerSize(2);
+    graph->SetLineColor(kBlack);
 
-      // Use a single distinctive marker style
-      graph->SetMarkerStyle(29);
-      graph->SetMarkerSize(2);
-      graph->SetLineColor(kBlack);
-
-      for (int i = 0; i < gbest_vector.size(); ++i)
-      {
-        graph->SetPoint(i, i + 1, gbest_vector[i]);
-      }
-
-      graph->Draw("ALP");
-
-      double current_best = gbest_vector[gbest_vector.size() - 1];
-      double x1 = 0.58, y1 = 0.12;
-      double x2 = 0.88, y2 = 0.28;
-
-      char label[50];
-      sprintf(label, "Global Best: (%.3f, %.3f, %.2f, %.3f)", gbest[0], gbest[1], gbest[2], gbest[3]);
-
-      // Adjust legend size to fit the parameter value
-      TLegend *legend = new TLegend(x1, y1, x2, y2);
-      legend->SetMargin(0.15);
-      legend->SetTextSize(0.02);
-      legend->AddEntry((TObject *)0, Form("Current Best: %.3f", current_best), "");
-      legend->AddEntry((TObject *)0, label, "");
-      legend->Draw();
-
-      c->SetGrid();
-      c->Draw();
-      c->SaveAs("significance_vs_iterations.png");
+    for (int i = 0; i < gbest_vector.size(); ++i)
+    {
+      graph->SetPoint(i, i + 1, gbest_vector[i]);
     }
+
+    graph->Draw("ALP");
+
+    Float_t current_best = gbest_vector[gbest_vector.size() - 1];
+    Float_t x1 = 0.58, y1 = 0.12;
+    Float_t x2 = 0.88, y2 = 0.28;
+
+    char label[50];
+    sprintf(label, "Global Best: (%.3f, %.3f, %.2f, %.3f)", gbest[0], gbest[1], gbest[2], gbest[3]);
+
+    // Adjust legend size to fit the parameter value
+    TLegend *legend = new TLegend(x1, y1, x2, y2);
+    legend->SetMargin(0.15);
+    legend->SetTextSize(0.02);
+    legend->AddEntry((TObject *)0, Form("Current Best: %.3f", current_best), "");
+    legend->AddEntry((TObject *)0, label, "");
+    legend->Draw();
+
+    c->SetGrid();
+    c->Draw();
+    c->SaveAs("significance_vs_iterations.png");
+  }
 
   cout << "   --------------------------------------------------------------------------" << endl << endl;
   cout << "   Max significance:      "  << gbest_significance << endl;
