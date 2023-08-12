@@ -77,15 +77,9 @@ void print_particle(const particle& p, double *gbest, double gbest_significance,
 
 
 //Apply boundaries on particles 
-void apply_bounds(vector<vector<particle>> &swarm, Float_t dLepR_bounds[2], Float_t dMetZPhi_bounds[2], Float_t met_tst_bounds[2], Float_t MetOHT_bounds[2], int i, int j, int k)
+void apply_bounds(vector<vector<particle>> &swarm, Float_t bounds[4][2], int i, int j, int k)
 {
-  Float_t bounds[4][2] = {
-      {dLepR_bounds[0], dLepR_bounds[1]},
-      {dMetZPhi_bounds[0], dMetZPhi_bounds[1]},
-      {met_tst_bounds[0], met_tst_bounds[1]},
-      {MetOHT_bounds[0], MetOHT_bounds[1]}};
-
-  if (swarm[i][j].position[k] < bounds[k][0])
+  if (swarm[i][j].position[k] <= bounds[k][0])
   {
     swarm[i][j].position[k] = bounds[k][0];
   }
@@ -96,7 +90,7 @@ void apply_bounds(vector<vector<particle>> &swarm, Float_t dLepR_bounds[2], Floa
 }
 
 //Update the search space particles before entering next iteration
-void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int iterations, int n_particles)
+void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], double *gbest, int i, int iterations, int n_particles)
 {
   uniform_real_distribution<> uni_dist(0., 1.);
   random_device rd;
@@ -116,18 +110,12 @@ void update_particle(vector<vector<particle>> &swarm, double *gbest, int i, int 
   {
     for (int k = 0; k < 4; k++)
     {
-      swarm[i][j].velocity[k] = w * swarm[i - 1][j].velocity[k] + c1 * r1 * (swarm[i - 1][j].pbest[k] - swarm[i - 1][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i - 1][j].position[k]);
-      swarm[i][j].position[k] = swarm[i - 1][j].position[k] + swarm[i][j].velocity[k];
+      cout << i << "  BEFORE UPDATE:    P " << swarm[i+1][j].position[k] << "        V" << swarm[i+1][j].velocity[k] << endl << endl;
+      swarm[i+1][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
+      swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i+1][j].velocity[k];
+      cout << i << "  AFTER UPDATE:     P " << swarm[i+1][j].position[k] << "        V" << swarm[i+1][j].velocity[k] << endl << endl;
 
-
-      //Boundaries
-      Float_t dLepR_bounds[2] = {1., 3.};
-      Float_t dMetZPhi_bounds[2] = {1.5, 4.};
-      Float_t met_tst_bounds[2] = {80, 120};
-      Float_t MetOHT_bounds[2] = {0.2, 1.4};
-
-
-      apply_bounds(swarm, dLepR_bounds, dMetZPhi_bounds, met_tst_bounds, MetOHT_bounds, i, j, k);
+      apply_bounds(swarm, bounds, i+1, j, k);
 
     }
   }
@@ -299,15 +287,23 @@ void PSO()
 
   //PSO ALGORITHM
 
-  int iterations = 50;
-  int n_particles = 2;
+  int iterations = 20;
+  int n_particles = 1;
 
   double max_signal[n_particles];
   double max_signal_er[n_particles];
   double max_significance[n_particles];
   double gbest[4];
-  double gbest_significance = - 1;
+  double gbest_significance = -1;
   vector<double> gbest_vector;
+
+  // Boundaries
+  Float_t bounds[4][2] = {
+      {1.0, 2.5},    // dLepR bounds
+      {1.5, 3.5},    // dMetZPhi bounds
+      {90.0, 120.0}, // met_tst bounds
+      {0.4, 1.0}     // MetOHT bounds
+  };
 
   for (int index = 0; index < 4; index++) {gbest[index] = -1;}
   for (int index = 0; index < n_particles; index++) {max_significance[index] = -1;}
@@ -315,15 +311,16 @@ void PSO()
   
 
   // Initialization
-  uniform_real_distribution<> uni_dLepR(1., 3. );
-  uniform_real_distribution<> uni_dMetZPhi(2., 4.);
-  uniform_real_distribution<> uni_met_tst(70, 130);
-  uniform_real_distribution<> uni_MetOHT(0.2, 1.4);
+  uniform_real_distribution<> uni_dLepR(bounds[0][0], bounds[0][1]);
+  uniform_real_distribution<> uni_dMetZPhi(bounds[1][0], bounds[1][1]);
+  uniform_real_distribution<> uni_met_tst(bounds[2][0], bounds[2][1]);
+  uniform_real_distribution<> uni_MetOHT(bounds[3][0], bounds[3][1]);
 
-  uniform_real_distribution<> uni_dLepR2(-2., 4.);
-  uniform_real_distribution<> uni_dMetZPhi2(-2., 6.);
-  uniform_real_distribution<> uni_met_tst2(-50, 200);
-  uniform_real_distribution<> uni_MetOHT2(-1.2, 1.8);
+  uniform_real_distribution<> uni_dLepR2(-fabs(bounds[0][1] - bounds[0][0]), bounds[0][1] + bounds[0][0]);    //bounds (-|min-max|, min+max)
+  uniform_real_distribution<> uni_dMetZPhi2(-fabs(bounds[1][1] - bounds[1][0]), bounds[1][1] + bounds[1][0]);
+  uniform_real_distribution<> uni_met_tst2(-fabs(bounds[2][1] - bounds[2][0]), bounds[2][1] + bounds[2][0]);
+  uniform_real_distribution<> uni_MetOHT2(-fabs(bounds[3][1] - bounds[3][0]), bounds[3][1] + bounds[3][0]);
+
 
   random_device rd;
   mt19937 gen(rd());
@@ -357,10 +354,6 @@ void PSO()
     for (int j = 0; j < n_particles; j++)
     {
       particle &particle = swarm[i][j]; // Define the particle
-      if (i != 0)
-      {
-        update_particle(swarm, gbest, i, iterations, n_particles);
-      }
 
       cout << "  ____________________________________________________" << endl << endl;
       cout << "              ITERATION:  " << i + 1 << "   PARTICLE:  " << j + 1 << "   " << endl;
@@ -371,7 +364,7 @@ void PSO()
 
 
       vector<Float_t> n_data = event_counter(particle, tree_data);
-      while (n_data[0] == 0)
+      while (n_data[0] == 0 )
       {
         cout << "    No entries - Re-initialize . . . " << endl << endl;
         // Initialize position
@@ -463,7 +456,6 @@ void PSO()
   
       Float_t S = events_signal;
       Float_t B = events_bkg;
-      Int_t sig_is_divergent = 0;
 
       if (S != 0 && B != 0)
       {
@@ -472,8 +464,7 @@ void PSO()
         particle.signal[1] = events_signal_er;
       }
 
-
-      if (particle.significance > max_significance[j] && particle.significance != 0)
+      if (particle.significance >= max_significance[j] && particle.significance != 0)
       { 
         max_significance[j] = particle.significance;
         max_signal[j] = particle.signal[0];
@@ -494,11 +485,11 @@ void PSO()
           }
         }
       }
-      else if (particle.significance <= max_significance[j] && particle.significance != 0)
+      else if (particle.significance < max_significance[j] && particle.significance != 0)
       {
         for (int index = 0; index < 4; ++index)
         {
-          swarm[i][j].pbest[index] = swarm[i - 1][j].pbest[index];
+          particle.pbest[index] = swarm[i - 1][j].pbest[index];
         }
       }
       else 
@@ -507,9 +498,21 @@ void PSO()
       }
 
       print_particle(particle, gbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
-      
     }
+
+    //Update the swarm for the next iteration
+    if (i < iterations - 1)
+    {
+      update_swarm(swarm, bounds, gbest, i, iterations, n_particles);
+    }
+    
+    
+
+    //Save the global best for plotting 
     gbest_vector.push_back(gbest_significance);
+
+
+
 
     // Graph significance vs iterations
     TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
