@@ -155,7 +155,7 @@ int bro_plot()
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../parameter_estimation/bro_plot.txt");
+  ofstream logFile("./bro_plot.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
