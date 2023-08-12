@@ -1,3 +1,5 @@
+//Particle Swarm optimization algorithm for background estimation - 4 variables optimization
+
 //ROOT headers
 #include <TFile.h>
 #include <TROOT.h>
@@ -100,8 +102,8 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], double 
   float_t w_max = 0.9;
   float_t w = w_max - (w_max - w_min) * i / iterations;
   // float_t w = 0.7;
-  float_t c1 = 1.;   
-  float_t c2 = 1.;
+  float_t c1 = 0.5;   
+  float_t c2 = 0.5;
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
   //Clerc p.40 - (w, c1, c2) = (0.7, 1.47, 1.47) or (0.6, 1.62, 1.62)
@@ -110,13 +112,10 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], double 
   {
     for (int k = 0; k < 4; k++)
     {
-      cout << i << "  BEFORE UPDATE:    P " << swarm[i+1][j].position[k] << "        V" << swarm[i+1][j].velocity[k] << endl << endl;
       swarm[i+1][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
       swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i+1][j].velocity[k];
-      cout << i << "  AFTER UPDATE:     P " << swarm[i+1][j].position[k] << "        V" << swarm[i+1][j].velocity[k] << endl << endl;
 
       apply_bounds(swarm, bounds, i+1, j, k);
-
     }
   }
   return;
@@ -197,7 +196,7 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
   {
     tree->GetEntry(i);
 
-    if (event_3CR==0 && (event_type==0 || event_type==1) && met_tst>90 && dLepR<1.8 && n_bjets==0 && dMetZPhi>2.6 &&
+    if (event_3CR==0 && (event_type==0 || event_type==1) && n_bjets == 0 &&
     dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     {
      
@@ -221,6 +220,7 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
 //Main
 void PSO()
 {
+
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -229,10 +229,70 @@ void PSO()
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
   std::streambuf *oldBuffer = std::cout.rdbuf(&dualBuffer);
 
-  gROOT->SetBatch(kTRUE); //Disable plot popups
+  //------------PSO ALGORITHM------------//
+
+  int iterations = 30;
+  int n_particles = 12;
+
+  double max_signal[n_particles];
+  double max_signal_er[n_particles];
+  double max_significance[n_particles];
+  double gbest[4];
+  double gbest_significance = -1;
+  vector<double> gbest_vector;
+
+  //Search space Boundaries {min, max}
+  Float_t bounds[4][2] = {  
+      {1.4, 2.2},           // dLepR bounds
+      {2.5, 3.},            // dMetZPhi bounds
+      {80.0, 120.0},        // met_tst bounds
+      {0.5, 0.8}            // MetOHT bounds
+  };
+
+  for (int index = 0; index < 4; index++) {gbest[index] = -1;}
+  for (int index = 0; index < n_particles; index++) {max_significance[index] = -1;}
+  for (int index = 0; index < n_particles; index++) {max_signal[index] = -1; max_signal_er[index] = -1;}
   
 
-  //Load root files
+  // Position uniform distributions
+  uniform_real_distribution<> uni_dLepR(bounds[0][0], bounds[0][1]);
+  uniform_real_distribution<> uni_dMetZPhi(bounds[1][0], bounds[1][1]);
+  uniform_real_distribution<> uni_met_tst(bounds[2][0], bounds[2][1]);
+  uniform_real_distribution<> uni_MetOHT(bounds[3][0], bounds[3][1]);
+
+  // Velocity uniform distributions
+  uniform_real_distribution<> uni_dLepR2(-fabs(bounds[0][1] - bounds[0][0]), fabs(bounds[0][1] - bounds[0][0])); // bounds (-|min-max|, |min-max|)
+  uniform_real_distribution<> uni_dMetZPhi2(-fabs(bounds[1][1] - bounds[1][0]), fabs(bounds[1][1] - bounds[1][0]));
+  uniform_real_distribution<> uni_met_tst2(-fabs(bounds[2][1] - bounds[2][0]), fabs(bounds[2][1] - bounds[2][0]));
+  uniform_real_distribution<> uni_MetOHT2(-fabs(bounds[3][1] - bounds[3][0]), fabs(bounds[3][1] - bounds[3][0]));
+
+  random_device rd;
+  mt19937 gen(rd());
+
+  // Initialize particle swarm before first iterations
+  vector<vector<particle>> swarm(iterations, vector<particle>(n_particles)); // Define the swarm
+
+  for (int j = 0; j < n_particles; j++)
+  {
+    particle &particle = swarm[0][j]; // Define the particle
+    // Initialize position
+    particle.position[0] = uni_dLepR(gen);
+    particle.position[1] = uni_dMetZPhi(gen);
+    particle.position[2] = uni_met_tst(gen);
+    particle.position[3] = uni_MetOHT(gen);
+    // Initialize pbest
+    particle.pbest[0] = particle.position[0];
+    particle.pbest[1] = particle.position[1];
+    particle.pbest[2] = particle.position[2];
+    particle.pbest[3] = particle.position[3];
+    // Initialize velocity
+    particle.velocity[0] = uni_dLepR2(gen);
+    particle.velocity[1] = uni_dMetZPhi2(gen);
+    particle.velocity[2] = uni_met_tst2(gen);
+    particle.velocity[3] = uni_MetOHT2(gen);
+  }
+
+  // Load root files
   string filepath = "../../data/SAMPLES/SR/";
 
   TFile *file_data = new TFile((string(filepath) + "DATA.root").c_str());
@@ -284,70 +344,6 @@ void PSO()
   TFile *file_llvvjj_WW = new TFile((string(filepath) + "llvvjj_WW.root").c_str());
   TTree *tree_llvvjj_WW = file_llvvjj_WW->Get<TTree>("tree");
 
-
-  //PSO ALGORITHM
-
-  int iterations = 20;
-  int n_particles = 1;
-
-  double max_signal[n_particles];
-  double max_signal_er[n_particles];
-  double max_significance[n_particles];
-  double gbest[4];
-  double gbest_significance = -1;
-  vector<double> gbest_vector;
-
-  // Boundaries
-  Float_t bounds[4][2] = {
-      {1.0, 2.5},    // dLepR bounds
-      {1.5, 3.5},    // dMetZPhi bounds
-      {90.0, 120.0}, // met_tst bounds
-      {0.4, 1.0}     // MetOHT bounds
-  };
-
-  for (int index = 0; index < 4; index++) {gbest[index] = -1;}
-  for (int index = 0; index < n_particles; index++) {max_significance[index] = -1;}
-  for (int index = 0; index < n_particles; index++) {max_signal[index] = -1; max_signal_er[index] = -1;}
-  
-
-  // Initialization
-  uniform_real_distribution<> uni_dLepR(bounds[0][0], bounds[0][1]);
-  uniform_real_distribution<> uni_dMetZPhi(bounds[1][0], bounds[1][1]);
-  uniform_real_distribution<> uni_met_tst(bounds[2][0], bounds[2][1]);
-  uniform_real_distribution<> uni_MetOHT(bounds[3][0], bounds[3][1]);
-
-  uniform_real_distribution<> uni_dLepR2(-fabs(bounds[0][1] - bounds[0][0]), bounds[0][1] + bounds[0][0]);    //bounds (-|min-max|, min+max)
-  uniform_real_distribution<> uni_dMetZPhi2(-fabs(bounds[1][1] - bounds[1][0]), bounds[1][1] + bounds[1][0]);
-  uniform_real_distribution<> uni_met_tst2(-fabs(bounds[2][1] - bounds[2][0]), bounds[2][1] + bounds[2][0]);
-  uniform_real_distribution<> uni_MetOHT2(-fabs(bounds[3][1] - bounds[3][0]), bounds[3][1] + bounds[3][0]);
-
-
-  random_device rd;
-  mt19937 gen(rd());
-
-  //Initialize particle swarm before first iterations
-  vector<vector<particle>> swarm(iterations, vector<particle>(n_particles)); // Define the swarm
-
-  for (int j = 0; j < n_particles; j++)
-  {
-    particle &particle = swarm[0][j]; // Define the particle
-    // Initialize position
-    particle.position[0] = uni_dLepR(gen);
-    particle.position[1] = uni_dMetZPhi(gen);
-    particle.position[2] = uni_met_tst(gen);
-    particle.position[3] = uni_MetOHT(gen);
-    // Initialize pbest
-    particle.pbest[0] = particle.position[0];
-    particle.pbest[1] = particle.position[1];
-    particle.pbest[2] = particle.position[2];
-    particle.pbest[3] = particle.position[3];
-    // Initialize velocity
-    particle.velocity[0] = uni_dLepR2(gen);
-    particle.velocity[1] = uni_dMetZPhi2(gen);
-    particle.velocity[2] = uni_met_tst2(gen);
-    particle.velocity[3] = uni_MetOHT2(gen);
-  }
-
   
   for (int i = 0; i < iterations; i++)
   {
@@ -366,23 +362,32 @@ void PSO()
       vector<Float_t> n_data = event_counter(particle, tree_data);
       while (n_data[0] == 0 )
       {
-        cout << "    No entries - Re-initialize . . . " << endl << endl;
-        // Initialize position
-        particle.position[0] = uni_dLepR(gen);
-        particle.position[1] = uni_dMetZPhi(gen);
-        particle.position[2] = uni_met_tst(gen);
-        particle.position[3] = uni_MetOHT(gen);
-        // Initialize pbest
-        particle.pbest[0] = particle.position[0];
-        particle.pbest[1] = particle.position[1];
-        particle.pbest[2] = particle.position[2];
-        particle.pbest[3] = particle.position[3];
-        // Initialize velocity
-        particle.velocity[0] = uni_dLepR2(gen);
-        particle.velocity[1] = uni_dMetZPhi2(gen);
-        particle.velocity[2] = uni_met_tst2(gen);
-        particle.velocity[3] = uni_MetOHT2(gen);
-        n_data = event_counter(particle, tree_data);
+        //Biased method
+        // cout << "    No entries - Re-initialize . . . " << endl << endl;
+        // // Initialize position
+        // particle.position[0] = uni_dLepR(gen);
+        // particle.position[1] = uni_dMetZPhi(gen);
+        // particle.position[2] = uni_met_tst(gen);
+        // particle.position[3] = uni_MetOHT(gen);
+        // // Initialize pbest
+        // particle.pbest[0] = particle.position[0];
+        // particle.pbest[1] = particle.position[1];
+        // particle.pbest[2] = particle.position[2];
+        // particle.pbest[3] = particle.position[3];
+        // // Initialize velocity
+        // particle.velocity[0] = uni_dLepR2(gen);
+        // particle.velocity[1] = uni_dMetZPhi2(gen);
+        // particle.velocity[2] = uni_met_tst2(gen);
+        // particle.velocity[3] = uni_MetOHT2(gen);
+        // n_data = event_counter(particle, tree_data);
+      }
+
+      //Break and try to prevent events from getting to 0
+      if (n_data[0] == 0)
+      {
+        cout << "    No events - break " << endl;
+        break;
+
       }
 
 
@@ -513,8 +518,10 @@ void PSO()
 
 
 
-
     // Graph significance vs iterations
+
+    gROOT->SetBatch(kTRUE); //Disable plot popups
+    
     TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
     TGraph *graph = new TGraph();
     graph->SetTitle("Significance vs Iterations");
@@ -541,8 +548,8 @@ void PSO()
     graph->Draw("ALP");
 
     double current_best = gbest_vector[gbest_vector.size() - 1];
-    double x1 = 0.12, y1 = 0.78;
-    double x2 = 0.45, y2 = 0.92; 
+    double x1 = 0.58, y1 = 0.12; 
+    double x2 = 0.88, y2 = 0.28;
 
     char label[50];
     sprintf(label, "Global Best: %.3f, %.3f, %.2f, %.3f", gbest[0], gbest[1], gbest[2], gbest[3]);
@@ -561,7 +568,7 @@ void PSO()
   }
 
   cout << "   --------------------------------------------------------------------------" << endl << endl;
-  cout << "   Max significance:  "  << gbest_significance << endl;
+  cout << "   Max significance:      "  << gbest_significance << endl;
   cout << "   Best position:        (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl;
   cout << "   --------------------------------------------------------------------------" << endl << endl;
 
