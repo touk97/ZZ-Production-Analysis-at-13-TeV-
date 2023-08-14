@@ -63,11 +63,9 @@ vector<Float_t> Counter(string category, string index1, string index2)
 
   TH1::SetDefaultSumw2(kTRUE);
 
-  
   Double_t weight;
   vector<Float_t> events;
   events.clear();
-  
 
   Double_t signal = 0.;
   Double_t signal_var = 0.;
@@ -79,12 +77,37 @@ vector<Float_t> Counter(string category, string index1, string index2)
   Int_t nentries = (Int_t)tree->GetEntries();
   tree->SetBranchAddress("global_weight", &weight);
 
+  vector<TString> branches = {
+      "M2Lep",
+      "met_tst",
+      "dMetZPhi",
+      "MetOHT",
+      "dLepR",
+      // "leading_pT_lepton",
+      // "subleading_pT_lepton",
+      // "Z_pT",
+      // "n_jets",
+      // "n_bjets",
+      // "detajj",
+      // "mjj",
+      // "leading_jet_pt",
+      // "second_jet_pt",
+      "event_3CR",
+      "event_type",
+      "global_weight"};
+
+  tree->SetBranchStatus("*", 0);
+
+  for (const auto &branch : branches)
+  {
+    tree->SetBranchStatus(branch, 1);
+  }
 
   for (Int_t i = 0; i < nentries; i++)
   {
       tree->GetEntry(i);
-      signal = signal + weight;
-      signal_var = signal_var + weight*weight;
+      signal += weight;
+      signal_var += weight*weight;
   }
 
   cout << "    ENTRIES = " << tree->GetEntries() << endl << endl; 
@@ -208,6 +231,7 @@ void truth()
       }
     }
 
+
     signal_qq = signal_qq1[0] + signal_qq2[0] +  signal_qq3[0];
     signal_qq_er = sqrt(signal_qq1[1] + signal_qq2[1] +  signal_qq3[1]);
     signal_gg = signal_gg1[0] + signal_gg2[0] +  signal_gg3[0];
@@ -216,7 +240,7 @@ void truth()
     signal_EWK_er = sqrt(signal_EWK1[1] + signal_EWK2[1] + signal_EWK3[1]);
 
     signal_tot = signal_qq + signal_gg + signal_EWK;
-    signal_tot_er = signal_qq_er + signal_gg_er + signal_EWK_er;
+    signal_tot_er = sqrt(pow(signal_qq_er, 2) + pow(signal_gg_er, 2) + pow(signal_EWK_er, 2));
 
     printf("    --------------------------------------\n");
     printf("    Signal QCD qq:   %.2f +- %.2f\n\n", signal_qq, signal_qq_er);
