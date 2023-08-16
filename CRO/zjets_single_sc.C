@@ -657,7 +657,7 @@ void zjets_single_sc()
       hist_top->Add(hist_Zjets);
       hist_WW->Add(hist_top);
       hist_WZ->Add(hist_WW);
-      cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
+      cout << "   SIGNAL/BKG = " << hist_signal->Integral(1, hist_signal->GetNbinsX()) / hist_WZ->Integral(1, hist_WZ->GetNbinsX()) << endl << endl;
     }
     else
     {
@@ -667,7 +667,7 @@ void zjets_single_sc()
       hist_WW->Add(hist_top);
       hist_WZ->Add(hist_WW);
       hist_signal->Add(hist_WZ);
-      cout << "   DATA/MC = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
+      cout << "   DATA/MC = " << hist_data->Integral(1, hist_data->GetNbinsX()) / hist_signal->Integral(1, hist_signal->GetNbinsX()) << endl << endl;
     }
 
     // if (directory != "SR")

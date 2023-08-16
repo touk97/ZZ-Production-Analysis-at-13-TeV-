@@ -126,7 +126,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
         // Inclusive
         signal = signal + weight;
         signaler = signaler + weight * weight;
-        hist->Fill(Z_pT, weight);
+        hist->Fill(met_tst, weight);
       }
       // {
         // // Exclusive
@@ -135,7 +135,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
         // {
         //   signal = signal + weight;
         //   signaler = signaler + weight * weight;
-        //   hist->Fill(Z_pTt, weight);
+        //   hist->Fill(met_tstt, weight);
         // }
       // }
     }
@@ -145,7 +145,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
       //Inclusive
       signal = signal + weight;
       signaler = signaler + weight * weight;
-      hist->Fill(Z_pT, weight);
+      hist->Fill(met_tst, weight);
 
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -153,7 +153,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
       // {
       //   signal = signal + weight;
       //   signaler = signaler + weight * weight;
-      //   hist->Fill(Z_pT, weight);
+      //   hist->Fill(met_tst, weight);
       // }
     }
   }
@@ -259,7 +259,7 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   Float_t signaler1 = 0;
   Float_t signaler2 = 0;
   // Float_t Norm = 1;
-
+ 
   // Loop over events
 
   for (Int_t i = 0; i < nentries; i++)
@@ -275,19 +275,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
         {
           signal0 = signal0 + weight;
           signaler0 = signaler0 + weight * weight;
-          hist0->Fill(Z_pT, weight);
+          hist0->Fill(met_tst, weight);
         }
         else if (n_jets > 0 && n_jets < 2)
         {
           signal1 = signal1 + weight;
           signaler1 = signaler1 + weight * weight;
-          hist1->Fill(Z_pT, weight);
+          hist1->Fill(met_tst, weight);
         }
         else if (n_jets > 1)
         {
           signal2 = signal2 + weight;
           signaler2 = signaler2 + weight * weight;
-          hist2->Fill(Z_pT, weight);
+          hist2->Fill(met_tst, weight);
         }
       }
     }
@@ -298,19 +298,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
       {
         signal0 = signal0 + weight;
         signaler0 = signaler0 + weight * weight;
-        hist0->Fill(Z_pT, weight);
+        hist0->Fill(met_tst, weight);
       }
       else if (n_jets > 0 && n_jets < 2)
       {
         signal1 = signal1 + weight;
         signaler1 = signaler1 + weight * weight;
-        hist1->Fill(Z_pT, weight);
+        hist1->Fill(met_tst, weight);
       }
       else if (n_jets > 1)
       {
         signal2 = signal2 + weight;
         signaler2 = signaler2 + weight * weight;
-        hist2->Fill(Z_pT, weight);
+        hist2->Fill(met_tst, weight);
       }
       // // Exclusive
       // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
@@ -318,7 +318,7 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
       // {
       //   signal = signal + weight;
       //   signaler = signaler + weight * weight;
-      //   hist->Fill(Z_pT, weight);
+      //   hist->Fill(met_tst, weight);
       // }
     }
   }
@@ -376,7 +376,7 @@ private:
 //
 //
 //
-//
+//ζ
 //
 //
 //
@@ -435,6 +435,7 @@ void zjets_splitted_sc()
   Float_t sf_Zjets0, sf_Zjets0_er;
   Float_t sf_Zjets1, sf_Zjets1_er;
   Float_t sf_Zjets2, sf_Zjets2_er;
+  Float_t sf_signal, sf_signal_er;
 
 
   for (string &directory : directories)
@@ -543,6 +544,7 @@ void zjets_splitted_sc()
     TH1F *hist_lllljj = new TH1F("Hist_lllljj", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_llvvjj_WW = new TH1F("Hist_llvvjj_WW", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
+    TH1F *hist_signal_reco = new TH1F("Hist_signal_reco", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_signal_sig = new TH1F("hist_signal_sig ", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
  
@@ -729,8 +731,10 @@ void zjets_splitted_sc()
 
     Float_t events_data = n_data[0];
     Float_t events_data_er = n_data[1];
-    Float_t events_signal = n_llvv[0] + n_llvvjj[0];
-    Float_t events_signal_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
+    Float_t signal_mc = n_llvv[0] + n_llvvjj[0];
+    Float_t signal_mc_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
+    Float_t signal_reco;
+    Float_t signal_reco_er;
     Float_t events_bkg;
     Float_t events_bkg_er;
     Float_t events_WZ = n_WZ[0];
@@ -755,8 +759,8 @@ void zjets_splitted_sc()
 
     if (directory == "3lCR")
     {
-      events_nonWZ = events_signal + events_WW + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
-      events_nonWZ_er = sqrt(pow(events_signal_er, 2) + pow(events_WW_er, 2) + pow(events_top_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      events_nonWZ = signal_mc + events_WW + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonWZ_er = sqrt(pow(signal_mc_er, 2) + pow(events_WW_er, 2) + pow(events_top_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       sf_3lCR = (events_data - events_nonWZ) / events_WZ; 
       sf_3lCR_er = sqrt(pow((events_data - events_nonWZ), 2) * pow(events_WZ_er, 2)/pow(events_WZ, 4)  +  (pow(events_data_er, 2) + pow(events_nonWZ_er, 2))/pow(events_WZ, 2));
       cout << "evenets_nonWZ =  " << events_nonWZ << " +- " << events_nonWZ_er << endl << endl;
@@ -771,8 +775,8 @@ void zjets_splitted_sc()
       events_WZ = events_WZ*sf_3lCR;
       events_WZ_er = sqrt( pow(sf_3lCR, 2) * pow(events_WZ_er, 2) + pow(events_WZ, 2) * pow(sf_3lCR_er, 2));
 
-      events_nontop = events_signal + events_WZ + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
-      events_nontop_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      events_nontop = signal_mc + events_WZ + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nontop_er = sqrt(pow(signal_mc_er, 2) + pow(events_WZ_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       sf_emuB = (events_data - events_nontop) / events_top;
       sf_emuB_er = sqrt(pow((events_data - events_nontop), 2) * pow(events_top_er, 2)/pow(events_top, 4) + (pow(events_data_er, 2) + pow(events_nontop_er, 2))/pow(events_top, 2));
       cout << "   TOP SCALING FACTOR =  " << sf_emuB << " +- " << sf_emuB_er << endl << endl;
@@ -787,8 +791,8 @@ void zjets_splitted_sc()
       events_top = events_top * sf_emuB;
       events_top_er = sqrt( pow(sf_emuB, 2) * pow(events_top_er, 2) + pow(events_top, 2) * pow(sf_emuB_er, 2));
 
-      events_nonWW = events_signal + events_WZ + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
-      events_nonWW_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      events_nonWW = signal_mc + events_WZ + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonWW_er = sqrt(pow(signal_mc_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       sf_emuA = (events_data - events_nonWW) / events_WW;
       sf_emuA_er = sqrt(pow((events_data - events_nonWW), 2) * pow(events_WW_er, 2)/pow(events_WW, 4) + (pow(events_data_er, 2) + pow(events_nonWW_er, 2))/pow(events_WW, 2));
       cout << "   WW SCALING FACTOR =  " << sf_emuA << " +- " << sf_emuA_er << endl << endl;
@@ -805,8 +809,8 @@ void zjets_splitted_sc()
       events_WW = events_WW * sf_emuA;
       events_WW_er = sqrt( pow(sf_emuA, 2) * pow(events_WW_er, 2) + pow(events_WW, 2) * pow(sf_emuA_er, 2));
 
-      events_nonZjets0 = events_signal + events_WZ + events_top + events_WW + events_Zjets1 + events_Zjets2 + events_othr;
-      events_nonZjets0_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2)   + pow(events_othr_er, 2));
+      events_nonZjets0 = signal_mc + events_WZ + events_top + events_WW + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonZjets0_er = sqrt(pow(signal_mc_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2)   + pow(events_othr_er, 2));
       sf_Zjets0 = (events_data - events_nonZjets0) / events_Zjets0;
       sf_Zjets0_er = sqrt(pow((events_data - events_nonZjets0), 2) * pow(events_Zjets0_er, 2)/pow(events_Zjets0, 4) + (pow(events_data_er, 2) + pow(events_nonZjets0_er, 2))/pow(events_Zjets0, 2));
       cout << "   Zjets0 SCALING FACTOR =  " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl;
@@ -825,8 +829,8 @@ void zjets_splitted_sc()
       events_Zjets0 = events_Zjets0 * sf_Zjets0;
       events_Zjets0_er = sqrt( pow(sf_Zjets0, 2) * pow(events_Zjets0_er, 2) + pow(events_Zjets0, 2) * pow(sf_Zjets0_er, 2));
 
-      events_nonZjets1 = events_signal + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets2 + events_othr;
-      events_nonZjets1_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
+      events_nonZjets1 = signal_mc + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets2 + events_othr;
+      events_nonZjets1_er = sqrt(pow(signal_mc_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       sf_Zjets1 = (events_data - events_nonZjets1) / events_Zjets1;
       sf_Zjets1_er = sqrt(pow((events_data - events_nonZjets1), 2) * pow(events_Zjets1_er, 2)/pow(events_Zjets1, 4) + (pow(events_data_er, 2) + pow(events_nonZjets1_er, 2))/pow(events_Zjets1, 2));
       cout << "   Zjets1 SCALING FACTOR =  " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
@@ -847,8 +851,8 @@ void zjets_splitted_sc()
       events_Zjets1 = events_Zjets1 * sf_Zjets1;
       events_Zjets1_er = sqrt( pow(sf_Zjets1, 2) * pow(events_Zjets1_er, 2) + pow(events_Zjets1, 2) * pow(sf_Zjets1_er, 2));
 
-      events_nonZjets2 = events_signal + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_othr;
-      events_nonZjets2_er = sqrt(pow(events_signal_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_othr_er, 2));
+      events_nonZjets2 = signal_mc + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_othr;
+      events_nonZjets2_er = sqrt(pow(signal_mc_er, 2) + pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_othr_er, 2));
       sf_Zjets2 = (events_data - events_nonZjets2) / events_Zjets2;
       sf_Zjets2_er = sqrt(pow((events_data - events_nonZjets2), 2) * pow(events_Zjets2_er, 2)/pow(events_Zjets2, 4) + (pow(events_data_er, 2) + pow(events_nonZjets2_er, 2))/pow(events_Zjets2, 2));
       cout << "   Zjets2 SCALING FACTOR =  " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
@@ -873,8 +877,11 @@ void zjets_splitted_sc()
       //Signal
       events_bkg = events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
       events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
-      events_signal = events_data - events_bkg;
-      events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_bkg_er, 2));
+      signal_reco = events_data - events_bkg;
+      signal_reco_er = sqrt(pow(events_data_er, 2) + pow(events_bkg_er, 2));
+      sf_signal = signal_reco / signal_mc;
+      sf_signal_er = sqrt(pow(signal_reco, 2) * pow(signal_mc_er, 2)/pow(signal_mc, 4) + pow(signal_reco_er, 2)/pow(signal_mc, 2));
+      cout << "   Zjets1 SCALING FACTOR =  " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl;
     }
     
     //Scale histograms before adding and plotting
@@ -940,6 +947,8 @@ void zjets_splitted_sc()
     hist_Zjets->Add(hist_Zjets0);
     hist_Zjets->Add(hist_Zjets1);
     hist_Zjets->Add(hist_Zjets2);
+
+    //Calculate signal histogram
     
     Double_t Z_max;
     Double_t Bin_max;
@@ -950,34 +959,44 @@ void zjets_splitted_sc()
        hist_top->Add(hist_Zjets);
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
-       cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
+       cout << "   SIGNAL/BKG = " << (hist_data->Integral(1, hist_data->GetNbinsX()) - hist_WZ->Integral(1, hist_WZ->GetNbinsX())) / hist_WZ->Integral(1, hist_WZ->GetNbinsX()) << endl << endl;
+      //  cout << "   SIGNAL/BKG = " << hist_signal->Integral(1, hist_signal->GetNbinsX()) / hist_WZ->Integral(1, hist_WZ->GetNbinsX()) << endl << endl;
+      
+      
+      //Reconstructed sugnal events
+      hist_signal_reco->Add(hist_data);
+      hist_signal_reco->Add(hist_WZ, -1);
 
-       for (int bin = 1; bin < hist_signal->GetSize(); ++bin)
+
+
+      for (int bin = 1; bin < hist_signal->GetSize(); ++bin)
+      {
+       Double_t B = hist_WZ->GetBinContent(bin);
+       Double_t S = hist_signal->GetBinContent(bin);
+      //  Double_t S = hist_signal_reco->GetBinContent(bin);
+
+       if (B > 0 && S > 0)
        {
-        Double_t B = hist_WZ->GetBinContent(bin);
-        Double_t S = hist_signal->GetBinContent(bin);
-
-        if (B > 0 && S > 0)
-        {
-          Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
-          // cout << "B=" << B << ", S=" << S << ", Z_bin=" << Z_bin << endl;
-          hist_signal_sig->SetBinContent(bin, Z);
-
-          if (Z > Z_max)
-          {
-            Z_max = Z;
-            Bin_max = hist_signal_sig->GetBinLowEdge(bin);
-          }
-         
-        }
+         Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+         // cout << "B=" << B << ", S=" << S << ", Z_bin=" << Z_bin << endl;
+         hist_signal_sig->SetBinContent(bin, Z);
+         if (Z > Z_max)
+         {
+           Z_max = Z;
+           Bin_max = hist_signal_sig->GetBinLowEdge(bin);
+         }
+        
        }
+      }
+
+      //  cout << "S =  " << S << ", B =  " << B << endl;
 
 
              //Print calculated events for every region
       
        cout << "------------------------------------------------------------------" << endl << endl;
-       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
-       cout << "   SIGNAL/BKG = " << events_signal/events_bkg << endl;
+       cout << endl << endl  << "   SIGNAL   =  " << signal_reco << " +- " << signal_reco_er  << endl;
+       cout << "   SIGNAL/BKG = " << signal_reco/events_bkg << endl;
        cout << "   Maximum significance is:  " << Z_max << "   for bin:   " << Bin_max << endl << endl;
        cout << "_________________________________" << endl << endl;
        cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
@@ -999,16 +1018,8 @@ void zjets_splitted_sc()
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
        hist_signal->Add(hist_WZ);
-       cout << "   DATA/MC = " << hist_data->Integral(-5000, 5000) / hist_signal->Integral(-5000, 5000) << endl << endl;
+       cout << "   DATA/MC = " << hist_data->Integral(1, hist_data->GetNbinsX())/ hist_signal->Integral(1, hist_signal->GetNbinsX()) << endl << endl;
     }
-
-
-    //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
-    //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
-    //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
-    //  cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
-    //  cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
-    //  cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
 
 
     //----------------------------------------PLOTS----------------------------------------//
@@ -1345,7 +1356,8 @@ void zjets_splitted_sc()
        << "                          μ_WW = " << sf_emuA << " +- " << sf_emuA_er << endl << endl
        << "                          μ_Zjets0 = " << sf_Zjets0 << " +- " << sf_Zjets0_er << endl << endl  
        << "                          μ_Zjets1 = " << sf_Zjets1 << " +- " << sf_Zjets1_er << endl << endl 
-       << "                          μ_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl;
+       << "                          μ_Zjets2 = " << sf_Zjets2 << " +- " << sf_Zjets2_er << endl << endl
+       << "                          μ_signal = " << sf_signal << " +- " << sf_signal_er << endl << endl;
           
           
   // Timer stop

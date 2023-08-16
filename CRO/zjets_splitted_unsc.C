@@ -535,6 +535,7 @@ void zjets_splitted_unsc()
     TH1F *hist_llvvjj_WW = new TH1F("Hist_llvvjj_WW", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
     TH1F *hist_signal_sig = new TH1F("hist_signal_sig ", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
+    TH1F *hist_signal_reco = new TH1F("Hist_signal_reco", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
  
  
@@ -756,7 +757,13 @@ void zjets_splitted_unsc()
        hist_top->Add(hist_Zjets);
        hist_WW->Add(hist_top);
        hist_WZ->Add(hist_WW);
-       cout << "   SIGNAL/BKG = " << hist_signal->Integral(-5000, 5000) / hist_WZ->Integral(-5000, 5000) << endl << endl;
+       cout << "   SIGNAL/BKG = " << (hist_data->Integral(1, hist_data->GetNbinsX()) - hist_WZ->Integral(1, hist_WZ->GetNbinsX())) / hist_WZ->Integral(1, hist_WZ->GetNbinsX()) << endl << endl;
+      //  cout << "   SIGNAL/BKG = " << hist_signal->Integral(1, hist_signal->GetNbinsX()) / hist_WZ->Integral(1, hist_WZ->GetNbinsX()) << endl << endl;
+
+      //Reconstructed sugnal events
+      hist_signal_reco->Add(hist_data);
+      hist_signal_reco->Add(hist_WZ, -1);
+
 
        
 
@@ -764,6 +771,7 @@ void zjets_splitted_unsc()
        {
         Double_t B = hist_WZ->GetBinContent(bin);
         Double_t S = hist_signal->GetBinContent(bin);
+        //  Double_t S = hist_signal_reco->GetBinContent(bin);
 
         if (B > 0 && S > 0)
         {
