@@ -109,33 +109,15 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
   Double_t signaler = 0.;
   // Float_t Norm = 1;
 
-
   // Loop over events
   for (Int_t i = 0; i < nentries; i++)
   {
     tree->GetEntry(i);
-    if (directory == "SR")
-    {
-
-      if (event_3CR == 0 && (event_type == 0 || event_type == 1)  && n_bjets < 1 &&
-          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
-      {
-        // Inclusive
-        signal = signal + weight;
-        signaler = signaler + weight * weight;
-        hist->Fill(met_tst, weight);
-      }
-    }
-    else 
-    {
-      //Inclusive
-      signal = signal + weight;
-      signaler = signaler + weight * weight;
-      hist->Fill(met_tst, weight);
-    }
+    signal = signal + weight;
+    signaler = signaler + weight * weight;
+    hist->Fill(met_tst, weight);
   }
 
-  
   cout << "    ENTRIES = " << tree->GetEntries() << endl << endl; 
   cout << "          N = " << signal << "+-" << sqrt(signaler) << endl << endl; 
 
@@ -236,58 +218,29 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   Float_t signaler1 = 0;
   Float_t signaler2 = 0;
   // Float_t Norm = 1;
- 
+
   // Loop over events
 
   for (Int_t i = 0; i < nentries; i++)
   {
     tree->GetEntry(i);
-    if (directory == "SR")
+    if (n_jets < 1)
     {
-      //SR SAMPLE -> FID.VOLUME: 80 < M2Lep < 100, met_tst > 70, dLepR < 1.8, dMetZPhi > 2.2, nbjets < 1, (event_3CR == 0 && (event_type == 0 || event_type == 1)
-      if (dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
-      {
-        if (n_jets < 1)
-        {
-          signal0 = signal0 + weight;
-          signaler0 = signaler0 + weight * weight;
-          hist0->Fill(met_tst, weight);
-        }
-        else if (n_jets > 0 && n_jets < 2)
-        {
-          signal1 = signal1 + weight;
-          signaler1 = signaler1 + weight * weight;
-          hist1->Fill(met_tst, weight);
-        }
-        else if (n_jets > 1)
-        {
-          signal2 = signal2 + weight;
-          signaler2 = signaler2 + weight * weight;
-          hist2->Fill(met_tst, weight);
-        }
-      }
+      signal0 = signal0 + weight;
+      signaler0 = signaler0 + weight * weight;
+      hist0->Fill(met_tst, weight);
     }
-    else
+    else if (n_jets > 0 && n_jets < 2)
     {
-      // Inclusive
-      if (n_jets < 1)
-      {
-        signal0 = signal0 + weight;
-        signaler0 = signaler0 + weight * weight;
-        hist0->Fill(met_tst, weight);
-      }
-      else if (n_jets > 0 && n_jets < 2)
-      {
-        signal1 = signal1 + weight;
-        signaler1 = signaler1 + weight * weight;
-        hist1->Fill(met_tst, weight);
-      }
-      else if (n_jets > 1)
-      {
-        signal2 = signal2 + weight;
-        signaler2 = signaler2 + weight * weight;
-        hist2->Fill(met_tst, weight);
-      }
+      signal1 = signal1 + weight;
+      signaler1 = signaler1 + weight * weight;
+      hist1->Fill(met_tst, weight);
+    }
+    else if (n_jets > 1)
+    {
+      signal2 = signal2 + weight;
+      signaler2 = signaler2 + weight * weight;
+      hist2->Fill(met_tst, weight);
     }
   }
 
@@ -362,14 +315,14 @@ private:
 //
 //
 // MAIN
-void zjets_splitted_sc()
+void zjets_splitted_sc_nocut()
 {
 
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../../cro/zjets_splitted_sc/zjets_splitted_sc.txt");
+  ofstream logFile("../../cro/zjets_splitted_sc/nocut/zjets_splitted_sc_nocut.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -980,13 +933,13 @@ void zjets_splitted_sc()
     }
     else
     {
-       // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
-       hist_signal->Add(hist_WZ);
-       cout << "   DATA/MC = " << hist_data->Integral(1, hist_data->GetNbinsX())/ hist_signal->Integral(1, hist_signal->GetNbinsX()) << endl << endl;
+      // Stacking with a specific order
+      hist_Zjets->Add(hist_othr);
+      hist_top->Add(hist_Zjets);
+      hist_WW->Add(hist_top);
+      hist_WZ->Add(hist_WW);
+      hist_signal->Add(hist_WZ);
+      cout << "   DATA/MC = " << hist_data->Integral(1, hist_data->GetNbinsX())/ hist_signal->Integral(1, hist_signal->GetNbinsX()) << endl << endl;
     }
 
 
@@ -1009,7 +962,15 @@ void zjets_splitted_sc()
     {
       hist_WZ->Draw("hist");
       hist_signal->Draw("histsame");
-      hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
+      if (hist_signal->GetMaximum() > hist_WZ->GetMaximum())
+      {
+        hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
+      }
+      else
+      {
+        hist_WZ->GetYaxis()->SetRangeUser(0, hist_WZ->GetMaximum() * 1.2);
+      }
+
       hist_WZ->SetStats(0);
       hist_WZ->SetLineWidth(2);
       hist_WZ->SetLineColor(kBlue);
@@ -1037,7 +998,7 @@ void zjets_splitted_sc()
     hist_signal->GetYaxis()->SetTitle("Events");
     hist_signal->GetXaxis()->SetTitleOffset(1.1);
     hist_signal->GetYaxis()->SetTitleFont(42);
-    hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
+    hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.2);
     hist_signal->SetStats(0);
 
     pad1->RedrawAxis();
@@ -1191,8 +1152,7 @@ void zjets_splitted_sc()
       hist_signal_sig->GetYaxis()->SetTitle("Significance");
       hist_signal_sig->GetXaxis()->SetTitle("P^{Z}_{T} [GeV]");
       pad1->Update();
-      c1->Update();
-      c1->SaveAs("../../cro/zjets_splitted_sc/ptz_SR_splitted_sc.png");
+      c1->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_SR_splitted_sc_nocut.png");
     }
     else if (directory == "3lCR")
     {
@@ -1208,7 +1168,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c2->Update();
-      c2->SaveAs("../../cro/zjets_splitted_sc/ptz_3lCR_splitted_sc.png");
+      c2->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_3lCR_splitted_sc_nocut.png");
     }
     else if (directory == "emCR_B")
     {
@@ -1224,7 +1184,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c3->Update();
-      c3->SaveAs("../../cro/zjets_splitted_sc/ptz_emCR_B_splitted_sc.png");
+      c3->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_emCR_B_splitted_sc_nocut.png");
     }
     else if (directory == "emCR_A")
     {
@@ -1240,7 +1200,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c4->Update();
-      c4->SaveAs("../../cro/zjets_splitted_sc/ptz_emCR_A_splitted_sc.png");
+      c4->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_emCR_A_splitted_sc_nocut.png");
     }
     else if (directory == "Zjets0")
     {
@@ -1256,7 +1216,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c5->Update();
-      c5->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets0_splitted_sc.png");
+      c5->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_Zjets0_splitted_sc_nocut.png");
 
     }
     else if (directory == "Zjets1")
@@ -1273,7 +1233,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c6->Update();
-      c6->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets1_splitted_sc.png");
+      c6->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_Zjets1_splitted_sc_nocut.png");
 
     }
     else if (directory == "Zjets2")
@@ -1290,7 +1250,7 @@ void zjets_splitted_sc()
 
       pad1->Update();
       c7->Update();
-      c7->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets2_splitted_sc.png");
+      c7->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_Zjets2_splitted_sc_nocut.png");
 
     }
 
