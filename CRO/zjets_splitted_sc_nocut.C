@@ -119,7 +119,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
     tree->GetEntry(i);
         signal = signal + weight;
         signaler = signaler + weight * weight;
-        hist->Fill(M2Lep, weight);
+        hist->Fill(met_tst, weight);
   }
 
   cout << "    ENTRIES = " << tree->GetEntries() << endl << endl; 
@@ -233,19 +233,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
         {
           signal0 = signal0 + weight;
           signaler0 = signaler0 + weight * weight;
-          hist0->Fill(M2Lep, weight);
+          hist0->Fill(met_tst, weight);
         }
         else if (n_jets > 0 && n_jets < 2)
         {
           signal1 = signal1 + weight;
           signaler1 = signaler1 + weight * weight;
-          hist1->Fill(M2Lep, weight);
+          hist1->Fill(met_tst, weight);
         }
         else if (n_jets > 1)
         {
           signal2 = signal2 + weight;
           signaler2 = signaler2 + weight * weight;
-          hist2->Fill(M2Lep, weight);
+          hist2->Fill(met_tst, weight);
     }
   }
 
@@ -270,12 +270,23 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
 //
 //
 //
+void hist_norm(TH1F *hist)
+{
+  Float_t integral = hist->Integral(1, hist->GetNbinsX());
+  hist->Scale(1.0 / integral);
+}
+//
+//
+//
+//
+//
 void plot_info(string directory, Int_t right_corner, TH1F *hist_data, TH1F *hist_signal, TH1F *hist_signal_reco, TH1F *hist_WZ, TH1F *hist_WW, TH1F *hist_Zjets, TH1F *hist_top, TH1F *hist_othr)
 {
 
   TLatex *tex1;
   TLatex *tex2;
   TLatex *tex3;
+  TLatex *tex4;
   TLegend *leg;
 
   if (right_corner == 1)
@@ -312,6 +323,8 @@ void plot_info(string directory, Int_t right_corner, TH1F *hist_data, TH1F *hist
     {
       tex3 = new TLatex(0.6, 0.45, "Zjets2 Control Region");
     }
+
+    tex4 = new TLatex(0.65, 0.4, "No Cuts Applied");
   }
   else
   {
@@ -347,6 +360,8 @@ void plot_info(string directory, Int_t right_corner, TH1F *hist_data, TH1F *hist
     {
       tex3 = new TLatex(0.15, 0.45, "Zjets2 Control Region");
     }
+
+    tex4 = new TLatex(0.15, 0.4, "No Cuts Applied");
   }
 
   if (directory == "SR")
@@ -383,6 +398,12 @@ void plot_info(string directory, Int_t right_corner, TH1F *hist_data, TH1F *hist
   tex3->SetTextSize(0.04);
   tex3->SetLineWidth(1);
   tex3->Draw();
+
+  tex4->SetNDC();
+  tex4->SetTextFont(1);
+  tex4->SetTextSize(0.04);
+  tex4->SetLineWidth(1);
+  tex4->Draw();
 
   leg->SetBorderSize(0);
   leg->SetTextSize(0.03);
@@ -489,9 +510,9 @@ void zjets_splitted_sc_nocut()
   
   //Binning according to variable plotting
 
-  // Float_t xbins[21] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 700}; //met_tst
+  Float_t xbins[21] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 700}; //met_tst
   // Float_t xbins[23] = {40, 70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700}; //pTZ
-  Float_t xbins[13] = {70, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 110}; //M2Lep
+  // Float_t xbins[13] = {70, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 110}; //M2Lep
   // Float_t xbins[18] = {0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0}; //dLepR
   // Float_t xbins[14] = {2.0, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4}; //dMetZPhi
   // Float_t xbins[20] = {0.0, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.5}; //frac_pT
@@ -781,8 +802,6 @@ void zjets_splitted_sc_nocut()
       events_nonWZ_er = sqrt(pow(signal_mc_er, 2) + pow(events_WW_er, 2) + pow(events_top_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
       sf_3lCR = (events_data - events_nonWZ) / events_WZ; 
       sf_3lCR_er = sqrt(pow((events_data - events_nonWZ), 2) * pow(events_WZ_er, 2)/pow(events_WZ, 4)  +  (pow(events_data_er, 2) + pow(events_nonWZ_er, 2))/pow(events_WZ, 2));
-      cout << "evenets_nonWZ =  " << events_nonWZ << " +- " << events_nonWZ_er << endl << endl;
-      cout << "evenets_WZ =  " << events_WZ << " +- " << events_WZ_er << endl << endl;
       cout << "   WZ SCALING FACTOR =  " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
     
     }
@@ -1011,9 +1030,10 @@ void zjets_splitted_sc_nocut()
       //Print calculated events for every region
     
       cout << "------------------------------------------------------------------" << endl << endl;
-      cout << endl << endl  << "   SIGNAL   =  " << signal_reco << " +- " << signal_reco_er  << endl;
-      cout << "   SIGNAL/BKG = " << signal_reco/events_bkg << endl;
-      cout << "   Maximum significance is:  " << Z_max << "   for bin:   " << Bin_max << endl << endl;
+      cout << "   SIGNAL MC       =  " << signal_mc << " +- " << signal_mc_er  << endl;
+      cout << "   SIGNAL RECO     =  " << signal_reco << " +- " << signal_reco_er  << endl;
+      cout << "   SIGNAL RECO/BKG =  " << signal_reco/events_bkg << endl << endl;
+      cout << "   Maximum significance is:  " << Z_max << " for bin:   " << Bin_max << endl << endl;
       cout << "_________________________________" << endl << endl;
       cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
       cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << "   |   mu_WZ = " << sf_3lCR << " +- " << sf_3lCR_er << endl << endl;
@@ -1036,7 +1056,6 @@ void zjets_splitted_sc_nocut()
       hist_signal->Add(hist_WZ);
       cout << "   DATA/MC = " << hist_data->Integral(1, hist_data->GetNbinsX())/ hist_signal->Integral(1, hist_signal->GetNbinsX()) << endl << endl;
     }
-
 
     //----------------------------------------PLOTS----------------------------------------//
 
@@ -1110,6 +1129,11 @@ void zjets_splitted_sc_nocut()
     {
       hist_WZ->Draw("hist");
       hist_signal_reco->Draw("histsame");
+
+      //Normalise to unity
+      hist_norm(hist_WZ);
+      hist_norm(hist_signal_reco);
+      
       if (hist_signal->GetMaximum() > hist_WZ->GetMaximum())
       {
        hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal_reco->GetMaximum() * 1.4);
@@ -1141,6 +1165,15 @@ void zjets_splitted_sc_nocut()
       hist_othr->Draw("histsame");
       hist_data->Draw("same");
 
+      // //Normalise to unity
+      // hist_norm(hist_signal);
+      // hist_norm(hist_WZ);
+      // hist_norm(hist_WW);
+      // hist_norm(hist_top);
+      // hist_norm(hist_Zjets);
+      // hist_norm(hist_othr);
+      // hist_norm(hist_data);
+
       hist_signal->GetXaxis()->SetTitleSize(0.03);
       hist_signal->GetXaxis()->SetTitleFont(42);
       hist_signal->GetXaxis()->SetTitleOffset(1.1);
@@ -1150,9 +1183,9 @@ void zjets_splitted_sc_nocut()
       hist_signal->SetStats(0);
       hist_signal->GetXaxis()->SetLabelSize(0);
     }
-    
 
-    Int_t right_corner = 0; //For use to choose corner to plot information
+
+    Int_t right_corner = 1; //Choose corner to plot information
     plot_info(directory, right_corner, hist_data, hist_signal, hist_signal_reco, hist_WZ, hist_WW, hist_Zjets, hist_top, hist_othr);
 
     pad1->RedrawAxis();
@@ -1182,7 +1215,7 @@ void zjets_splitted_sc_nocut()
       hist_signal_sig->GetYaxis()->SetLabelSize(0.10);
       hist_signal_sig->SetStats(0);
       hist_signal_sig->GetYaxis()->SetTitle("Significance");
-      hist_signal_sig->GetXaxis()->SetTitle("dLepR");
+      hist_signal_sig->GetXaxis()->SetTitle("met_tst");
       pad2->SetGrid();
     }
     else
@@ -1204,7 +1237,7 @@ void zjets_splitted_sc_nocut()
       numerator->SetMarkerStyle(20);
       numerator->GetXaxis()->SetTitle("");
       numerator->GetXaxis()->SetTitleSize(0.15);
-      numerator->GetXaxis()->SetTitle("dLepR");
+      numerator->GetXaxis()->SetTitle("met_tst");
       numerator->GetXaxis()->SetTitleOffset(1.1);
       numerator->GetXaxis()->SetLabelSize(0.14);
 
@@ -1244,17 +1277,14 @@ void zjets_splitted_sc_nocut()
     else if (directory == "Zjets0")
     {
       c5->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_Zjets0_splitted_sc_nocut.png");
-
     }
     else if (directory == "Zjets1")
     {
       c6->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_Zjets1_splitted_sc_nocut.png");
-
     }
     else if (directory == "Zjets2")
     {
       c7->SaveAs("../../cro/zjets_splitted_sc/nocut/ptz_Zjets2_splitted_sc_nocut.png");
-
     }
 
 
