@@ -743,6 +743,44 @@ void zjets_splitted_unsc()
     Float_t events_othr_er = sqrt(pow(n_llll[1], 2) + pow(n_llqq[1], 2) + pow(n_VVV[1], 2) + pow(n_Wjets[1], 2) + pow(n_Ztt[1], 2) + pow(n_WZjj[1], 2) + pow(n_lllljj[1], 2) + pow(n_llvvjj_WW[1], 2));
 
 
+    //Find CR purities
+
+    if (directory == "3lCR")
+    {
+      events_nonWZ = events_signal + events_WW + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      cout << "   Events WZ / Events Non-WZ (%) =  " << events_WZ * 100 / (events_WZ + events_nonWZ) << endl << endl;
+    
+    }
+    else if (directory == "emCR_B")
+    {
+      events_nontop = events_signal + events_WZ + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      cout << "   Events top / Events Non-top (%) =  " << events_top * 100 / (events_top + events_nontop) << endl << endl;
+
+    }
+    else if (directory == "emCR_A")
+    {
+      events_nonWW = events_signal + events_WZ + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      cout << "   Events WW / Events Non-WW (%) =  " << events_WW * 100 / (events_WW + events_nonWW) << endl << endl;
+    }
+    else if (directory == "Zjets0")
+    {
+      events_nonZjets0 = events_signal + events_WZ + events_top + events_WW + events_Zjets1 + events_Zjets2 + events_othr;
+      cout << "   Events Zjets0 / Events Non-Zjets0 (%) =  " << events_Zjets0 * 100/ (events_Zjets0 + events_nonZjets0) << endl << endl;
+
+    }
+    else if (directory == "Zjets1")
+    {
+      events_nonZjets1 = events_signal + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets2 + events_othr;
+      cout << "   Events Zjets1 / Events Non-Zjets1 (%) =  " << events_Zjets1 * 100 / (events_Zjets1 + events_nonZjets1) << endl << endl;
+
+    }
+    else if (directory == "Zjets2")
+    {
+      events_nonZjets2 = events_signal + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_othr;
+      cout << "   Events Zjets2 / Events Non-Zjets2 (%) =  " << events_Zjets2 * 100/ (events_Zjets2 + events_nonZjets2) << endl << endl;
+
+    }
+
     //Merge Zjets before start plotting
     hist_Zjets->Add(hist_Zjets0);
     hist_Zjets->Add(hist_Zjets1);
