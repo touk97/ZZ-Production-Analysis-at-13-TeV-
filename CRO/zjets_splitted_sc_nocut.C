@@ -219,6 +219,8 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   Float_t signal0 = 0;
   Float_t signal1 = 0;
   Float_t signal2 = 0;
+  Float_t signal_tot = 0;
+  Float_t signal_tot_er = 0;
   Float_t signaler0 = 0;
   Float_t signaler1 = 0;
   Float_t signaler2 = 0;
@@ -248,11 +250,15 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
           hist2->Fill(met_tst, weight);
     }
   }
+  signal_tot = signal0 + signal1 + signal2;
+  signal_tot_er = sqrt(signaler0 + signaler1 + signaler2);
+
+
 
   cout << "     ENTRIES = " << tree->GetEntries() << endl << endl; 
-  cout << "          N0 = " << signal0 << "+-" << sqrt(signaler0) << endl << endl; 
-  cout << "          N1 = " << signal1 << "+-" << sqrt(signaler1) << endl << endl; 
-  cout << "          N2 = " << signal2 << "+-" << sqrt(signaler2) << endl << endl; 
+  cout << "          N0 = " << signal0    << "+-" << sqrt(signaler0) << endl << endl; 
+  cout << "          N1 = " << signal1    << "+-" << sqrt(signaler1) << endl << endl; 
+  cout << "          N2 = " << signal2    << "+-" << sqrt(signaler2) << endl << endl; 
 
 
   events.push_back(signal0);
@@ -261,6 +267,8 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   events.push_back(sqrt(signaler1));
   events.push_back(signal2);
   events.push_back(sqrt(signaler2));
+  events.push_back(signal_tot);
+  events.push_back(signal_tot_er);
 
   return events;
 }
@@ -365,7 +373,7 @@ void plot_info(string directory, Int_t right_corner, TH1F *hist_data, TH1F *hist
 
   if (directory == "SR")
   {
-    leg->AddEntry(hist_signal_reco, "Signal", "f");
+    leg->AddEntry(hist_signal, "Signal", "f");
     leg->AddEntry(hist_WZ, "Backgournd", "f");
   }
   else
@@ -660,8 +668,12 @@ void zjets_splitted_sc_nocut()
     cout << "   ================== Zjets ==================    " << endl << endl;
     cout << "   Z_jets_ee:";
     vector<Float_t> n_Zjets_ee = ZCounter(tree_Z_jets_ee, hist_Zjets_ee0, hist_Zjets_ee1, hist_Zjets_ee2, directory);
+    cout << "    ee_total = " << n_Zjets_ee[6] << "+-" << n_Zjets_ee[7] << endl << endl;
     cout << "   Z_jets_mumu:";
     vector<Float_t> n_Zjets_mumu = ZCounter(tree_Z_jets_mumu, hist_Zjets_mumu0, hist_Zjets_mumu1, hist_Zjets_mumu2, directory);
+    cout << "  mumu_total = " << n_Zjets_mumu[6] << "+-" << n_Zjets_mumu[7] << endl << endl;
+    cout << " Zjets_total = " << n_Zjets_ee[6] + n_Zjets_mumu[6] << "+-" << sqrt(pow(n_Zjets_ee[7],2) + pow(n_Zjets_mumu[7]) << endl << endl;
+    
 
     cout << "   ================== top ==================    " << endl << endl;
     cout << "   Top:";
@@ -1009,7 +1021,7 @@ void zjets_splitted_sc_nocut()
       //  cout << "   SIGNAL/BKG = " << hist_signal->Integral(1, hist_signal->GetNbinsX()) / hist_WZ->Integral(1, hist_WZ->GetNbinsX()) << endl << endl;
       
       
-      //Reconstructed sugnal events
+      //Reconstructed signal events
       hist_signal_reco->Add(hist_data);
       hist_signal_reco->Add(hist_WZ, -1);
 
@@ -1134,15 +1146,15 @@ void zjets_splitted_sc_nocut()
     if (directory == "SR")
     {
       hist_WZ->Draw("hist");
-      hist_signal_reco->Draw("histsame");
+      hist_signal->Draw("histsame");
 
       //Normalise to unity
       hist_norm(hist_WZ);
-      hist_norm(hist_signal_reco);
+      hist_norm(hist_signal);
       
-      if (hist_signal_reco->GetMaximum() > hist_WZ->GetMaximum())
+      if (hist_signal->GetMaximum() > hist_WZ->GetMaximum())
       {
-       hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal_reco->GetMaximum() * 1.4);
+       hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
       }
       else
       {
@@ -1156,10 +1168,10 @@ void zjets_splitted_sc_nocut()
       hist_WZ->GetYaxis()->SetTitle("Events");
       hist_WZ->GetXaxis()->SetLabelSize(0);
 
-      hist_signal_reco->SetLineColor(TColor::GetColor("#DE3163"));
-      hist_signal_reco->SetFillColorAlpha(TColor::GetColor("#DE3163"), 0.8);
-      hist_signal_reco->SetLineWidth(2);
-      hist_signal_reco->SetFillStyle(3244);
+      hist_signal->SetLineColor(TColor::GetColor("#DE3163"));
+      hist_signal->SetFillColorAlpha(TColor::GetColor("#DE3163"), 0.8);
+      hist_signal->SetLineWidth(2);
+      hist_signal->SetFillStyle(3244);
     }
     else
     {

@@ -37,9 +37,9 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
 
   Double_t M2Lep = 0.; 
   Double_t met_tst = 0.;
-  // Double_t met_signif = 0.;
+  Double_t met_signif = 0.;
   Double_t dMetZPhi = 0.;
-  // Float_t frac_pT = 0.;
+  Float_t frac_pT = 0.;
   Double_t MetOHT = 0.;
   Double_t dPhiJ100met = 0.;
   Double_t dLepR = 0.;
@@ -61,6 +61,7 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
   vector<TString> branches = {
       "M2Lep",
       "met_tst",
+      "met_signif",
       "dMetZPhi",
       "MetOHT",
       "dLepR",
@@ -85,9 +86,9 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
     tree->SetBranchStatus(branch, 1);
   }
 
-  // tree->SetBranchAddress("M2Lep", &M2Lep);
+  tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
-  // tree->SetBranchAddress("met_signif", &met_signif);
+  tree->SetBranchAddress("met_signif", &met_signif);
   tree->SetBranchAddress("dMetZPhi", &dMetZPhi);
   tree->SetBranchAddress("MetOHT", &MetOHT);
   tree->SetBranchAddress("dLepR", &dLepR);
@@ -105,12 +106,12 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
 
+  frac_pT = abs(met_tst - Z_pT) / Z_pT;
+
   Double_t signal = 0.;
   Double_t signaler = 0.;
   // Float_t Norm = 1;
 
-
-  
 
   // Loop over events
   for (Int_t i = 0; i < nentries; i++)
@@ -118,43 +119,21 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
     tree->GetEntry(i);
     if (directory == "SR")
     {
-
-      if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
-          leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
-          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
+      //SR SAMPLE -> FID.VOLUME: 80 < M2Lep < 100, met_tst > 70, dLepR < 1.8, dMetZPhi > 2.2, nbjets < 1, (event_3CR == 0 && (event_type == 0 || event_type == 1)
+      if (dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65 )
       {
         // Inclusive
         signal = signal + weight;
         signaler = signaler + weight * weight;
-        hist->Fill(Z_pT, weight);
+        hist->Fill(met_tst, weight);
       }
-      // {
-        // // Exclusive
-        // if (n_jets > 1 && mjj > 0 && leading_jet_pt > 30 && second_jet_pt > 30)
-        // // if (met_tst > 70 && n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30 && detajj > 1 && MetOHT > 0.3 && dMetZPhi > 2.2 && n_bjets < 1 && dLepR < 2.2 )
-        // {
-        //   signal = signal + weight;
-        //   signaler = signaler + weight * weight;
-        //   hist->Fill(Z_pTt, weight);
-        // }
-      // }
     }
     else 
     {
-
       //Inclusive
       signal = signal + weight;
       signaler = signaler + weight * weight;
-      hist->Fill(Z_pT, weight);
-
-      // // Exclusive
-      // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
-      // // if (met_tst > 70 && n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30 && detajj > 1 && MetOHT > 0.3 && dMetZPhi > 2.2 && n_bjets < 1 && dLepR < 2.2 )
-      // {
-      //   signal = signal + weight;
-      //   signaler = signaler + weight * weight;
-      //   hist->Fill(Z_pT, weight);
-      // }
+      hist->Fill(met_tst, weight);
     }
   }
 
@@ -184,9 +163,9 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
 
   Double_t M2Lep; 
   Double_t met_tst;
-  // Double_t met_signif;
+  Double_t met_signif;
   Double_t dMetZPhi;
-  // Float_t frac_pT;
+  Float_t frac_pT;
   Double_t MetOHT;
   Double_t dPhiJ100met;
   Double_t dLepR;
@@ -208,19 +187,20 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   vector<TString> branches = {
       "M2Lep",
       "met_tst",
+      "met_signif",
       "dMetZPhi",
       "MetOHT",
       "dLepR",
       "M2Lep",
-      "leading_pT_lepton",
-      "subleading_pT_lepton",
+      // "leading_pT_lepton",
+      // "subleading_pT_lepton",
       "Z_pT",
       "n_jets",
       "n_bjets",
       "detajj",
       "mjj",
-      "leading_jet_pt",
-      "second_jet_pt",
+      // "leading_jet_pt",
+      // "second_jet_pt",
       "event_3CR",
       "event_type",
       "global_weight"};
@@ -232,9 +212,8 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
     tree->SetBranchStatus(branch, 1);
   }
 
-  // tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
-  // tree->SetBranchAddress("met_signif", &met_signif);
+  tree->SetBranchAddress("met_signif", &met_signif);
   tree->SetBranchAddress("dMetZPhi", &dMetZPhi);
   tree->SetBranchAddress("MetOHT", &MetOHT);
   tree->SetBranchAddress("dLepR", &dLepR);
@@ -251,15 +230,18 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   tree->SetBranchAddress("event_3CR", &event_3CR);
   tree->SetBranchAddress("event_type", &event_type);
   tree->SetBranchAddress("global_weight", &weight);
+  frac_pT = abs(met_tst - Z_pT) / Z_pT;
 
   Float_t signal0 = 0;
   Float_t signal1 = 0;
   Float_t signal2 = 0;
+  Float_t signal_tot = 0;
+  Float_t signal_tot_er = 0;
   Float_t signaler0 = 0;
   Float_t signaler1 = 0;
   Float_t signaler2 = 0;
   // Float_t Norm = 1;
-
+ 
   // Loop over events
 
   for (Int_t i = 0; i < nentries; i++)
@@ -267,27 +249,26 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
     tree->GetEntry(i);
     if (directory == "SR")
     {
-      if (event_3CR == 0 && (event_type == 0 || event_type == 1) &&
-          leading_pT_lepton > 30 && subleading_pT_lepton > 20 && M2Lep > 80 && M2Lep < 100 && n_bjets < 1 &&
-          dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
+      //SR SAMPLE -> FID.VOLUME: 80 < M2Lep < 100, met_tst > 70, dLepR < 1.8, dMetZPhi > 2.2, nbjets < 1, (event_3CR == 0 && (event_type == 0 || event_type == 1)
+      if (dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
       {
         if (n_jets < 1)
         {
           signal0 = signal0 + weight;
           signaler0 = signaler0 + weight * weight;
-          hist0->Fill(Z_pT, weight);
+          hist0->Fill(met_tst, weight);
         }
         else if (n_jets > 0 && n_jets < 2)
         {
           signal1 = signal1 + weight;
           signaler1 = signaler1 + weight * weight;
-          hist1->Fill(Z_pT, weight);
+          hist1->Fill(met_tst, weight);
         }
         else if (n_jets > 1)
         {
           signal2 = signal2 + weight;
           signaler2 = signaler2 + weight * weight;
-          hist2->Fill(Z_pT, weight);
+          hist2->Fill(met_tst, weight);
         }
       }
     }
@@ -298,35 +279,32 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
       {
         signal0 = signal0 + weight;
         signaler0 = signaler0 + weight * weight;
-        hist0->Fill(Z_pT, weight);
+        hist0->Fill(met_tst, weight);
       }
       else if (n_jets > 0 && n_jets < 2)
       {
         signal1 = signal1 + weight;
         signaler1 = signaler1 + weight * weight;
-        hist1->Fill(Z_pT, weight);
+        hist1->Fill(met_tst, weight);
       }
       else if (n_jets > 1)
       {
         signal2 = signal2 + weight;
         signaler2 = signaler2 + weight * weight;
-        hist2->Fill(Z_pT, weight);
+        hist2->Fill(met_tst, weight);
       }
-      // // Exclusive
-      // if (n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30)
-      // // if (met_tst > 70 && n_jets > 1 && mjj > 100 && leading_jet_pt > 30 && second_jet_pt > 30 && detajj > 1 && MetOHT > 0.3 && dMetZPhi > 2.2 && n_bjets < 1 && dLepR < 2.2 )
-      // {
-      //   signal = signal + weight;
-      //   signaler = signaler + weight * weight;
-      //   hist->Fill(Z_pT, weight);
-      // }
     }
   }
 
+  signal_tot = signal0 + signal1 + signal2;
+  signal_tot_er = sqrt(signaler0 + signaler1 + signaler2);
+
+
+
   cout << "     ENTRIES = " << tree->GetEntries() << endl << endl; 
-  cout << "          N0 = " << signal0 << "+-" << sqrt(signaler0) << endl << endl; 
-  cout << "          N1 = " << signal1 << "+-" << sqrt(signaler1) << endl << endl; 
-  cout << "          N2 = " << signal2 << "+-" << sqrt(signaler2) << endl << endl; 
+  cout << "          N0 = " << signal0    << "+-" << sqrt(signaler0) << endl << endl; 
+  cout << "          N1 = " << signal1    << "+-" << sqrt(signaler1) << endl << endl; 
+  cout << "          N2 = " << signal2    << "+-" << sqrt(signaler2) << endl << endl; 
 
 
   events.push_back(signal0);
@@ -335,14 +313,169 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
   events.push_back(sqrt(signaler1));
   events.push_back(signal2);
   events.push_back(sqrt(signaler2));
-
+  events.push_back(signal_tot);
+  events.push_back(signal_tot_er);
 
   return events;
-
-
 }
 //
 //
+//
+//
+//
+void hist_norm(TH1F *hist)
+{
+  Float_t integral = hist->Integral(1, hist->GetNbinsX());
+  hist->Scale(1.0 / integral);
+}
+//
+//
+//
+//
+//
+void plot_info(string directory, Int_t right_corner, TH1F *hist_data, TH1F *hist_signal, TH1F *hist_signal_reco, TH1F *hist_WZ, TH1F *hist_WW, TH1F *hist_Zjets, TH1F *hist_top, TH1F *hist_othr)
+{
+
+  TLatex *tex1;
+  TLatex *tex2;
+  TLatex *tex3;
+  TLatex *tex4;
+  TLegend *leg;
+
+  if (right_corner == 1)
+  {
+    tex1 = new TLatex(0.65, 0.65, "#intL dt = 138.9 fb^{-1}");
+    tex2 = new TLatex(0.65, 0.55, "#sqrt{s} = 13 TeV");
+    leg = new TLegend(0.65, 0.75, 0.9, 0.85);
+
+    if (directory == "SR")
+    {
+      tex3 = new TLatex(0.65, 0.45, "Signal Region");
+    }
+    else if (directory == "3lCR")
+    {
+      tex3 = new TLatex(0.6, 0.45, "3l Control Region"); 
+    }
+    else if (directory == "emCR_B")
+    {
+      tex3 = new TLatex(0.6, 0.45, "emuB Control Region"); 
+    }
+    else if (directory == "emCR_A")
+    {
+      tex3 = new TLatex(0.6, 0.45, "emuA Control Region"); 
+    }
+    else if (directory == "Zjets0")
+    {
+      tex3 = new TLatex(0.6, 0.45, "Zjets0 Control Region"); 
+    }
+    else if (directory == "Zjets1")
+    {
+      tex3 = new TLatex(0.6, 0.45, "Zjets1 Control Region");
+    }
+    else if (directory == "Zjets2")
+    {
+      tex3 = new TLatex(0.6, 0.45, "Zjets2 Control Region");
+    }
+
+    tex4 = new TLatex(0.65, 0.4, "Cuts Applied");
+  }
+  else
+  {
+    tex1 = new TLatex(0.15, 0.65, "#intL dt = 138.9 fb^{-1}");
+    tex2 = new TLatex(0.15, 0.55, "#sqrt{s} = 13 TeV");
+    leg = new TLegend(0.15, 0.75, 0.35, 0.85); 
+
+    if (directory == "SR")
+    {
+      tex3 = new TLatex(0.15, 0.45, "Signal Region");
+    }
+    else if (directory == "3lCR")
+    {
+      tex3 = new TLatex(0.15, 0.45, "3l Control Region");
+    }
+    else if (directory == "emCR_B")
+    {
+      tex3 = new TLatex(0.15, 0.45, "emuB Control Region"); 
+    }
+    else if (directory == "emCR_A")
+    {
+      tex3 = new TLatex(0.15, 0.45, "emuA Control Region"); 
+    }
+    else if (directory == "Zjets0")
+    {
+      tex3 = new TLatex(0.15, 0.45, "Zjets0 Control Region"); 
+    }
+    else if (directory == "Zjets1")
+    {
+      tex3 = new TLatex(0.15, 0.45, "Zjets1 Control Region"); 
+    }
+    else if (directory == "Zjets2")
+    {
+      tex3 = new TLatex(0.15, 0.45, "Zjets2 Control Region");
+    }
+
+    tex4 = new TLatex(0.15, 0.4, "Cuts Applied");
+  }
+
+  if (directory == "SR")
+  {
+    leg->AddEntry(hist_signal, "Signal", "f");
+    leg->AddEntry(hist_WZ, "Backgournd", "f");
+  }
+  else
+  {
+      leg->SetNColumns(2);
+      leg->AddEntry(hist_data, "Data", "p");
+      leg->AddEntry(hist_signal, "Signal", "f");
+      leg->AddEntry(hist_WZ, "WZ", "f");
+      leg->AddEntry(hist_WW, "WW", "f");
+      leg->AddEntry(hist_Zjets, "Z+jets", "f");
+      leg->AddEntry(hist_top, "top", "f");
+      leg->AddEntry(hist_othr, "othr", "f");
+  }
+
+  tex1->SetNDC();
+  tex1->SetTextFont(42);
+  tex1->SetTextSize(0.04);
+  tex1->SetLineWidth(2);
+  tex1->Draw();
+
+  tex2->SetNDC();
+  tex2->SetTextFont(42);
+  tex2->SetTextSize(0.04);
+  tex2->SetLineWidth(2);
+  tex2->Draw();
+
+  tex3->SetNDC();
+  tex3->SetTextFont(1);
+  tex3->SetTextSize(0.04);
+  tex3->SetLineWidth(1);
+  tex3->Draw();
+
+  leg->SetBorderSize(0);
+  leg->SetTextSize(0.03);
+  leg->SetMargin(0.25);
+  leg->SetEntrySeparation(0.1);
+  leg->Draw("same");
+
+  // TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
+  // leg->SetBorderSize(0);
+  // leg->SetTextSize(0.03);
+  // leg->SetMargin(0.25);
+  // leg->SetEntrySeparation(0.1);
+  // leg->SetNColumns(2);
+  // leg->AddEntry(hist_data, "Data", "p");
+  // leg->AddEntry(hist_signal, "Signal", "f");
+  // leg->AddEntry(hist_WZ, "WZ", "f");
+  // leg->AddEntry(hist_WW, "WW", "f");
+  // leg->AddEntry(hist_Zjets, "Z+jets", "f");
+  // leg->AddEntry(hist_top, "top", "f");
+  // leg->AddEntry(hist_othr, "othr", "f");
+  // leg->Draw("same");
+
+  return;
+
+}
 //
 //
 //
@@ -414,15 +547,24 @@ void zjets_splitted_unsc()
   //-------------------------ANALYSIS-------------------------//
 
 
-  vector<string> directories = {"3lCR", "emCR_B", "emCR_A", "Zjets0", "Zjets1", "Zjets2", "SR"};
+  vector<string> directories = {"emCR_B", "3lCR", "Zjets2", "Zjets1", "Zjets0", "emCR_A", "SR"};
   vector<string> filenames = {"DATA", "WZ", "Z_jets_ee", "Z_jets_mumu",
                               "top", "ttbarV_ttbarVV", "Wt", "WW",
                               "llll", "llqq", "VVV", "W_jets", "Ztt",
                               "lllljj", "llvv", "llvvjj", "llvvjj_WW",
                               "WZ_jj"};
 
+  
+  //Binning according to variable plotting
 
-  Float_t xbins[22] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700}; 
+  Float_t xbins[21] = {70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 700}; //met_tst
+  // Float_t xbins[23] = {40, 70, 100, 130, 160, 190, 220, 250, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700}; //pTZ
+  // Float_t xbins[13] = {70, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 110}; //M2Lep
+  // Float_t xbins[18] = {0, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0}; //dLepR
+  // Float_t xbins[14] = {2.0, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3, 3.4}; //dMetZPhi
+  // Float_t xbins[20] = {0.0, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.5}; //frac_pT
+  // Float_t xbins[15] = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4, 1.6}; //MetOHT
+  // Float_t xbins[16] = {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30}; //met_signif
   // Float_t xbins[36] = {70, 80, 90, 100, 110, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250, 260, 280, 310, 340, 370, 400, 430, 460, 490, 520, 550, 580, 610, 640, 670, 700}; //pTZ
   // Float_t xbins[29] = {0, 30, 50, 60, 70, 80, 90, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 580, 700, 800, 1000, 1200};  //sTZ
   // Float_t xbins[27] = {100, 200, 220, 240, 260, 280, 300, 320, 345, 375, 410, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 1000, 1100, 1200, 1300, 1400, 1500};  //STjj
@@ -434,6 +576,7 @@ void zjets_splitted_unsc()
   for (string &directory : directories)
   {
     string filepath = "/home/touk/Desktop/touk/master/thesis/data/SAMPLES/" + directory + "/";
+
     cout << endl << endl << endl;
     cout << "   ------------------------------------------   " << endl;
     cout << "   FILEPATH:   " << filepath << endl;
@@ -534,8 +677,8 @@ void zjets_splitted_unsc()
     TH1F *hist_lllljj = new TH1F("Hist_lllljj", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_llvvjj_WW = new TH1F("Hist_llvvjj_WW", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
-    TH1F *hist_signal_sig = new TH1F("hist_signal_sig ", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
     TH1F *hist_signal_reco = new TH1F("Hist_signal_reco", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
+    TH1F *hist_signal_sig = new TH1F("hist_signal_sig ", " ", sizeof(xbins) / sizeof(xbins[0]) - 1, xbins);
 
  
  
@@ -556,8 +699,11 @@ void zjets_splitted_unsc()
     cout << "   ================== Zjets ==================    " << endl << endl;
     cout << "   Z_jets_ee:";
     vector<Float_t> n_Zjets_ee = ZCounter(tree_Z_jets_ee, hist_Zjets_ee0, hist_Zjets_ee1, hist_Zjets_ee2, directory);
+    cout << "    ee_total = " << n_Zjets_ee[6] << "+-" << n_Zjets_ee[7] << endl << endl;
     cout << "   Z_jets_mumu:";
     vector<Float_t> n_Zjets_mumu = ZCounter(tree_Z_jets_mumu, hist_Zjets_mumu0, hist_Zjets_mumu1, hist_Zjets_mumu2, directory);
+    cout << "  mumu_total = " << n_Zjets_mumu[6] << "+-" << n_Zjets_mumu[7] << endl << endl;
+    cout << " Zjets_total = " << n_Zjets_ee[6] + n_Zjets_mumu[6] << "+-" << sqrt(pow(n_Zjets_ee[7],2) + pow(n_Zjets_mumu[7],2)) <<  endl << endl;
 
     cout << "   ================== top ==================    " << endl << endl;
     cout << "   Top:";
@@ -589,62 +735,6 @@ void zjets_splitted_unsc()
     cout << "   llvvjj_WW:";
     vector<Float_t> n_llvvjj_WW = Counter(tree_llvvjj_WW, hist_llvvjj_WW, directory);
 
-
-
-
-    //Plotting
-
-    TCanvas *c1 = new TCanvas("c1", "pTZ_SR", 1400, 600, 700, 700);
-    TCanvas *c2 = new TCanvas("c2", "pTZ_3lCR", 1400, 600, 700, 700);
-    TCanvas *c3 = new TCanvas("c3", "pTZ_emuB", 1400, 600, 700, 700);
-    TCanvas *c4 = new TCanvas("c4", "pTZ_emuA", 1400, 600, 700, 700);
-    TCanvas *c5 = new TCanvas("c5", "pTZ_Zjets0", 1400, 600, 700, 700);
-    TCanvas *c6 = new TCanvas("c6", "pTZ_Zjets1", 1400, 600, 700, 700);
-    TCanvas *c7 = new TCanvas("c7", "pTZ_Zjets2", 1400, 600, 700, 700);
-
-    if (directory == "SR")
-    {
-      c1->cd();
-    }
-    else if (directory == "3lCR")
-    {
-      c2->cd();
-    }
-    else if (directory == "emCR_B")
-    {
-      c3->cd();
-    }
-    else if (directory == "emCR_A")
-    {
-      c4->cd();
-    }
-    else if (directory == "Zjets0")
-    {
-      c5->cd();
-    }
-    else if (directory == "Zjets1")
-    {
-      c6->cd();
-    }
-    else if (directory == "Zjets2")
-    {
-      c7->cd();
-    }
-
-    TPad *pad1 = new TPad("pad1", "pad1", 0.01, 0.23, 1., 1.);
-    TPad *pad2 = new TPad("pad2", "pad2", 0.01, 0.01, 1., 0.25);
-
-    pad1->SetBorderSize(0);
-    pad1->SetBottomMargin(0.035);
-    pad2->SetBottomMargin(0.35);
-    pad2->SetTopMargin(0.0);
-    pad2->SetBorderSize(0);
-    pad1->Draw();
-    pad2->Draw();
-
-    gStyle->SetOptTitle(kTRUE);
-    gStyle->SetLegendFont(1);
-    gStyle->SetPalette(20);
 
     // Data
     hist_data->SetMarkerStyle(20);
@@ -721,10 +811,10 @@ void zjets_splitted_unsc()
 
     Float_t events_data = n_data[0];
     Float_t events_data_er = n_data[1];
-    Float_t events_signal = n_llvv[0] + n_llvvjj[0];
-    Float_t events_signal_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
-    Float_t events_bkg;
-    Float_t events_bkg_er;
+    Float_t signal_mc = n_llvv[0] + n_llvvjj[0];
+    Float_t signal_mc_er = sqrt(pow(n_llvv[1], 2) + pow(n_llvvjj[1], 2));
+    Float_t signal_reco;
+    Float_t signal_reco_er;
     Float_t events_WZ = n_WZ[0];
     Float_t events_WZ_er = n_WZ[1];
     Float_t events_Zjets;
@@ -741,42 +831,44 @@ void zjets_splitted_unsc()
     Float_t events_WW_er = n_WW[1];
     Float_t events_othr = n_llll[0] + n_llqq[0] + n_VVV[0] + n_Wjets[0] + n_Ztt[0] + n_WZjj[0] + n_lllljj[0] + n_llvvjj_WW[0];
     Float_t events_othr_er = sqrt(pow(n_llll[1], 2) + pow(n_llqq[1], 2) + pow(n_VVV[1], 2) + pow(n_Wjets[1], 2) + pow(n_Ztt[1], 2) + pow(n_WZjj[1], 2) + pow(n_lllljj[1], 2) + pow(n_llvvjj_WW[1], 2));
+    Float_t events_bkg = events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+    Float_t events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
 
 
     //Find CR purities
 
     if (directory == "3lCR")
     {
-      events_nonWZ = events_signal + events_WW + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonWZ = signal_mc + events_WW + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
       cout << "   Events WZ / Events Non-WZ (%) =  " << events_WZ * 100 / (events_WZ + events_nonWZ) << endl << endl;
     
     }
     else if (directory == "emCR_B")
     {
-      events_nontop = events_signal + events_WZ + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nontop = signal_mc + events_WZ + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
       cout << "   Events top / Events Non-top (%) =  " << events_top * 100 / (events_top + events_nontop) << endl << endl;
 
     }
     else if (directory == "emCR_A")
     {
-      events_nonWW = events_signal + events_WZ + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonWW = signal_mc + events_WZ + events_top + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
       cout << "   Events WW / Events Non-WW (%) =  " << events_WW * 100 / (events_WW + events_nonWW) << endl << endl;
     }
     else if (directory == "Zjets0")
     {
-      events_nonZjets0 = events_signal + events_WZ + events_top + events_WW + events_Zjets1 + events_Zjets2 + events_othr;
+      events_nonZjets0 = signal_mc + events_WZ + events_top + events_WW + events_Zjets1 + events_Zjets2 + events_othr;
       cout << "   Events Zjets0 / Events Non-Zjets0 (%) =  " << events_Zjets0 * 100/ (events_Zjets0 + events_nonZjets0) << endl << endl;
 
     }
     else if (directory == "Zjets1")
     {
-      events_nonZjets1 = events_signal + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets2 + events_othr;
+      events_nonZjets1 = signal_mc + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets2 + events_othr;
       cout << "   Events Zjets1 / Events Non-Zjets1 (%) =  " << events_Zjets1 * 100 / (events_Zjets1 + events_nonZjets1) << endl << endl;
 
     }
     else if (directory == "Zjets2")
     {
-      events_nonZjets2 = events_signal + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_othr;
+      events_nonZjets2 = signal_mc + events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_othr;
       cout << "   Events Zjets2 / Events Non-Zjets2 (%) =  " << events_Zjets2 * 100/ (events_Zjets2 + events_nonZjets2) << endl << endl;
 
     }
@@ -786,6 +878,8 @@ void zjets_splitted_unsc()
     hist_Zjets->Add(hist_Zjets1);
     hist_Zjets->Add(hist_Zjets2);
 
+    //Calculate signal histogram
+    
     Double_t Z_max;
     Double_t Bin_max;
     if (directory == "SR")
@@ -797,81 +891,117 @@ void zjets_splitted_unsc()
        hist_WZ->Add(hist_WW);
        cout << "   SIGNAL/BKG = " << (hist_data->Integral(1, hist_data->GetNbinsX()) - hist_WZ->Integral(1, hist_WZ->GetNbinsX())) / hist_WZ->Integral(1, hist_WZ->GetNbinsX()) << endl << endl;
       //  cout << "   SIGNAL/BKG = " << hist_signal->Integral(1, hist_signal->GetNbinsX()) / hist_WZ->Integral(1, hist_WZ->GetNbinsX()) << endl << endl;
-
-      //Reconstructed sugnal events
+    
+      //Reconstructed signal events
       hist_signal_reco->Add(hist_data);
       hist_signal_reco->Add(hist_WZ, -1);
 
+      for (int bin = 1; bin < hist_signal_reco->GetSize(); ++bin)
+      {
+       Double_t B = hist_WZ->GetBinContent(bin);
+       Double_t S = hist_signal_reco->GetBinContent(bin);
 
-       
-
-       for (int bin = 1; bin < hist_signal->GetSize(); ++bin)
+       if (B > 0 && S > 0)
        {
-        Double_t B = hist_WZ->GetBinContent(bin);
-        Double_t S = hist_signal->GetBinContent(bin);
-        //  Double_t S = hist_signal_reco->GetBinContent(bin);
-
-        if (B > 0 && S > 0)
-        {
-          Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
-          // cout << "B=" << B << ", S=" << S << ", Z_bin=" << Z_bin << endl;
-          hist_signal_sig->SetBinContent(bin, Z);
-
-          if (Z > Z_max)
-          {
-            Z_max = Z;
-            Bin_max = hist_signal_sig->GetBinLowEdge(bin);
-          }
-          
-         
-        }
+         Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+         // cout << "B=" << B << ", S=" << S << ", Z_bin=" << Z_bin << endl;
+         hist_signal_sig->SetBinContent(bin, Z);
+         if (Z > Z_max)
+         {
+           Z_max = Z;
+           Bin_max = hist_signal_sig->GetBinLowEdge(bin);
+         }
+        
        }
+      }
 
-      //Signal
-      events_bkg = events_WZ + events_top + events_WW + events_Zjets0 + events_Zjets1 + events_Zjets2 + events_othr;
-      events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets0_er, 2) + pow(events_Zjets1_er, 2) + pow(events_Zjets2_er, 2) + pow(events_othr_er, 2));
-      events_signal = events_data - events_bkg;
-      events_signal_er = sqrt(pow(events_data_er, 2) + pow(events_bkg_er, 2));
+      cout << "   SIGNAL INTEGRAL IS:   " << hist_signal_reco->Integral(1, hist_signal_reco->GetNbinsX()) << endl << endl;
 
       //Print calculated events for every region
-      
-       cout << "------------------------------------------------------------------" << endl << endl;
-       cout << endl << endl  << "   SIGNAL   =  " << events_signal << " +- " << events_signal_er  << endl;
-       cout << "   SIGNAL/BKG = " << events_signal/events_bkg << endl;
-       cout << "   Maximum significance is:  " << Z_max << "   for bin:   " << Bin_max << endl << endl;
-       cout << "_________________________________" << endl << endl;
-       cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
-       cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << endl << endl;
-       cout << "   Top: " << "      " << events_top << " +- " << events_top_er << endl << endl;
-       cout << "   WW: " << "       " << events_WW << " +- " << events_WW_er << endl << endl;
-       cout << "   Zjets0: " << "   " << events_Zjets0 << " +- " << events_Zjets0_er << endl << endl;
-       cout << "   Zjets1: " << "   " << events_Zjets1 << " +- " << events_Zjets1_er << endl << endl;
-       cout << "   Zjets2: " << "   " << events_Zjets2 << " +- " << events_Zjets2_er << endl << endl;
-       cout << "   Other: " << "    "  << events_othr << " +- " << events_othr_er << endl << endl;
-       cout << "------------------------------------------------------------------" << endl << endl;
+    
+      cout << "------------------------------------------------------------------" << endl << endl;
+      cout << "   SIGNAL MC       =  " << signal_mc << " +- " << signal_mc_er  << endl;
+      cout << "   SIGNAL RECO     =  " << signal_reco << " +- " << signal_reco_er  << endl;
+      cout << "   SIGNAL RECO/BKG =  " << signal_reco/events_bkg << endl << endl;
+      cout << "   Maximum significance is:  " << Z_max << " for bin:   " << Bin_max << endl << endl;
+      cout << "_________________________________" << endl << endl;
+      cout << "   Data: " << "     " << events_data << " +- " << events_data_er << endl << endl;
+      cout << "   WZ: " << "       " << events_WZ << " +- " << events_WZ_er << endl << endl;
+      cout << "   Top: " << "      " << events_top << " +- " << events_top_er << endl << endl;
+      cout << "   WW: " << "       " << events_WW << " +- " << events_WW_er << endl << endl;
+      cout << "   Zjets0: " << "   " << events_Zjets0 << " +- " << events_Zjets0_er << endl << endl;
+      cout << "   Zjets1: " << "   " << events_Zjets1 << " +- " << events_Zjets1_er << endl << endl;
+      cout << "   Zjets2: " << "   " << events_Zjets2 << " +- " << events_Zjets2_er << endl << endl;
+      cout << "   Other: " << "    " << events_othr << " +- " << events_othr_er << endl << endl;
+      cout << "------------------------------------------------------------------" << endl << endl;
     }
     else
     {
-       // Stacking with a specific order
-       hist_Zjets->Add(hist_othr);
-       hist_top->Add(hist_Zjets);
-       hist_WW->Add(hist_top);
-       hist_WZ->Add(hist_WW);
-       hist_signal->Add(hist_WZ);
+      // Stacking with a specific order
+      hist_Zjets->Add(hist_othr);
+      hist_top->Add(hist_Zjets);
+      hist_WW->Add(hist_top);
+      hist_WZ->Add(hist_WW);
+      hist_signal->Add(hist_WZ);
+      cout << "   DATA/MC = " << hist_data->Integral(1, hist_data->GetNbinsX())/ hist_signal->Integral(1, hist_signal->GetNbinsX()) << endl << endl;
     }
-
-
-    //  cout << "   DATA:     " << "MEAN =     " << hist_data->GetMean() << endl;
-    //  cout << "             " << "RMS =      " << hist_data->GetRMS() << endl;
-    //  cout << "             " << "INTEGRAL = " << hist_data->Integral(-3000, 3000) << endl << endl;
-    //  cout << "   MC:       " << "MEAN =     " << hist_signal->GetMean() << endl;
-    //  cout << "             " << "RMS =      " << hist_signal->GetRMS() << endl;
-    //  cout << "             " << "INTEGRAL = " << hist_signal->Integral(-3000, 3000) << endl << endl;
-
 
     //----------------------------------------PLOTS----------------------------------------//
 
-    // PAD 1
+
+    TCanvas *c1 = new TCanvas("c1", "pTZ_SR", 1400, 600, 700, 700);
+    TCanvas *c2 = new TCanvas("c2", "pTZ_3lCR", 1400, 600, 700, 700);
+    TCanvas *c3 = new TCanvas("c3", "pTZ_emuB", 1400, 600, 700, 700);
+    TCanvas *c4 = new TCanvas("c4", "pTZ_emuA", 1400, 600, 700, 700);
+    TCanvas *c5 = new TCanvas("c5", "pTZ_Zjets0", 1400, 600, 700, 700);
+    TCanvas *c6 = new TCanvas("c6", "pTZ_Zjets1", 1400, 600, 700, 700);
+    TCanvas *c7 = new TCanvas("c7", "pTZ_Zjets2", 1400, 600, 700, 700);
+
+    if (directory == "SR")
+    {
+      c1->cd();
+    }
+    else if (directory == "3lCR")
+    {
+      c2->cd();
+    }
+    else if (directory == "emCR_B")
+    {
+      c3->cd();
+    }
+    else if (directory == "emCR_A")
+    {
+      c4->cd();
+    }
+    else if (directory == "Zjets0")
+    {
+      c5->cd();
+    }
+    else if (directory == "Zjets1")
+    {
+      c6->cd();
+    }
+    else if (directory == "Zjets2")
+    {
+      c7->cd();
+    }
+
+    TPad *pad1 = new TPad("pad1", "pad1", 0.01, 0.23, 1., 1.);
+    TPad *pad2 = new TPad("pad2", "pad2", 0.01, 0.01, 1., 0.25);
+
+    pad1->SetBorderSize(0);
+    pad1->SetBottomMargin(0.045);
+    pad2->SetBottomMargin(0.35);
+    pad2->SetTopMargin(0.0);
+    pad2->SetBorderSize(0);
+    pad1->Draw();
+    pad2->Draw();
+
+    gStyle->SetOptTitle(kTRUE);
+    gStyle->SetLegendFont(1);
+    gStyle->SetPalette(20);
+
+    //---------------PAD 1---------------//
 
     // Plotting according to stacking order
     pad1->cd();
@@ -883,18 +1013,32 @@ void zjets_splitted_unsc()
     // hist_Zjets->Draw("histsame");
     // hist_othr->Draw("histsame");
     // hist_data->Draw("same");
-    
+
     if (directory == "SR")
     {
       hist_WZ->Draw("hist");
       hist_signal->Draw("histsame");
-      hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
+
+      //Normalise to unity
+      hist_norm(hist_WZ);
+      hist_norm(hist_signal);
+      
+      if (hist_signal->GetMaximum() > hist_WZ->GetMaximum())
+      {
+       hist_WZ->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
+      }
+      else
+      {
+       hist_WZ->GetYaxis()->SetRangeUser(0, hist_WZ->GetMaximum() * 1.4);
+      }
       hist_WZ->SetStats(0);
       hist_WZ->SetLineWidth(2);
       hist_WZ->SetLineColor(kBlue);
       hist_WZ->SetFillColorAlpha(TColor::GetColor("#6495ED"), 0.9);
       hist_WZ->SetLineWidth(2);
       hist_WZ->GetYaxis()->SetTitle("Events");
+      hist_WZ->GetXaxis()->SetLabelSize(0);
+
       hist_signal->SetLineColor(TColor::GetColor("#DE3163"));
       hist_signal->SetFillColorAlpha(TColor::GetColor("#DE3163"), 0.8);
       hist_signal->SetLineWidth(2);
@@ -909,76 +1053,35 @@ void zjets_splitted_unsc()
       hist_Zjets->Draw("histsame");
       hist_othr->Draw("histsame");
       hist_data->Draw("same");
+
+      // //Normalise to unity
+      // hist_norm(hist_signal);
+      // hist_norm(hist_WZ);
+      // hist_norm(hist_WW);
+      // hist_norm(hist_top);
+      // hist_norm(hist_Zjets);
+      // hist_norm(hist_othr);
+      // hist_norm(hist_data);
+
+      hist_signal->GetXaxis()->SetTitleSize(0.03);
+      hist_signal->GetXaxis()->SetTitleFont(42);
+      hist_signal->GetXaxis()->SetTitleOffset(1.1);
+      hist_signal->GetYaxis()->SetTitleFont(42);
+      hist_signal->GetYaxis()->SetTitle("Events");
+      hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
+      hist_signal->SetStats(0);
+      hist_signal->GetXaxis()->SetLabelSize(0);
     }
 
-    hist_signal->GetXaxis()->SetTitleSize(0.03);
-    hist_signal->GetXaxis()->SetTitleFont(42);
-    hist_signal->GetYaxis()->SetTitle("Events");
-    hist_signal->GetXaxis()->SetTitleOffset(1.1);
-    hist_signal->GetYaxis()->SetTitleFont(42);
-    hist_signal->GetYaxis()->SetRangeUser(0, hist_signal->GetMaximum() * 1.4);
-    hist_signal->SetStats(0);
+
+    Int_t right_corner = 0; //For use to choose corner to plot information
+    plot_info(directory, right_corner, hist_data, hist_signal, hist_signal_reco, hist_WZ, hist_WW, hist_Zjets, hist_top, hist_othr);
 
     pad1->RedrawAxis();
 
-    // TLatex *tex1 = new TLatex(0.3, 0.8, "#intL dt = 138.9 fb^{-1}");
-    TLatex *tex1 = new TLatex(0.6, 0.55, "#intL dt = 138.9 fb^{-1}");
-    tex1->SetNDC();
-    tex1->SetTextFont(42);
-    tex1->SetTextSize(0.04);
-    tex1->SetLineWidth(2);
-    tex1->Draw();
-    // TLatex *tex2 = new TLatex(0.3, 0.7, "#sqrt{s} = 13 TeV");
-    TLatex *tex2 = new TLatex(0.6, 0.45, "#sqrt{s} = 13 TeV");
-    tex2->SetNDC();
-    tex2->SetTextFont(42);
-    tex2->SetTextSize(0.04);
-    tex2->SetLineWidth(2);
-    tex2->Draw();
 
-    // TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
-    // leg->SetBorderSize(0);
-    // leg->SetTextSize(0.03);
-    // leg->SetMargin(0.25);
-    // leg->SetEntrySeparation(0.1);
-    // leg->SetNColumns(2);
-    // leg->AddEntry(hist_data, "Data", "p");
-    // leg->AddEntry(hist_signal, "Signal", "f");
-    // leg->AddEntry(hist_WZ, "WZ", "f");
-    // leg->AddEntry(hist_WW, "WW", "f");
-    // leg->AddEntry(hist_Zjets, "Z+jets", "f");
-    // leg->AddEntry(hist_top, "top", "f");
-    // leg->AddEntry(hist_othr, "othr", "f");
-    // leg->Draw("same");
 
-    if (directory == "SR")
-    {
-      TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
-      leg->SetBorderSize(0);
-      leg->SetTextSize(0.03);
-      leg->SetMargin(0.25);
-      leg->SetEntrySeparation(0.1);
-      leg->AddEntry(hist_signal, "Signal", "f");
-      leg->AddEntry(hist_WZ, "Backgournd", "f");
-      leg->Draw("same");
-    }
-    else
-    {
-      TLegend *leg = new TLegend(0.6, 0.65, 0.9, 0.85);
-      leg->SetBorderSize(0);
-      leg->SetTextSize(0.03);
-      leg->SetMargin(0.25);
-      leg->SetEntrySeparation(0.1);
-      leg->SetNColumns(2);
-      leg->AddEntry(hist_data, "Data", "p");
-      leg->AddEntry(hist_signal, "Signal", "f");
-      leg->AddEntry(hist_WZ, "WZ", "f");
-      leg->AddEntry(hist_WW, "WW", "f");
-      leg->AddEntry(hist_Zjets, "Z+jets", "f");
-      leg->AddEntry(hist_top, "top", "f");
-      leg->AddEntry(hist_othr, "othr", "f");
-      leg->Draw("same");
-    }
+    //---------------PAD 2---------------//
 
     pad2->cd();
     
@@ -1000,21 +1103,15 @@ void zjets_splitted_unsc()
       hist_signal_sig->GetYaxis()->SetTitleSize(0.12);
       hist_signal_sig->GetYaxis()->SetLabelSize(0.10);
       hist_signal_sig->SetStats(0);
+      hist_signal_sig->GetYaxis()->SetTitle("Significance");
+      hist_signal_sig->GetXaxis()->SetTitle("met_tst");
       pad2->SetGrid();
     }
-    else if (directory == "Zjets0" || directory == "Zjets1" || directory == "Zjets2")
-    {
-      numerator->Add(hist_data);
-      denominator->Add(hist_signal);
-      numerator->GetYaxis()->SetRangeUser(-1, 4);
-    }
-    
     else
     {
       numerator->Add(hist_data);
       denominator->Add(hist_signal);
       // pad2->SetLogy();
-      pad2->Update();
     }
     
 
@@ -1025,151 +1122,58 @@ void zjets_splitted_unsc()
       TLine *line = new TLine(xbins[0], 1, xbins[sizeof(xbins) / sizeof(xbins[0]) - 1], 1);
       line->SetLineStyle(2);
       line->SetLineWidth(2);
-      line->Draw("same");
-      pad2->RedrawAxis();
 
       numerator->SetMarkerStyle(20);
       numerator->GetXaxis()->SetTitle("");
       numerator->GetXaxis()->SetTitleSize(0.15);
-      numerator->GetXaxis()->SetTitle("P^{Z}_{T} [GeV]");
+      numerator->GetXaxis()->SetTitle("met_tst");
       numerator->GetXaxis()->SetTitleOffset(1.1);
       numerator->GetXaxis()->SetLabelSize(0.14);
 
       numerator->GetYaxis()->SetTitleOffset(0.4);
       numerator->GetYaxis()->SetTitleSize(0.12);
+      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
       numerator->GetYaxis()->SetLabelSize(0.10);
       numerator->SetStats(0);
-
-    // numerator->GetYaxis()->SetLabelSize(0.12);
-    // numerator->GetYaxis()->SetTitle("Events");
-    // numerator->GetYaxis()->SetTitleSize(0.05);
 
       numerator->SetTitle(" ");
       numerator->SetLineColor(kBlack);
       numerator->Divide(denominator);
 
       numerator->Draw();
+      line->Draw("same");
+      pad2->RedrawAxis();
     }
 
-    TLine *line = new TLine(xbins[0], 1, xbins[sizeof(xbins) / sizeof(xbins[0]) - 1], 1);
-    line->SetLineStyle(2);
-    line->SetLineWidth(2);
-    line->Draw("same");
-    pad2->RedrawAxis();
-    pad2->Update();
-
+    
+    
     if (directory == "SR")
     {
-      pad1->cd();
-      // TLatex *tex3 = new TLatex(0.28, 0.65, "Signal Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "Signal Region");
-      tex3->SetNDC();
-      tex3->SetTextFont(1);
-      tex3->SetTextSize(0.04);
-      tex3->SetLineWidth(1);
-      tex3->Draw();
-      hist_signal_sig->GetYaxis()->SetTitle("Significance");
-      hist_signal_sig->GetXaxis()->SetTitle("P^{Z}_{T} [GeV]");
-      pad1->Update();
-      c1->Update();
       c1->SaveAs("../../cro/zjets_splitted_unsc/ptz_SR_splitted_unsc.png");
     }
     else if (directory == "3lCR")
     {
-      pad1->cd();
-      // TLatex *tex3 = new TLatex(0.28, 0.65, "3l Control Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "3l Control Region");
-      tex3->SetNDC();
-      tex3->SetTextFont(1);
-      tex3->SetTextSize(0.04);
-      tex3->SetLineWidth(1);
-      tex3->Draw();
-      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
-
-      pad1->Update();
-      c2->Update();
       c2->SaveAs("../../cro/zjets_splitted_unsc/ptz_3lCR_splitted_unsc.png");
     }
     else if (directory == "emCR_B")
     {
-      pad1->cd();
-      // TLatex *tex3 = new TLatex(0.28, 0.65, "emuB Control Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "emuB Control Region");
-      tex3->SetNDC();
-      tex3->SetTextFont(1);
-      tex3->SetTextSize(0.04);
-      tex3->SetLineWidth(1);
-      tex3->Draw();
-      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
-
-      pad1->Update();
-      c3->Update();
       c3->SaveAs("../../cro/zjets_splitted_unsc/ptz_emCR_B_splitted_unsc.png");
     }
     else if (directory == "emCR_A")
     {
-      pad1->cd();
-      // TLatex *tex3 = new TLatex(0.58, 0.65, "emuA Control Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "emuA Control Region");
-      tex3->SetNDC();
-      tex3->SetTextFont(1);
-      tex3->SetTextSize(0.04);
-      tex3->SetLineWidth(1);
-      tex3->Draw();
-      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
-
-      pad1->Update();
-      c4->Update();
       c4->SaveAs("../../cro/zjets_splitted_unsc/ptz_emCR_A_splitted_unsc.png");
     }
     else if (directory == "Zjets0")
     {
-      pad1->cd();
-      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets0 Control Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets0 Control Region");
-      tex3->SetNDC();
-      tex3->SetTextFont(1);
-      tex3->SetTextSize(0.04);
-      tex3->SetLineWidth(1);
-      tex3->Draw();
-      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
-
-      pad1->Update();
-      c5->Update();
       c5->SaveAs("../../cro/zjets_splitted_unsc/ptz_Zjets0_splitted_unsc.png");
     }
     else if (directory == "Zjets1")
     {
-      pad1->cd();
-      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets1 Control Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets1 Control Region");
-      tex3->SetNDC();
-      tex3->SetTextFont(1);
-      tex3->SetTextSize(0.04);
-      tex3->SetLineWidth(1);
-      tex3->Draw();
-      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
-
-      pad1->Update();
-      c6->Update();
       c6->SaveAs("../../cro/zjets_splitted_unsc/ptz_Zjets1_splitted_unsc.png");
     }
     else if (directory == "Zjets2")
     {
-      pad1->cd();
-      // TLatex *tex3 = new TLatex(0.26, 0.65, "Zjets2 Control Region");
-      TLatex *tex3 = new TLatex(0.6, 0.4, "Zjets2 Control Region");
-      tex3->SetNDC();
-      tex3->SetTextFont(1);
-      tex3->SetTextSize(0.04);
-      tex3->SetLineWidth(1);
-      tex3->Draw();
-      numerator->GetYaxis()->SetTitle("#frac{Data}{MC}");
-
-      pad1->Update();
-      c7->Update();
       c7->SaveAs("../../cro/zjets_splitted_unsc/ptz_Zjets2_splitted_unsc.png");
-
     }
 
 
@@ -1196,16 +1200,14 @@ void zjets_splitted_unsc()
 
   }
   // Timer stop
-    auto end = chrono::high_resolution_clock::now();
+  auto end = chrono::high_resolution_clock::now();
+  chrono::duration<float> duration = end - start;
+  cout << endl << "   Script executed in: " << int(duration.count() / 60.0) << " minutes" << " and " << int((duration.count() / 60.0 - int(duration.count() / 60.0))*60) << " s" <<  endl << endl;
 
-    chrono::duration<float> duration = end - start;
+  // For the log file
+  std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
+  logFile.close(); // Close the log file
 
-    cout << endl << "   Script executed in: " << int(duration.count() / 60.0) << " minutes" << " and " << int((duration.count() / 60.0 - int(duration.count() / 60.0))*60) << " s" <<  endl << endl;
-
-    // For the log file
-    std::cout.rdbuf(oldBuffer); // Restore the original stream buffer for std::cout
-
-    logFile.close(); // Close the log file
-
-    return;
+  return;
+  
 }
