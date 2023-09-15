@@ -61,20 +61,21 @@ struct particle
 };
 
 
-void print_particle(const particle& p, Float_t *gbest, Int_t is_new_gbest, Float_t gbest_significance, Float_t *max_significance, Float_t *max_signal, Float_t *max_signal_er, int i, int j)
+void print_particle(const particle& p, Float_t *gbest, Int_t is_new_gbest, Int_t is_new_pbest, Float_t gbest_significance, Float_t *max_significance, Float_t *max_signal, Float_t *max_signal_er, int i, int j)
 {
   cout << "    ------------------------------------------------------------------------------" << endl;
   cout << "                                   Particle (" << i + 1 << ", " << j + 1 << "):" << endl << endl; 
   cout << "    Position:                            (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << ", " << p.position[3] << ")" << endl  << endl;
   cout << "    Best Position:                       (" << p.pbest[0] << ", " << p.pbest[1] << ", " << p.pbest[2] << ", " << p.pbest[3] << ")" << endl  << endl;
+  cout << "    Best Position has been updated:      "  << is_new_pbest << endl  << endl;
   cout << "    Velocity:                            (" << p.velocity[0] << ", " << p.velocity[1] << ", " << p.velocity[2] << ", " << p.velocity[3] << ")" << endl  << endl;
-  cout << "    Current Signal:                      " << p.signal[0] << " +- " << p.signal[1] << endl << endl;
-  cout << "    Max Signal:                          " << max_signal[j] << " +- " << max_signal_er[j] << endl << endl;
-  cout << "    Current Significance:                " << p.significance << endl << endl;
-  cout << "    Max Significance:                    " << max_significance[j] << endl << endl;   
+  cout << "    Current Signal:                      "  << p.signal[0] << " +- " << p.signal[1] << endl << endl;
+  cout << "    Max Signal:                          "  << max_signal[j] << " +- " << max_signal_er[j] << endl << endl;
+  cout << "    Current Significance:                "  << p.significance << endl << endl;
+  cout << "    Max Significance:                    "  << max_significance[j] << endl << endl;   
   cout << "    Global Best:                         (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ")" << endl  << endl;
-  cout << "    Global Best has been updated:        " << is_new_gbest << endl  << endl;
-  cout << "    Global Max Significance:             " << gbest_significance << endl << endl;   
+  cout << "    Global Best has been updated:        "  << is_new_gbest << endl  << endl;
+  cout << "    Global Max Significance:             "  << gbest_significance << endl << endl;   
   cout << "    ----------------------------------------------------------------------------" << endl << endl;
 }
 
@@ -85,10 +86,12 @@ void apply_bounds(vector<vector<particle>> &swarm, Float_t bounds[4][2], int i, 
   if (swarm[i][j].position[k] <= bounds[k][0])
   {
     swarm[i][j].position[k] = bounds[k][0];
+    swarm[i][j].velocity[k] = 0;
   }
   else if (swarm[i][j].position[k] > bounds[k][1])
   {
     swarm[i][j].position[k] = bounds[k][1];
+    swarm[i][j].velocity[k] = 0;
   }
 }
 
@@ -99,12 +102,11 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], Float_t
   random_device rd;
   mt19937 gen(rd());
 
-  float_t w_min = 0.6;
-  float_t w_max = 0.9;
+  // float_t w_min = 0.6;
+  // float_t w_max = 0.9;
   // float_t w = w_max - (w_max - w_min) * i / iterations;
-  float_t w = 0.9;
-  float_t c1 = 1.5;   
-  float_t c2 = 1.5;
+  float_t w = 0.7;
+  float_t cmax = 1.47;   
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
   //Clerc p.40 - (w, c1, c2) = (0.7, 1.47, 1.47) or (0.6, 1.62, 1.62)
@@ -113,7 +115,7 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], Float_t
   {
     for (int k = 0; k < 4; k++)
     {
-      swarm[i+1][j].velocity[k] = w * swarm[i][j].velocity[k] + c1 * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + c2 * r2 * (gbest[k] - swarm[i][j].position[k]);
+      swarm[i+1][j].velocity[k] = w * swarm[i][j].velocity[k] + cmax * r1 * (swarm[i][j].pbest[k] - swarm[i][j].position[k]) + cmax * r2 * (gbest[k] - swarm[i][j].position[k]);
       swarm[i+1][j].position[k] = swarm[i][j].position[k] + swarm[i+1][j].velocity[k];
 
       apply_bounds(swarm, bounds, i+1, j, k);
@@ -154,23 +156,22 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
   events.clear();
 
   vector<TString> branches = {
-      "M2Lep",
+      // "M2Lep",
       "met_tst",
       "dMetZPhi",
       "MetOHT",
       "dLepR",
-      "M2Lep",
       // "leading_pT_lepton",
       // "subleading_pT_lepton",
       // "Z_pT",
-      // "n_jets",
+      "n_jets",
       // "n_bjets",
       // "detajj",
       // "mjj",
       // "leading_jet_pt",
       // "second_jet_pt",
-      "event_3CR",
-      "event_type",
+      // "event_3CR",
+      // "event_type",
       "global_weight"};
 
 
@@ -180,13 +181,14 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
     tree->SetBranchStatus(branch, 1);
   }
 
-  tree->SetBranchAddress("M2Lep", &M2Lep);
+  // tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
   tree->SetBranchAddress("met_signif", &met_signif);
   tree->SetBranchAddress("dMetZPhi", &dMetZPhi);
   tree->SetBranchAddress("MetOHT", &MetOHT);
   tree->SetBranchAddress("dLepR", &dLepR);
   tree->SetBranchAddress("M2Lep", &M2Lep);
+  tree->SetBranchAddress("n_jets", &n_jets);
   tree->SetBranchAddress("global_weight", &weight);
 
   Double_t signal = 0.;
@@ -196,13 +198,11 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
   for (Int_t i = 0; i < nentries; i++)
   {
     tree->GetEntry(i);
-
-    if (event_3CR==0 && (event_type==0 || event_type==1) && n_bjets == 0 &&
-    dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    
+    //Any additional criteria is already accounted for during the sample files generation
+    //FID.VOLUME: 80 < M2Lep < 100, met_tst > 70, dLepR < 1.8, dMetZPhi > 2.2
+    if (dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     {
-     
-    // if (event_3CR==0 && (event_type==0 || event_type==1) && dLepR < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
-    // {
       signal = signal + weight;
       signaler = signaler + weight * weight;
     }
@@ -232,20 +232,21 @@ void PSO()
 
   //------------PSO ALGORITHM------------//
 
-  int iterations = 40;
-  int n_particles = 15;
+  int iterations = 20;
+  int n_particles = 20;
 
   Float_t max_signal[n_particles];
   Float_t max_signal_er[n_particles];
   Float_t max_significance[n_particles];
   Float_t gbest[4];
   Int_t   is_new_gbest = 0;
+  Int_t   is_new_pbest = 0;
   Float_t gbest_significance = -1;
   vector<Float_t> gbest_vector;
 
   //Search space Boundaries {min, max}
   Float_t bounds[4][2] = {  
-      {1.2, 2.4},           // dLepR bounds
+      {1.2, 1.8},           // dLepR bounds
       {2.2, 3.},            // dMetZPhi bounds
       {90.0, 120.0},        // met_tst bounds
       {0.5, 0.8}            // MetOHT bounds
@@ -456,6 +457,8 @@ void PSO()
         max_significance[j] = particle.significance;
         max_signal[j] = particle.signal[0];
         max_signal_er[j] = particle.signal[1];
+
+        is_new_pbest = is_new_pbest + 1;
   
         for (int index = 0; index < 4; ++index)
         {
@@ -486,7 +489,7 @@ void PSO()
         cout << "   Unable to calculate particle significance  " << particle.significance <<  endl;
       }
 
-      print_particle(particle, gbest, is_new_gbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
+      print_particle(particle, gbest, is_new_gbest, is_new_pbest, gbest_significance, max_significance, max_signal, max_signal_er, i, j);
     }
 
     // Update the swarm for the next iteration
