@@ -105,8 +105,8 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[3][2], Float_t
   // float_t w_min = 0.6;
   // float_t w_max = 0.9;
   // float_t w = w_max - (w_max - w_min) * i / iterations;
-  float_t w = 0.7;
-  float_t cmax = 1.47;   
+  float_t w = 0.6;
+  float_t cmax = 1.62;   
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
   //Clerc p.40 - (w, cmax) = (0.7, 1.47) or (0.6, 1.62)
@@ -526,7 +526,7 @@ void PSO()
     Float_t x2 = 0.88, y2 = 0.28;
 
     char label[50];
-    sprintf(label, "Global Best: (%.3f, %.3f, %.2f, %.3f)", gbest[0], gbest[1], gbest[2], gbest[3]);
+    sprintf(label, "Global Best: (%.3f, %.3f, %.2f, %.3f)", gbest[0], gbest[1], gbest[2]);
 
     // Adjust legend size to fit the parameter value
     TLegend *legend = new TLegend(x1, y1, x2, y2);

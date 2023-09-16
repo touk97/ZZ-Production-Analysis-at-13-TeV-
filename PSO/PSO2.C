@@ -105,8 +105,8 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], Float_t
   // float_t w_min = 0.6;
   // float_t w_max = 0.9;
   // float_t w = w_max - (w_max - w_min) * i / iterations;
-  float_t w = 0.7;
-  float_t cmax = 1.47;   
+  float_t w = 0.6;
+  float_t cmax = 1.62;   
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
   //Clerc p.40 - (w, cmax) = (0.7, 1.47) or (0.6, 1.62)
