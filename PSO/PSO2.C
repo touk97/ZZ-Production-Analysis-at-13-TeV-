@@ -1,4 +1,4 @@
-//Particle Swarm optimization algorithm for background estimation - 3 variables optimization
+//Particle Swarm optimization algorithm for background estimation - 4 variables optimization
 
 //ROOT headers
 #include <TFile.h>
@@ -53,9 +53,9 @@ private:
 
 struct particle
 {
-  Float_t position[3];
-  Float_t pbest[3];
-  Float_t velocity[3];
+  Float_t position[4];
+  Float_t pbest[4];
+  Float_t velocity[4];
   Float_t signal[2];
   Float_t significance;
 };
@@ -65,15 +65,15 @@ void print_particle(const particle& p, Float_t *gbest, Int_t is_new_gbest, Int_t
 {
   cout << "    ------------------------------------------------------------------------------" << endl;
   cout << "                                   Particle (" << i + 1 << ", " << j + 1 << "):" << endl << endl; 
-  cout << "    Position:                            (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << ")" << endl  << endl;
-  cout << "    Best Position:                       (" << p.pbest[0] << ", " << p.pbest[1] << ", " << p.pbest[2] << ")" << endl  << endl;
+  cout << "    Position:                            (" << p.position[0] << ", " << p.position[1] << ", " << p.position[2] << ", " << p.position[3] << ")" << endl  << endl;
+  cout << "    Best Position:                       (" << p.pbest[0] << ", " << p.pbest[1] << ", " << p.pbest[2] << ", " << p.pbest[3] << ")" << endl  << endl;
   cout << "    Best Position has been updated:      "  << is_new_pbest << endl  << endl;
-  cout << "    Velocity:                            (" << p.velocity[0] << ", " << p.velocity[1] << ", " << p.velocity[2] <<  ")" << endl  << endl;
+  cout << "    Velocity:                            (" << p.velocity[0] << ", " << p.velocity[1] << ", " << p.velocity[2] << ", " << p.velocity[3] << ")" << endl  << endl;
   cout << "    Current Signal:                      "  << p.signal[0] << " +- " << p.signal[1] << endl << endl;
   cout << "    Max Signal:                          "  << max_signal[j] << " +- " << max_signal_er[j] << endl << endl;
   cout << "    Current Significance:                "  << p.significance << endl << endl;
   cout << "    Max Significance:                    "  << max_significance[j] << endl << endl;   
-  cout << "    Global Best:                         (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ")" << endl  << endl;
+  cout << "    Global Best:                         (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ")" << endl  << endl;
   cout << "    Global Best has been updated:        "  << is_new_gbest << endl  << endl;
   cout << "    Global Max Significance:             "  << gbest_significance << endl << endl;   
   cout << "    ----------------------------------------------------------------------------" << endl << endl;
@@ -81,7 +81,7 @@ void print_particle(const particle& p, Float_t *gbest, Int_t is_new_gbest, Int_t
 
 
 //Apply boundaries on particles 
-void apply_bounds(vector<vector<particle>> &swarm, Float_t bounds[3][2], int i, int j, int k)
+void apply_bounds(vector<vector<particle>> &swarm, Float_t bounds[4][2], int i, int j, int k)
 {
   if (swarm[i][j].position[k] <= bounds[k][0])
   {
@@ -96,7 +96,7 @@ void apply_bounds(vector<vector<particle>> &swarm, Float_t bounds[3][2], int i, 
 }
 
 //Update the search space particles before entering next iteration
-void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[3][2], Float_t *gbest, int i, int iterations, int n_particles)
+void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[4][2], Float_t *gbest, int i, int iterations, int n_particles)
 {
   uniform_real_distribution<> uni_dist(0., 1.);
   random_device rd;
@@ -164,7 +164,7 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
       // "leading_pT_lepton",
       // "subleading_pT_lepton",
       // "Z_pT",
-      // "n_jets",
+      "n_jets",
       // "n_bjets",
       // "detajj",
       // "mjj",
@@ -186,6 +186,7 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
   tree->SetBranchAddress("met_signif", &met_signif);
   tree->SetBranchAddress("dMetZPhi", &dMetZPhi);
   tree->SetBranchAddress("MetOHT", &MetOHT);
+  tree->SetBranchAddress("n_jets", &n_jets);
   tree->SetBranchAddress("global_weight", &weight);
 
   Double_t signal = 0.;
@@ -198,7 +199,7 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
     
     //Any additional criteria is already accounted for during the sample files generation
     //FID.VOLUME: 80 < M2Lep < 100, met_tst > 70, dLepR < 1.8, dMetZPhi > 2.2
-    if (dMetZPhi > particle.position[0] && met_tst > particle.position[1] && MetOHT > particle.position[2])
+    if (n_jets < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     {
       signal = signal + weight;
       signaler = signaler + weight * weight;
@@ -216,14 +217,14 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
 
 
 //Main
-void PSO()
+void PSO2()
 {
 
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
   // Output log file
-  ofstream logFile("./PSO.txt");
+  ofstream logFile("./PSO2.txt");
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
   std::streambuf *oldBuffer = std::cout.rdbuf(&dualBuffer);
 
@@ -241,11 +242,12 @@ void PSO()
   Float_t gbest_significance = -1;
   vector<Float_t> gbest_vector;
 
-  //Search space Boundaries {min, max}
-  Float_t bounds[3][2] = {  
-      {2.2, 3.},            // dMetZPhi bounds
-      {90.0, 120.0},        // met_tst bounds
-      {0.5, 0.8}            // MetOHT bounds
+  // Search space Boundaries {min, max}
+  Float_t bounds[4][2] = {
+      {1, 8},    // n_jets bounds
+      {2.2, 3.},     // dMetZPhi bounds
+      {90.0, 120.0}, // met_tst bounds
+      {0.5, 0.8}     // MetOHT bounds
   };
 
   for (int index = 0; index < 4; index++) {gbest[index] = -1;}
@@ -254,14 +256,16 @@ void PSO()
   
 
   // Position uniform distributions
-  uniform_real_distribution<> uni_dMetZPhi(bounds[0][0], bounds[0][1]);
-  uniform_real_distribution<> uni_met_tst(bounds[1][0], bounds[1][1]);
-  uniform_real_distribution<> uni_MetOHT(bounds[2][0], bounds[2][1]);
+  uniform_real_distribution<> uni_n_jets(bounds[0][0], bounds[0][1]);
+  uniform_real_distribution<> uni_dMetZPhi(bounds[1][0], bounds[1][1]);
+  uniform_real_distribution<> uni_met_tst(bounds[2][0], bounds[2][1]);
+  uniform_real_distribution<> uni_MetOHT(bounds[3][0], bounds[3][1]);
 
   // Velocity uniform distributions
-  uniform_real_distribution<> uni_dMetZPhi2(-fabs(bounds[0][1] - bounds[0][0]), fabs(bounds[0][1] - bounds[0][0])); // bounds (-|min-max|, |min-max|)
-  uniform_real_distribution<> uni_met_tst2(-fabs(bounds[1][1] - bounds[1][0]), fabs(bounds[1][1] - bounds[1][0]));
-  uniform_real_distribution<> uni_MetOHT2(-fabs(bounds[2][1] - bounds[2][0]), fabs(bounds[2][1] - bounds[2][0]));
+  uniform_real_distribution<> uni_n_jets2(-fabs(bounds[0][1] - bounds[0][0]), fabs(bounds[0][1] - bounds[0][0])); // bounds (-|min-max|, |min-max|)
+  uniform_real_distribution<> uni_dMetZPhi2(-fabs(bounds[1][1] - bounds[1][0]), fabs(bounds[1][1] - bounds[1][0]));
+  uniform_real_distribution<> uni_met_tst2(-fabs(bounds[2][1] - bounds[2][0]), fabs(bounds[2][1] - bounds[2][0]));
+  uniform_real_distribution<> uni_MetOHT2(-fabs(bounds[3][1] - bounds[3][0]), fabs(bounds[3][1] - bounds[3][0]));
 
   random_device rd;
   mt19937 gen(rd());
@@ -273,17 +277,20 @@ void PSO()
   {
     particle &particle = swarm[0][j]; // Define the particle
     // Initialize position
-    particle.position[0] = uni_dMetZPhi(gen);
-    particle.position[1] = uni_met_tst(gen);
-    particle.position[2] = uni_MetOHT(gen);
+    particle.position[0] = uni_n_jets(gen);
+    particle.position[1] = uni_dMetZPhi(gen);
+    particle.position[2] = uni_met_tst(gen);
+    particle.position[3] = uni_MetOHT(gen);
     // Initialize pbest
     particle.pbest[0] = particle.position[0];
     particle.pbest[1] = particle.position[1];
     particle.pbest[2] = particle.position[2];
+    particle.pbest[3] = particle.position[3];
     // Initialize velocity
-    particle.velocity[0] = uni_dMetZPhi2(gen);
-    particle.velocity[1] = uni_met_tst2(gen);
-    particle.velocity[2] = uni_MetOHT2(gen);
+    particle.velocity[0] = uni_n_jets2(gen);
+    particle.velocity[1] = uni_dMetZPhi2(gen);
+    particle.velocity[2] = uni_met_tst2(gen);
+    particle.velocity[3] = uni_MetOHT2(gen);
   }
 
   // Load root files
@@ -451,7 +458,7 @@ void PSO()
 
         is_new_pbest = is_new_pbest + 1;
   
-        for (int index = 0; index < sizeof(particle.position) / sizeof(particle.position[0]); ++index)
+        for (int index = 0; index < 4; ++index)
         {
           particle.pbest[index] = particle.position[index];
         }
@@ -462,7 +469,7 @@ void PSO()
           
           is_new_gbest = is_new_gbest + 1;
 
-          for (int index = 0; index < sizeof(particle.pbest) / sizeof(particle.pbest[0]); ++index)
+          for (int index = 0; index < 4; ++index)
           {
             gbest[index] = particle.pbest[index];
           }
@@ -470,7 +477,7 @@ void PSO()
       }
       else if (particle.significance < max_significance[j] && particle.significance != 0)
       {
-        for (int index = 0; index < sizeof(particle.pbest) / sizeof(particle.pbest[0]); ++index)
+        for (int index = 0; index < 4; ++index)
         {
           particle.pbest[index] = swarm[i - 1][j].pbest[index];
         }
@@ -538,12 +545,12 @@ void PSO()
 
     c->SetGrid();
     c->Draw();
-    c->SaveAs("significance_vs_iterations.png");
+    c->SaveAs("significance_vs_iterations2.png");
   }
 
   cout << "   --------------------------------------------------------------------------" << endl << endl;
   cout << "   Max significance:      "  << gbest_significance << endl;
-  cout << "   Best position:        (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ") " << endl;
+  cout << "   Best position:        (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ", " << gbest[3] << ") " << endl;
   cout << "   --------------------------------------------------------------------------" << endl << endl;
 
   
