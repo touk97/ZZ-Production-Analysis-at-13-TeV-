@@ -102,11 +102,11 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[3][2], Float_t
   random_device rd;
   mt19937 gen(rd());
 
-  // float_t w_min = 0.6;
-  // float_t w_max = 0.9;
-  // float_t w = w_max - (w_max - w_min) * i / iterations;
-  float_t w = 0.6;
-  float_t cmax = 1.62;   
+  float_t w_min = 0.4;
+  float_t w_max = 0.9;
+  float_t w = w_max - (w_max - w_min) * i /  iterations;
+  // float_t w = 0.4;
+  float_t cmax = 1.47;   
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
   //Clerc p.40 - (w, cmax) = (0.7, 1.47) or (0.6, 1.62)
@@ -229,7 +229,7 @@ void PSO()
 
   //------------PSO ALGORITHM------------//
 
-  int iterations = 20;
+  int iterations = 200;
   int n_particles = 20;
 
   Float_t max_signal[n_particles];
@@ -242,10 +242,11 @@ void PSO()
   vector<Float_t> gbest_vector;
 
   //Search space Boundaries {min, max}
-  Float_t bounds[3][2] = {  
-      {2.2, 3.},            // dMetZPhi bounds
-      {90.0, 120.0},        // met_tst bounds
-      {0.5, 0.8}            // MetOHT bounds
+  Float_t bounds[3][2] = 
+  {  
+    {2.2, 3.2},            // dMetZPhi bounds
+    {90.0, 150.0},        // met_tst bounds
+    {0., 1.2}            // MetOHT bounds
   };
 
   for (int index = 0; index < 4; index++) {gbest[index] = -1;}
@@ -259,9 +260,9 @@ void PSO()
   uniform_real_distribution<> uni_MetOHT(bounds[2][0], bounds[2][1]);
 
   // Velocity uniform distributions
-  uniform_real_distribution<> uni_dMetZPhi2(-fabs(bounds[0][1] - bounds[0][0]), fabs(bounds[0][1] - bounds[0][0])); // bounds (-|min-max|, |min-max|)
-  uniform_real_distribution<> uni_met_tst2(-fabs(bounds[1][1] - bounds[1][0]), fabs(bounds[1][1] - bounds[1][0]));
-  uniform_real_distribution<> uni_MetOHT2(-fabs(bounds[2][1] - bounds[2][0]), fabs(bounds[2][1] - bounds[2][0]));
+  uniform_real_distribution<> uni_dMetZPhi2(-fabs(bounds[0][1] - bounds[0][0])/2, fabs(bounds[0][1] - bounds[0][0])/2); // bounds (-|min-max|, |min-max|)
+  uniform_real_distribution<> uni_met_tst2(-fabs(bounds[1][1] - bounds[1][0])/2, fabs(bounds[1][1] - bounds[1][0])/2);
+  uniform_real_distribution<> uni_MetOHT2(-fabs(bounds[2][1] - bounds[2][0])/2, fabs(bounds[2][1] - bounds[2][0])/2);
 
   random_device rd;
   mt19937 gen(rd());
@@ -512,6 +513,7 @@ void PSO()
     // Use a single distinctive marker style
     graph->SetMarkerStyle(29);
     graph->SetMarkerSize(2);
+    graph->SetMarkerColor(kRed);
     graph->SetLineColor(kBlack);
 
     for (int i = 0; i < gbest_vector.size(); ++i)
@@ -523,16 +525,16 @@ void PSO()
 
     Float_t current_best = gbest_vector[gbest_vector.size() - 1];
     Float_t x1 = 0.58, y1 = 0.12;
-    Float_t x2 = 0.88, y2 = 0.28;
+    Float_t x2 = 0.89, y2 = 0.28;
 
     char label[50];
-    sprintf(label, "Global Best: (%.3f, %.3f, %.2f, %.3f)", gbest[0], gbest[1], gbest[2]);
+    sprintf(label, "Global Best: (%.3f, %.3f, %.2f)", gbest[0], gbest[1], gbest[2]);
 
     // Adjust legend size to fit the parameter value
     TLegend *legend = new TLegend(x1, y1, x2, y2);
-    legend->SetMargin(0.15);
-    legend->SetTextSize(0.02);
-    legend->AddEntry((TObject *)0, Form("Current Best: %.3f", current_best), "");
+    legend->SetMargin(0.02);
+    legend->SetTextSize(0.028);
+    legend->AddEntry((TObject *)0, Form("Best Significance: %.3f", current_best), "");
     legend->AddEntry((TObject *)0, label, "");
     legend->Draw();
 
@@ -543,7 +545,7 @@ void PSO()
 
   cout << "   --------------------------------------------------------------------------" << endl << endl;
   cout << "   Max significance:      "  << gbest_significance << endl;
-  cout << "   Best position:        (" << gbest[0] << ", " << gbest[1] << ", " << gbest[2] << ") " << endl;
+  cout << "   Best position:        (" << gbest [0] << ", " << gbest[1] << ", " << gbest[2] << ") " << endl;
   cout << "   --------------------------------------------------------------------------" << endl << endl;
 
   
