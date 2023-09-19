@@ -65,18 +65,19 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
       "dMetZPhi",
       "MetOHT",
       "dLepR",
-      "M2Lep",
+      // "M2Lep",
       "leading_pT_lepton",
       "subleading_pT_lepton",
       "Z_pT",
       "n_jets",
       "n_bjets",
-      "detajj",
-      "mjj",
-      "leading_jet_pt",
-      "second_jet_pt",
-      "event_3CR",
-      "event_type",
+      "Z_rapidity",
+      // "detajj",
+      // "mjj",
+      // "leading_jet_pt",
+      // "second_jet_pt",
+      // "event_3CR",
+      // "event_type",
       "global_weight"};
 
       
@@ -120,7 +121,9 @@ vector<Float_t> Counter(TTree *tree, TH1F *hist, string directory)
     if (directory == "SR")
     {
       //SR SAMPLE -> FID.VOLUME: 80 < M2Lep < 100, met_tst > 70, dLepR < 1.8, dMetZPhi > 2.2, nbjets < 1, (event_3CR == 0 && (event_type == 0 || event_type == 1)
-      if (dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65 )
+      // if (dLepR < 1.74 && dMetZPhi > 2.3 && met_tst > 101 && MetOHT > 0.66)
+      if ( dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
+      // if (dMetZPhi > 2.5 && met_tst > 101.5 && MetOHT > 0.74)
       {
         // Inclusive
         signal = signal + weight;
@@ -191,18 +194,19 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
       "dMetZPhi",
       "MetOHT",
       "dLepR",
-      "M2Lep",
-      // "leading_pT_lepton",
-      // "subleading_pT_lepton",
+      // "M2Lep",
+      "leading_pT_lepton",
+      "subleading_pT_lepton",
       "Z_pT",
       "n_jets",
       "n_bjets",
-      "detajj",
-      "mjj",
+      "Z_rapidity",
+      // "detajj",
+      // "mjj",
       // "leading_jet_pt",
       // "second_jet_pt",
-      "event_3CR",
-      "event_type",
+      // "event_3CR",
+      // "event_type",
       "global_weight"};
 
 
@@ -250,7 +254,9 @@ vector<Float_t> ZCounter(TTree *tree, TH1F *hist0, TH1F *hist1, TH1F *hist2, str
     if (directory == "SR")
     {
       //SR SAMPLE -> FID.VOLUME: 80 < M2Lep < 100, met_tst > 70, dLepR < 1.8, dMetZPhi > 2.2, nbjets < 1, (event_3CR == 0 && (event_type == 0 || event_type == 1)
-      if (dLepR < 1.8 && dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
+      // if (dLepR < 1.74 && dMetZPhi > 2.3 && met_tst > 101 && MetOHT > 0.66)
+      if ( dMetZPhi > 2.7 && met_tst > 110 && MetOHT > 0.65)
+      // if (dMetZPhi > 2.69 && met_tst > 101.5 && MetOHT > 0.74)
       {
         if (n_jets < 1)
         {
@@ -377,7 +383,7 @@ void plot_info(string directory, Int_t right_corner, TH1F *hist_data, TH1F *hist
       tex3 = new TLatex(0.6, 0.45, "Zjets2 Control Region");
     }
 
-    tex4 = new TLatex(0.65, 0.4, "Cuts Applied");
+    tex4 = new TLatex(0.6, 0.4, "Cuts Applied");
   }
   else
   {
@@ -451,6 +457,12 @@ void plot_info(string directory, Int_t right_corner, TH1F *hist_data, TH1F *hist
   tex3->SetTextSize(0.04);
   tex3->SetLineWidth(1);
   tex3->Draw();
+
+  tex4->SetNDC();
+  tex4->SetTextFont(1);
+  tex4->SetTextSize(0.04);
+  tex4->SetLineWidth(1);
+  tex4->Draw();
 
   leg->SetBorderSize(0);
   leg->SetTextSize(0.03);
@@ -534,7 +546,7 @@ void zjets_splitted_sc()
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("../../cro/zjets_splitted_sc/zjets_splitted_sc.txt");
+  ofstream logFile("./zjets_splitted_sc/zjets_splitted_sc.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
@@ -843,6 +855,23 @@ void zjets_splitted_sc()
     Float_t events_othr = n_llll[0] + n_llqq[0] + n_VVV[0] + n_Wjets[0] + n_Ztt[0] + n_WZjj[0] + n_lllljj[0] + n_llvvjj_WW[0];
     Float_t events_othr_er = sqrt(pow(n_llll[1], 2) + pow(n_llqq[1], 2) + pow(n_VVV[1], 2) + pow(n_Wjets[1], 2) + pow(n_Ztt[1], 2) + pow(n_WZjj[1], 2) + pow(n_lllljj[1], 2) + pow(n_llvvjj_WW[1], 2));
 
+    Double_t S;
+    Double_t B;
+    Double_t Z;
+
+    if (directory == "SR")
+    {
+
+      B = events_top + events_WW + events_WZ + events_Zjets0 + events_Zjets1 + events_Zjets2;
+      S = signal_mc;
+
+      if (B > 0 && S > 0)
+      {
+        Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+      }
+
+      cout << "   Significance for signal mc:   " << Z << endl<< endl;
+    }
 
     //Scaling factors calculations 
 
@@ -982,61 +1011,61 @@ void zjets_splitted_sc()
     }
     
     //Scale histograms before adding and plotting
-    if (directory == "emCR_B")
+    if (directory == "3lCR")
     {
        for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
        {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-       }
-    }
-    if (directory == "emCR_A")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-       }
-    }
-    if (directory == "Zjets0")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-       }
-    }
-    if (directory == "Zjets1")
-    {
-       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
-        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
+          hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
        }
     }
     else if (directory == "Zjets2")
     {
        for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
-       {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+       {   
         hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+       }
+    }
+    else if (directory == "Zjets1")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_Zjets2->SetBinContent(bin, hist_Zjets2->GetBinContent(bin) * sf_Zjets2);
+       }
+    }
+    else if (directory == "Zjets0")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_Zjets2->SetBinContent(bin, hist_Zjets2->GetBinContent(bin) * sf_Zjets2);
         hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
+       }
+    }
+    else if (directory == "emCR_A")
+    {
+       for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
+       {
+        hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
+        hist_Zjets2->SetBinContent(bin, hist_Zjets2->GetBinContent(bin) * sf_Zjets2);
+        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
+        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
        }
     }
     else if (directory == "SR")
     {
        for (int bin = 1; bin < sizeof(xbins) / sizeof(xbins[0]); bin++)
        {
-        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
         hist_top->SetBinContent(bin, hist_top->GetBinContent(bin) * sf_emuB);
-        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
-        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
-        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
+        hist_WZ->SetBinContent(bin, hist_WZ->GetBinContent(bin) * sf_3lCR);
         hist_Zjets2->SetBinContent(bin, hist_Zjets2->GetBinContent(bin) * sf_Zjets2);
+        hist_Zjets1->SetBinContent(bin, hist_Zjets1->GetBinContent(bin) * sf_Zjets1);
+        hist_Zjets0->SetBinContent(bin, hist_Zjets0->GetBinContent(bin) * sf_Zjets0);
+        hist_WW->SetBinContent(bin, hist_WW->GetBinContent(bin) * sf_emuA);
        }
     }
 
@@ -1064,26 +1093,34 @@ void zjets_splitted_sc()
       hist_signal_reco->Add(hist_data);
       hist_signal_reco->Add(hist_WZ, -1);
 
-      for (int bin = 1; bin < hist_signal_reco->GetSize(); ++bin)
+      for (int bin = 1; bin < hist_signal->GetSize(); ++bin)
       {
-       Double_t B = hist_WZ->GetBinContent(bin);
-       Double_t S = hist_signal_reco->GetBinContent(bin);
+        B = hist_WZ->GetBinContent(bin);
+        S = hist_signal->GetBinContent(bin);
 
-       if (B > 0 && S > 0)
-       {
-         Double_t Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
-         // cout << "B=" << B << ", S=" << S << ", Z_bin=" << Z_bin << endl;
-         hist_signal_sig->SetBinContent(bin, Z);
-         if (Z > Z_max)
-         {
-           Z_max = Z;
-           Bin_max = hist_signal_sig->GetBinLowEdge(bin);
-         }
-        
-       }
+        if (B > 0 && S > 0)
+        {
+          Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+          // cout << "B=" << B << ", S=" << S << ", Z_bin=" << Z_bin << endl;
+          hist_signal_sig->SetBinContent(bin, Z);
+          if (Z > Z_max)
+          {
+            Z_max = Z;
+            Bin_max = hist_signal_sig->GetBinLowEdge(bin);
+          }
+        }
       }
 
-      cout << "   SIGNAL INTEGRAL IS:   " << hist_signal_reco->Integral(1, hist_signal_reco->GetNbinsX()) << endl << endl;
+      B = events_bkg;
+      S = signal_mc;
+
+      if (B > 0 && S > 0)
+      {
+        Z = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
+      }
+
+      cout << "   Significance mc after scaling is:   " << Z << endl << endl;
+      cout << "   RECO INTEGRAL IS:   " << hist_signal_reco->Integral(1, hist_signal_reco->GetNbinsX()) << endl << endl;
 
       //Print calculated events for every region
     
@@ -1242,7 +1279,7 @@ void zjets_splitted_sc()
     }
 
 
-    Int_t right_corner = 0; //For use to choose corner to plot information
+    Int_t right_corner = 1; //For use to choose corner to plot information
     plot_info(directory, right_corner, hist_data, hist_signal, hist_signal_reco, hist_WZ, hist_WW, hist_Zjets, hist_top, hist_othr);
 
     pad1->RedrawAxis();
@@ -1317,31 +1354,31 @@ void zjets_splitted_sc()
     
     if (directory == "SR")
     {
-      c1->SaveAs("../../cro/zjets_splitted_sc/ptz_SR_splitted_sc.png");
+      c1->SaveAs("./zjets_splitted_sc/ptz_SR_splitted_sc.png");
     }
     else if (directory == "3lCR")
     {
-      c2->SaveAs("../../cro/zjets_splitted_sc/ptz_3lCR_splitted_sc.png");
+      c2->SaveAs("./zjets_splitted_sc/ptz_3lCR_splitted_sc.png");
     }
     else if (directory == "emCR_B")
     {
-      c3->SaveAs("../../cro/zjets_splitted_sc/ptz_emCR_B_splitted_sc.png");
+      c3->SaveAs("./zjets_splitted_sc/ptz_emCR_B_splitted_sc.png");
     }
     else if (directory == "emCR_A")
     {
-      c4->SaveAs("../../cro/zjets_splitted_sc/ptz_emCR_A_splitted_sc.png");
+      c4->SaveAs("./zjets_splitted_sc/ptz_emCR_A_splitted_sc.png");
     }
     else if (directory == "Zjets0")
     {
-      c5->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets0_splitted_sc.png");
+      c5->SaveAs("./zjets_splitted_sc/ptz_Zjets0_splitted_sc.png");
     }
     else if (directory == "Zjets1")
     {
-      c6->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets1_splitted_sc.png");
+      c6->SaveAs("./zjets_splitted_sc/ptz_Zjets1_splitted_sc.png");
     }
     else if (directory == "Zjets2")
     {
-      c7->SaveAs("../../cro/zjets_splitted_sc/ptz_Zjets2_splitted_sc.png");
+      c7->SaveAs("./zjets_splitted_sc/ptz_Zjets2_splitted_sc.png");
     }
 
 
