@@ -110,10 +110,10 @@ void update_swarm(vector<vector<particle>> &swarm, Float_t bounds[3][2], Float_t
   random_device rd;
   mt19937 gen(rd());
 
-  float_t w_min = 0.4;
-  float_t w_max = 0.9;
-  float_t w = w_max - (w_max - w_min) * i /  iterations;
-  // float_t w = 0.4;
+  // float_t w_min = 0.4;
+  // float_t w_max = 0.9;
+  // float_t w = w_max - (w_max - w_min) * i /  iterations;
+  float_t w = 0.7;
   float_t cmax = 1.47;   
   float_t r1 = uni_dist(gen);
   float_t r2 = uni_dist(gen);
@@ -256,7 +256,7 @@ void PSO()
   {  
     {2.2, 3.},          // dMetZPhi bounds
     {90.0, 140.0},       // met_tst bounds
-    {0., 1.}            // MetOHT bounds
+    {0.5, 1.}            // MetOHT bounds
   };
 
   for (int index = 0; index < 4; index++) {gbest[index] = -1;}
@@ -264,10 +264,12 @@ void PSO()
   for (int index = 0; index < n_particles; index++) {max_signal[index] = -1; max_signal_er[index] = -1;}
 
   TCanvas *c1 = new TCanvas("c1", "Significance vs Iterations", 800, 600);
-  TCanvas *c2 = new TCanvas("c2", "Search Space 2D", 800, 600);
-  TCanvas *c3 = new TCanvas("c3", "Search Space 3D", 800, 600);
+  TCanvas *c2 = new TCanvas("c2", "Search Space met 2D", 800, 600);
+  TCanvas *c3 = new TCanvas("c3", "Search Space metoht 2D", 800, 600);
+  TCanvas *c4 = new TCanvas("c4", "Search Space 3D", 800, 600);
 
-  TH2F *hist2d = new TH2F("hist2d", "Search Space Histogram 2D", 30, bounds[0][0], bounds[0][1], 30, bounds[2][0], bounds[2][1]);
+  TH2F *hist2d_metoht = new TH2F("hist2d_metoht", "Search Space Histogram 2D", 30, bounds[0][0], bounds[0][1], 30, bounds[2][0], bounds[2][1]);
+  TH2F *hist2d_met = new TH2F("hist2d_met", "Search Space Histogram 2D", 30, bounds[0][0], bounds[0][1], 30, bounds[1][0], bounds[1][1]);
   TH3F *hist3d = new TH3F("hist3d", "Search Space Histogram 3D", 20, bounds[0][0], bounds[0][1], 20, bounds[1][0], bounds[1][1], 20, bounds[2][0], bounds[2][1]);
 
   // Position uniform distributions
@@ -461,7 +463,8 @@ void PSO()
       }
       
       //Plot every particle update
-      hist2d->Fill(particle.position[0], particle.position[2]);
+      hist2d_met->Fill(particle.position[0], particle.position[1]);
+      hist2d_metoht->Fill(particle.position[0], particle.position[2]);
       hist3d->Fill(particle.position[0], particle.position[1], particle.position[2]);
 
       if (particle.significance >= max_significance[j] && particle.significance != 0)
@@ -478,7 +481,8 @@ void PSO()
           particle.pbest[index] = particle.position[index];
         }
         // //Plot the particles with new pbest
-        // hist2d->Fill(particle.pbest[0], particle.pbest[2]);
+        // hist2d_metst->Fill(particle.position[0], particle.position[1]);
+        // hist2d_metoht->Fill(particle.pbest[0], particle.pbest[2]);
         // hist3d->Fill(particle.pbest[0], particle.pbest[1], particle.pbest[2]);
 
 
@@ -565,29 +569,42 @@ void PSO()
     legend->AddEntry((TObject *)0, label, "");
     legend->Draw();
 
+
     c2->cd();
     c2->SetRightMargin(0.15);
-    hist2d->GetXaxis()->SetTitle(" dMetZphi");
-    hist2d->GetYaxis()->SetTitle(" MetOHT");
-    hist2d->GetZaxis()->SetTitle(" Entries");
-    hist2d->SetTitle(" ");
-    hist2d->SetStats(0);
+    hist2d_met->GetXaxis()->SetTitle(" dMetZphi");
+    hist2d_met->GetYaxis()->SetTitle(" met_tst");
+    hist2d_met->GetZaxis()->SetTitle(" Entries");
+    hist2d_met->SetTitle(" ");
+    hist2d_met->SetStats(0);
     gStyle->SetPalette(kRainBow);
-    // hist2d->SetContour(1000);
-    hist2d->Draw("COLZ");
-    // hist2d->Draw("LEGO2Z");
-    
+    // hist2d_met->SetContour(1000);
+    hist2d_met->Draw("COLZ");
+    // hist2d_met->Draw("LEGO2Z");
 
     c3->cd();
+    c3->SetRightMargin(0.15);
+    hist2d_metoht->GetXaxis()->SetTitle(" dMetZphi");
+    hist2d_metoht->GetYaxis()->SetTitle(" MetOHT");
+    hist2d_metoht->GetZaxis()->SetTitle(" Entries");
+    hist2d_metoht->SetTitle(" ");
+    hist2d_metoht->SetStats(0);
+    gStyle->SetPalette(kRainBow);
+    // hist2d_metoht->SetContour(1000);
+    hist2d_metoht->Draw("COLZ");
+    // hist2d_metoht->Draw("LEGO2Z");
+    
+
+    c4->cd();
     hist3d->GetXaxis()->SetTitle(" dMetZphi");
     hist3d->GetYaxis()->SetTitle(" met_tst");
     hist3d->GetZaxis()->SetTitle(" metOHT");
     hist3d->SetTitle(" ");
     hist3d->SetStats(0);
     // hist3d->SetContour(1000);
-    // c3->SetRightMargin(0.15);
+    // c4->SetRightMargin(0.15);
     gStyle->SetPalette(kRainBow);
-    // hist2d->Draw("LEGO3Z");
+    // hist3d->Draw("LEGO3Z");
     hist3d->Draw("BOX2 Z");
 
 
@@ -595,19 +612,27 @@ void PSO()
     c1->Draw();
     c1->SaveAs("significance_vs_iterations.png");
 
+
     c2->Draw();
-    
-    //Save a 2d histogram every 10 iters to study the progress
-    if ((i+1) % 10 == 0)
+    if ((i+1) % 5 == 0)
     {
-      string framename = "./frames/iter_" + to_string(i+1) + ".png"; 
+      string framename = "./frames/met/met_iter_" + to_string(i+1) + ".png"; 
       c2->SaveAs(framename.c_str());
     }
+    c2->SaveAs("search_space_met_2d.png");
 
-    c2->SaveAs("search_space_plot_2d.png");
 
     c3->Draw();
-    c3->SaveAs("search_space_plot_3d.png");
+    if ((i+1) % 5 == 0)
+    {
+      string framename = "./frames/metoht/metoht_iter_" + to_string(i+1) + ".png"; 
+      c3->SaveAs(framename.c_str());
+    }
+    c3->SaveAs("search_space_metoht_2d.png");
+
+
+    c4->Draw();
+    c4->SaveAs("search_space_plot_3d.png");
 
 
   }
