@@ -5,10 +5,14 @@
 #include <TROOT.h>
 #include <TTree.h>
 #include <TH1.h>
+#include <TH2.h>
+#include <TH3.h>
+#include <TF1.h>
+#include <TStyle.h>
 #include <TCanvas.h>
 #include <TGraph.h>
 #include <TLegend.h>
-#include <TF1.h>
+#include <TBrowser.h>
 
 
 //Cpp headers
@@ -83,15 +87,19 @@ void print_particle(const particle& p, Float_t *gbest, Int_t is_new_gbest, Int_t
 //Apply boundaries on particles 
 void apply_bounds(vector<vector<particle>> &swarm, Float_t bounds[3][2], int i, int j, int k)
 {
+  uniform_real_distribution<> uni_dist(0, 1);
+  random_device rd;
+  mt19937 gen(rd());
+
   if (swarm[i][j].position[k] <= bounds[k][0])
   {
     swarm[i][j].position[k] = bounds[k][0];
-    swarm[i][j].velocity[k] = 0;
+    swarm[i][j].velocity[k] = -swarm[i][j].velocity[k] * uni_dist(gen);
   }
   else if (swarm[i][j].position[k] > bounds[k][1])
   {
     swarm[i][j].position[k] = bounds[k][1];
-    swarm[i][j].velocity[k] = 0;
+    swarm[i][j].velocity[k] = -swarm[i][j].velocity[k] * uni_dist(gen);
   }
 }
 
@@ -219,6 +227,8 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
 void PSO()
 {
 
+  gROOT->SetBatch(kTRUE); // Disable plot popups
+
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
@@ -229,7 +239,7 @@ void PSO()
 
   //------------PSO ALGORITHM------------//
 
-  int iterations = 200;
+  int iterations = 80;
   int n_particles = 20;
 
   Float_t max_signal[n_particles];
@@ -244,15 +254,21 @@ void PSO()
   //Search space Boundaries {min, max}
   Float_t bounds[3][2] = 
   {  
-    {2.2, 3.2},            // dMetZPhi bounds
-    {90.0, 150.0},        // met_tst bounds
-    {0., 1.2}            // MetOHT bounds
+    {2.2, 3.},          // dMetZPhi bounds
+    {90.0, 140.0},       // met_tst bounds
+    {0., 1.}            // MetOHT bounds
   };
 
   for (int index = 0; index < 4; index++) {gbest[index] = -1;}
   for (int index = 0; index < n_particles; index++) {max_significance[index] = -1;}
   for (int index = 0; index < n_particles; index++) {max_signal[index] = -1; max_signal_er[index] = -1;}
-  
+
+  TCanvas *c1 = new TCanvas("c1", "Significance vs Iterations", 800, 600);
+  TCanvas *c2 = new TCanvas("c2", "Search Space 2D", 800, 600);
+  TCanvas *c3 = new TCanvas("c3", "Search Space 3D", 800, 600);
+
+  TH2F *hist2d = new TH2F("hist2d", "Search Space Histogram 2D", 30, bounds[0][0], bounds[0][1], 30, bounds[2][0], bounds[2][1]);
+  TH3F *hist3d = new TH3F("hist3d", "Search Space Histogram 3D", 20, bounds[0][0], bounds[0][1], 20, bounds[1][0], bounds[1][1], 20, bounds[2][0], bounds[2][1]);
 
   // Position uniform distributions
   uniform_real_distribution<> uni_dMetZPhi(bounds[0][0], bounds[0][1]);
@@ -433,7 +449,6 @@ void PSO()
       events_bkg = events_WZ + events_top + events_WW + events_Zjets + events_othr;
       events_bkg_er = sqrt(pow(events_WZ_er, 2) + pow(events_top_er, 2) + pow(events_WW_er, 2) + pow(events_Zjets, 2) + pow(events_othr_er, 2));
   
-  
       Float_t S = events_signal;
       Float_t B = events_bkg;
 
@@ -442,13 +457,19 @@ void PSO()
         particle.significance = sqrt(2 * ((S + B) * log(1 + (S / B)) - S));
         particle.signal[0] = events_signal;
         particle.signal[1] = events_signal_er;
+        
       }
+      
+      //Plot every particle update
+      hist2d->Fill(particle.position[0], particle.position[2]);
+      hist3d->Fill(particle.position[0], particle.position[1], particle.position[2]);
 
       if (particle.significance >= max_significance[j] && particle.significance != 0)
       { 
         max_significance[j] = particle.significance;
         max_signal[j] = particle.signal[0];
         max_signal_er[j] = particle.signal[1];
+        
 
         is_new_pbest = is_new_pbest + 1;
   
@@ -456,6 +477,10 @@ void PSO()
         {
           particle.pbest[index] = particle.position[index];
         }
+        // //Plot the particles with new pbest
+        // hist2d->Fill(particle.pbest[0], particle.pbest[2]);
+        // hist3d->Fill(particle.pbest[0], particle.pbest[1], particle.pbest[2]);
+
 
         if (particle.significance > gbest_significance)
         {
@@ -495,9 +520,10 @@ void PSO()
 
     // Graph significance vs iterations
 
-    gROOT->SetBatch(kTRUE); // Disable plot popups
 
-    TCanvas *c = new TCanvas("c", "Significance vs Iterations", 800, 600);
+    
+
+    c1->cd();
     TGraph *graph = new TGraph();
     graph->SetTitle("Significance vs Iterations");
     graph->GetXaxis()->SetTitle("Iterations");
@@ -515,6 +541,7 @@ void PSO()
     graph->SetMarkerSize(2);
     graph->SetMarkerColor(kRed);
     graph->SetLineColor(kBlack);
+
 
     for (int i = 0; i < gbest_vector.size(); ++i)
     {
@@ -538,10 +565,54 @@ void PSO()
     legend->AddEntry((TObject *)0, label, "");
     legend->Draw();
 
-    c->SetGrid();
-    c->Draw();
-    c->SaveAs("significance_vs_iterations.png");
+    c2->cd();
+    c2->SetRightMargin(0.15);
+    hist2d->GetXaxis()->SetTitle(" dMetZphi");
+    hist2d->GetYaxis()->SetTitle(" MetOHT");
+    hist2d->GetZaxis()->SetTitle(" Entries");
+    hist2d->SetTitle(" ");
+    hist2d->SetStats(0);
+    gStyle->SetPalette(kRainBow);
+    // hist2d->SetContour(1000);
+    hist2d->Draw("COLZ");
+    // hist2d->Draw("LEGO2Z");
+    
+
+    c3->cd();
+    hist3d->GetXaxis()->SetTitle(" dMetZphi");
+    hist3d->GetYaxis()->SetTitle(" met_tst");
+    hist3d->GetZaxis()->SetTitle(" metOHT");
+    hist3d->SetTitle(" ");
+    hist3d->SetStats(0);
+    // hist3d->SetContour(1000);
+    // c3->SetRightMargin(0.15);
+    gStyle->SetPalette(kRainBow);
+    // hist2d->Draw("LEGO3Z");
+    hist3d->Draw("BOX2 Z");
+
+
+    c1->SetGrid();
+    c1->Draw();
+    c1->SaveAs("significance_vs_iterations.png");
+
+    c2->Draw();
+    
+    //Save a 2d histogram every 10 iters to study the progress
+    if ((i+1) % 10 == 0)
+    {
+      string framename = "./frames/iter_" + to_string(i+1) + ".png"; 
+      c2->SaveAs(framename.c_str());
+    }
+
+    c2->SaveAs("search_space_plot_2d.png");
+
+    c3->Draw();
+    c3->SaveAs("search_space_plot_3d.png");
+
+
   }
+
+
 
   cout << "   --------------------------------------------------------------------------" << endl << endl;
   cout << "   Max significance:      "  << gbest_significance << endl;
