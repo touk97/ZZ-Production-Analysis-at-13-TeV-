@@ -148,14 +148,14 @@ std::vector<float> Counter(TTree *tree, TH1F *hist, Float_t dLepR_value, Float_t
 //
 //
 //
-int bro_plot()
+int bro_plot_primary()
 {
 
   // Timer start
   auto start = std::chrono::high_resolution_clock::now();
 
   //Output log file
-  ofstream logFile("./bro_plot.txt");
+  ofstream logFile("./bro_plot_primary.txt");
 
   DualStreamBuffer dualBuffer(std::cout.rdbuf(), logFile.rdbuf());
 
