@@ -1,6 +1,6 @@
 
 
-# ZZ Production Analysis at 13 TeV
+# $ZZ \rightarrow \ell \ell \nu \nu$ at 13 TeV
 
 This repo refers to the thesis submitted in partial fullfillment of my Master degree in Subatomic Physics and technological applications. The title of the thesis is the following: 
 
