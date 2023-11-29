@@ -6,6 +6,7 @@
 #include <TCanvas.h>
 #include <TGraph.h>
 #include <TH1.h>
+#include <TLine.h>
 
 // cpp headers
 #include <vector>
@@ -56,37 +57,56 @@ Double_t calc_neglnL(Double_t n_obs, Double_t n_signal, Double_t mu_signal, Doub
 
 Double_t calc_total_neglnL(Double_t mu_signal, Double_t mu_WZ, Double_t mu_top, Double_t mu_Zjets0, Double_t mu_Zjets1, Double_t mu_Zjets2, Double_t mu_WW)
 {
-  Double_t lnL_SR;
-  Double_t lnL_3l;
-  Double_t lnL_Zjets0;
-  Double_t lnL_Zjets1;
-  Double_t lnL_Zjets2;
-  Double_t lnL_emuA;
-  Double_t lnL_emuB;
-  Double_t lnL_WZ;
+  Double_t lnL_SR1;
+  Double_t lnL_3l1;
+  Double_t lnL_Zjets01;
+  Double_t lnL_Zjets11;
+  Double_t lnL_Zjets21;
+  Double_t lnL_emuA1;
+  Double_t lnL_emuB1; 
+
+  Double_t lnL_SR2;
+  Double_t lnL_3l2;
+  Double_t lnL_Zjets02;
+  Double_t lnL_Zjets12;
+  Double_t lnL_Zjets22;
+  Double_t lnL_emuA2;
+  Double_t lnL_emuB2; 
+
+  Double_t lnL_total1;
+  Double_t lnL_total2;
   Double_t lnL_total;
+  
 
-  //                   obs   sig   wz   t   z0  z1  z2  ww  ot  sf
-  // lnL_SR = calc_neglnL(2891, 1577, mu_signal, 669, mu_WZ, 91, mu_top, 102, mu_Zjets0, 32, mu_Zjets1, 1, mu_Zjets2, 37, mu_WW, 45); //DATA UNBLINDED
+  
 
-  // lnL_SR = calc_neglnL(2636, 1577, mu_signal, 669, mu_WZ, 91, mu_top, 102, mu_Zjets0, 32, mu_Zjets1, 1, mu_Zjets2, 37, mu_WW, 45); //DATA = MC TOTAL
+  //                    obs   sig   wz   t   z0  z1  z2  ww  ot  sf
+  lnL_3l1 = calc_neglnL(1229, 0.86, mu_signal, 1081, mu_WZ, 34, mu_top, 2.4, mu_Zjets0, 20.5, mu_Zjets1, 9.2, mu_Zjets2, 0.4, mu_WW, 51.3);
+  lnL_3l2 = calc_neglnL(1180, 1.42, mu_signal, 1018, mu_WZ, 23, mu_top, 33.3, mu_Zjets0, 14.0, mu_Zjets1, 6.5, mu_Zjets2, 0.3, mu_WW, 62.8);
 
-  lnL_3l = calc_neglnL(2409, 2.3, mu_signal, 2099, mu_WZ, 57, mu_top, 35.7, mu_Zjets0, 34.5, mu_Zjets1, 15.7, mu_Zjets2, 0.6, mu_WW, 114.1);
+  lnL_emuA1 = calc_neglnL(1445, 0., mu_signal, 9.0, mu_WZ, 1067.5, mu_top, 0.3, mu_Zjets0, 2.3, mu_Zjets1, 0.2, mu_Zjets2, 206.2, mu_WW, 28.2);
+  lnL_emuA2 = calc_neglnL(1458, 0.4, mu_signal, 13.3, mu_WZ, 767.3, mu_top, 0.3, mu_Zjets0, 0.0, mu_Zjets1, 0.2, mu_Zjets2, 425.9, mu_WW, 68.7);
 
-  lnL_emuA = calc_neglnL(2903, 0.4, mu_signal, 22.3, mu_WZ, 1834.8, mu_top, 0.6, mu_Zjets0, 2.2, mu_Zjets1, 0.4, mu_Zjets2, 632.1, mu_WW, 96.9);
+  lnL_emuB1 = calc_neglnL(2867, 0, mu_signal, 0.4, mu_WZ, 2860.7, mu_top, 0, mu_Zjets0, 0.0, mu_Zjets1, 0.1, mu_Zjets2, 6.1, mu_WW, 0.9);
+  lnL_emuB2 = calc_neglnL(2869, 0, mu_signal, 0.5, mu_WZ, 2793, mu_top, 0, mu_Zjets0, 0.1, mu_Zjets1, 0.1, mu_Zjets2, 7.0, mu_WW, 3.6);
 
-  lnL_emuB = calc_neglnL(5736, 0, mu_signal, 0.9, mu_WZ, 5653.7, mu_top, 0, mu_Zjets0, 0.1, mu_Zjets1, 0.1, mu_Zjets2, 13, mu_WW, 4.6);
+  lnL_Zjets01 = calc_neglnL(1355, 37, mu_signal, 40.5, mu_WZ, 63.1, mu_top, 855.7, mu_Zjets0, 0, mu_Zjets1, 0, mu_Zjets2, 19.7, mu_WW, 7.6);
+  lnL_Zjets02 = calc_neglnL(1336, 60.8, mu_signal, 38.9, mu_WZ, 27.9, mu_top, 874.4, mu_Zjets0, 0, mu_Zjets1, 0, mu_Zjets2, 28.0, mu_WW, 4.8);
 
-  lnL_Zjets0 = calc_neglnL(2691, 97.7, mu_signal, 79.4, mu_WZ, 91, mu_top, 1730.1, mu_Zjets0, 0, mu_Zjets1, 0, mu_Zjets2, 47.7, mu_WW, 12.4);
+  lnL_Zjets11 = calc_neglnL(2836, 86.5, mu_signal, 144.4, mu_WZ, 144.0, mu_top, 0, mu_Zjets0, 1790.6, mu_Zjets1, 0, mu_Zjets2, 34.8, mu_WW, 18.4);
+  lnL_Zjets12 = calc_neglnL(2897, 58.5, mu_signal, 103.9, mu_WZ, 52.5, mu_top, 0, mu_Zjets0, 2007.9, mu_Zjets1, 0, mu_Zjets2, 11.2, mu_WW, 27.7);
 
-  lnL_Zjets1 = calc_neglnL(5733, 145, mu_signal, 248.2, mu_WZ, 196.5, mu_top, 0, mu_Zjets0, 3798.5, mu_Zjets1, 0, mu_Zjets2, 46, mu_WW, 46.1);
+  lnL_Zjets21 = calc_neglnL(2871, 83.6, mu_signal, 158.6, mu_WZ, 152.3, mu_top, 0, mu_Zjets0, 0, mu_Zjets1, 2296.7, mu_Zjets2, 12.4, mu_WW, 24.8);
+  lnL_Zjets22 = calc_neglnL(2898, 78.3, mu_signal, 150.0, mu_WZ, 91.7, mu_top, 0, mu_Zjets0, 0, mu_Zjets1, 2362.6, mu_Zjets2, 5.9, mu_WW, 33.0);
 
-  lnL_Zjets2 = calc_neglnL(5769, 161.9, mu_signal, 308.7, mu_WZ, 244.1, mu_top, 0, mu_Zjets0, 0, mu_Zjets1, 4659.2, mu_Zjets2, 18.4, mu_WW, 57.9);
+  lnL_SR1 = calc_neglnL(1314.01, 713.5, mu_signal, 356.2, mu_WZ, 71.8, mu_top, 51.8, mu_Zjets0, 31.2, mu_Zjets1, 0.9, mu_Zjets2, 19.7, mu_WW, 22.8); // DATA = MC SCALED
+  lnL_SR2 = calc_neglnL(1320.53, 863.6, mu_signal, 312.9, mu_WZ, 19.1, mu_top, 50.1, mu_Zjets0, 0.5, mu_Zjets1, 0.2, mu_Zjets2, 17.7, mu_WW, 22.1); // DATA = MC SCALED
 
-  lnL_SR = calc_neglnL(2636, 1577, mu_signal, 669.2, mu_WZ, 90.9, mu_top, 101.9, mu_Zjets0, 31.6, mu_Zjets1, 1.2, mu_Zjets2, 37.3, mu_WW, 44.9); // DATA = MC TOTAL
 
-  lnL_total = lnL_SR + lnL_3l + lnL_emuA + lnL_emuB + lnL_Zjets0 + lnL_Zjets1 + lnL_Zjets2;
-  // lnL_total = lnL_3l + lnL_emuA + lnL_emuB + lnL_Zjets0 + lnL_Zjets1 + lnL_Zjets2;
+  lnL_total1 = lnL_SR1 + lnL_3l1 + lnL_emuA1 + lnL_emuB1 + lnL_Zjets01 + lnL_Zjets11 + lnL_Zjets21;
+  lnL_total2 = lnL_SR2 + lnL_3l2 + lnL_emuA2 + lnL_emuB2 + lnL_Zjets02 + lnL_Zjets12 + lnL_Zjets22;
+
+  lnL_total = lnL_total1 + lnL_total2;
 
   return lnL_total;
 }
@@ -99,20 +119,28 @@ void mle_simfit()
   auto start = std::chrono::high_resolution_clock::now();
 
   // Output log file
-  ofstream logFile("./sim_fit_new.txt");
+  ofstream logFile("./mle_simfit.txt");
 
   DualStreamBuffer dualBuffer(cout.rdbuf(), logFile.rdbuf());
 
   std::streambuf *oldBuffer = cout.rdbuf(&dualBuffer);
 
-  Double_t lnL_SR;
-  Double_t lnL_3l;
-  Double_t lnL_Zjets0;
-  Double_t lnL_Zjets1;
-  Double_t lnL_Zjets2;
-  Double_t lnL_emuA;
-  Double_t lnL_emuB;
-  Double_t lnL_WZ;
+  Double_t lnL_SR1;
+  Double_t lnL_3l1;
+  Double_t lnL_Zjets01;
+  Double_t lnL_Zjets11;
+  Double_t lnL_Zjets21;
+  Double_t lnL_emuA1;
+  Double_t lnL_emuB1;
+
+  Double_t lnL_SR2;
+  Double_t lnL_3l2;
+  Double_t lnL_Zjets02;
+  Double_t lnL_Zjets12;
+  Double_t lnL_Zjets22;
+  Double_t lnL_emuA2;
+  Double_t lnL_emuB2; 
+  
   Double_t lnL_total;
   vector<Double_t> lnL_total_vec;
 
@@ -139,49 +167,34 @@ void mle_simfit()
   Double_t min_mu_Zjets2 = 1;
   Double_t min_mu_WW = 1;
 
+  Double_t step;
+
   //----------------------------------
 
-  // // Min
-  // Double_t low_signal = 1.168 - value;
-  // Double_t low_WZ = 1.023 - value;
-  // Double_t low_WW = 1.466 - value;
-  // Double_t low_top = 1.011 - value;
-  // Double_t low_Zjets0 = 1.364 - value;
-  // Double_t low_Zjets1 = 1.328 - value;
-  // Double_t low_Zjets2 = 1.066 - value;
-
-  // // Max
-  // Double_t up_signal = 1.168 + value;
-  // Double_t up_WZ = 1.023 + value;
-  // Double_t up_WW = 1.466 + value;
-  // Double_t up_top = 1.011 + value;
-  // Double_t up_Zjets0 = 1.364 + value;
-  // Double_t up_Zjets1 = 1.328 + value;
-  // Double_t up_Zjets2 = 1.066 + value;
-
-  Double_t value = 0.01;
+  //BEST FIT CENTRAL VALUES AT 0.001 PRECISION -
+  Double_t value = 0.003;
 
   // Min
-  Double_t low_signal = 1.01 - value;
-  Double_t low_WZ = 1.013 - value;
-  Double_t low_WW = 1.461 - value;
-  Double_t low_top = 1.011 - value;
-  Double_t low_Zjets0 = 1.354 - value;
-  Double_t low_Zjets1 = 1.323 - value;
-  Double_t low_Zjets2 = 1.061 - value;
+  Double_t low_signal = 1.006 - value;
+  Double_t low_WZ = 1.012 - value;
+  Double_t low_WW = 1.435 - value;
+  Double_t low_top = 1.013 - value;
+  Double_t low_Zjets0 = 1.352 - value;
+  Double_t low_Zjets1 = 1.322 - value;
+  Double_t low_Zjets2 = 1.065 - value;
 
   // Max
-  Double_t up_signal = 1.01 + value;
-  Double_t up_WZ = 1.013 + value;
-  Double_t up_WW = 1.461 + value;
-  Double_t up_top = 1.011 + value;
-  Double_t up_Zjets0 = 1.354 + value;
-  Double_t up_Zjets1 = 1.323 + value;
-  Double_t up_Zjets2 = 1.061 + value;
+  Double_t up_signal = 1.006 + value;
+  Double_t up_WZ = 1.012 + value;
+  Double_t up_WW = 1.435 + value;
+  Double_t up_top = 1.013 + value;
+  Double_t up_Zjets0 = 1.352 + value;
+  Double_t up_Zjets1 = 1.322 + value;
+  Double_t up_Zjets2 = 1.065 + value;
 
-  Double_t step = 0.1;
+  step = 0.001;
 
-  int only_CRs = 0;
+
   long int iter = 0;
   long int iter_best;
   long int iter_er_plus;
@@ -237,56 +250,35 @@ void mle_simfit()
     }
   }
 
-  if (only_CRs == 0)
-  {
-    cout << "   ----------------------------------------------------------------------------" << endl << endl;
-    cout << "   SIMULTANEOUS FIT:        " << endl;
-    cout << "   ____________________________        " << endl << endl;
-    cout << "   lnL =          " << setprecision(10) << lnL_min << endl << endl;
-    cout << "   mu_signal =    " << min_mu_signal << endl << endl;
-    cout << "   mu_WZ =        " << min_mu_WZ << endl << endl;
-    cout << "   mu_WW =        " << min_mu_WW << endl << endl;
-    cout << "   mu_top =       " << min_mu_top << endl << endl;
-    cout << "   mu_Zjets0 =    " << min_mu_Zjets0 << endl << endl;
-    cout << "   mu_Zjets1 =    " << min_mu_Zjets1 << endl << endl;
-    cout << "   mu_Zjets2 =    " << min_mu_Zjets2 << endl << endl;
-    cout << "   ----------------------------------------------------------------------------" << endl << endl;
-  }
-  else if (only_CRs == 1)
-  {
-    cout << "   ----------------------------------------------------------------------------" << endl << endl;
-    cout << "   SIMULTANEOUS FIT - CRs ONLY:        " << endl;
-    cout << "   ____________________________        " << endl << endl;
-    cout << "   lnL =          " << lnL_min << setprecision(10) << endl << endl;
-    cout << "   mu_signal =    " << min_mu_signal << endl << endl;
-    cout << "   mu_WZ =        " << min_mu_WZ << endl << endl;
-    cout << "   mu_WW =        " << min_mu_WW << endl << endl;
-    cout << "   mu_top =       " << min_mu_top << endl << endl;
-    cout << "   mu_Zjets0 =    " << min_mu_Zjets0 << endl << endl;
-    cout << "   mu_Zjets1 =    " << min_mu_Zjets1 << endl << endl;
-    cout << "   mu_Zjets2 =    " << min_mu_Zjets2 << endl << endl;
-    cout << "   ----------------------------------------------------------------------------" << endl << endl;
-  }
 
-  //Statistical uncertainty
+  cout << "   ----------------------------------------------------------------------------" << endl << endl;
+  cout << "   SIMULTANEOUS FIT - CRs ONLY:        " << endl;
+  cout << "   ____________________________        " << endl << endl;
+  cout << "   lnL =          " << lnL_min << setprecision(10) << endl << endl;
+  cout << "   mu_signal =    " << min_mu_signal << endl << endl;
+  cout << "   mu_WZ =        " << min_mu_WZ << endl << endl;
+  cout << "   mu_WW =        " << min_mu_WW << endl << endl;
+  cout << "   mu_top =       " << min_mu_top << endl << endl;
+  cout << "   mu_Zjets0 =    " << min_mu_Zjets0 << endl << endl;
+  cout << "   mu_Zjets1 =    " << min_mu_Zjets1 << endl << endl;
+  cout << "   mu_Zjets2 =    " << min_mu_Zjets2 << endl << endl;
+  cout << "   ----------------------------------------------------------------------------" << endl << endl;
 
-  float sf_low = 1 - 1.;
-  float sf_up  = 1 + 1.;
+  //Statistical uncertainty from likelihood shape
+
+  float sf_low = 1 - 0.8;
+  float sf_up  = 1 + 0.8;
   float sf;
   float sf_min;
-  step = 0.0001;
+  step = 0.00001;
   iter = 0;
-
+  
   for (sf = sf_low; sf <= sf_up; sf += step)
   {
 
-    //mu_signal, mu_WZ, mu_top, mu_Zjets0, mu_Zjets1, mu_Zjets2, mu_WW
-
-    // lnL_total = calc_total_neglnL(1, 1.011, 1.010, sf, 1.314, 1.050, 1.466);         // SIM CR ONLY
-    // lnL_total = calc_total_neglnL(1.005, 1.011, 1.010, 1.384, 1.314, 1.049, 1.466);     // SIM ALL REGIONS
-    lnL_total = calc_total_neglnL(sf, 1.012, 1.010, 1.351, 1.323, 1.065, 1.465);     // SIM ALL REGIONS2
-    // lnL_total = calc_total_neglnL(0.989, 1.024, 1.011, 1.401, 1.321, 1.051, sf);        // PER REGION FIT
-
+    //mu_signal,  mu_WZ,  mu_top,  mu_Zjets0,  mu_Zjets1,  mu_Zjets2,  mu_WW
+    lnL_total = calc_total_neglnL(sf, 1.012, 1.013, 1.352, 1.322, 1.065, 1.435);     // SIM ALL REGIONS
+    
     lnL_total_vec.push_back(lnL_total);
     sf_vec.push_back(sf);
 
@@ -306,15 +298,13 @@ void mle_simfit()
   }
 
   TCanvas *c1 = new TCanvas("c1", "-lnL vs mu", 800, 600);
-  TCanvas *c2 = new TCanvas("c2", "mu distribution", 800, 600);
-  TCanvas *c3 = new TCanvas("c3", "rnd values", 800, 600);
+  TGraph *gr1 = new TGraph();
 
- 
 
-  // for (int i = 0; i < lnL_total_vec.size(); i++)
-  // {
-  //   gr1->SetPoint(i, sf_vec.at(i), lnL_total_vec.at(i));
-  // }
+  for (int i = 0; i < lnL_total_vec.size(); i++)
+  {
+    gr1->SetPoint(i, sf_vec.at(i), lnL_total_vec.at(i));
+  }
 
   for (int i = 0; i < lnL_total_vec.size(); i++)
   {
@@ -335,25 +325,37 @@ void mle_simfit()
     }
   }
 
-  // // cout << "   ----------------------------------------------------------------------------" << endl << endl;
-  // // cout << "   SIMULTANEOUS FIT - CRs ONLY:        " << endl;
-  // // cout << "   ____________________________        " << endl << endl;
-  // // cout << "   lnL =          " << lnL_min << setprecision(10) << endl << endl;
-  // // cout << "   mu_signal =    " << mu_signal << endl << endl;
-  // // cout << "   mu_WZ =        " << mu_WZ << endl << endl;
-  // // cout << "   mu_WW =        " << mu_WW << endl << endl;
-  // // cout << "   mu_top =       " << mu_top << endl << endl;
-  // // cout << "   mu_Zjets0 =    " << mu_Zjets0 << endl << endl;
-  // // cout << "   mu_Zjets1 =    " << mu_Zjets1 << endl << endl;
-  // // cout << "   mu_Zjets2 =    " << mu_Zjets2 << endl << endl;
-  // // cout << "   ----------------------------------------------------------------------------" << endl << endl;
 
-  cout << "   Iter minus:  " << iter_best << endl << endl;
-  cout << "   Iter minus:  " << iter_er_minus << "  ->  -" << sf_vec.at(iter_best) - sf_vec.at(iter_er_minus) << endl << endl;
-  cout << "   Iter plus:   " << iter_er_plus  << "  ->  +" << sf_vec.at(iter_er_plus) - sf_vec.at(iter_best) << endl << endl;
+  cout << "   lnL:           " << lnL_min << setprecision(10) << endl << endl;
+  cout << "   sf_min :       " << sf_min << endl << endl;
+  cout << "   Iter best:     " << iter_best << endl << endl;
+  cout << "   Iter plus:     " << iter_er_plus  << "  ->  +" << sf_vec.at(iter_er_plus) - sf_vec.at(iter_best) << endl << endl;
+  cout << "   Iter minus:    " << iter_er_minus << "  ->  -" << sf_vec.at(iter_best) - sf_vec.at(iter_er_minus) << endl << endl;
+  
+  c1->SetLeftMargin(0.15);
+  
+  gr1->GetXaxis()->SetTitleFont(62);
+  gr1->GetXaxis()->SetTitleSize(0.04);
+  gr1->GetXaxis()->SetTitle("#mu_{S}");
+  
+  gr1->GetYaxis()->SetTitle("-lnL");
+  gr1->GetYaxis()->SetTitleOffset(1.5);
+  gr1->GetYaxis()->SetTitleSize(0.05);
+  // gr1->GetYaxis()->SetNdivisions(0);
 
-  // gr1->Draw("ALP");
-  // c1->SaveAs("./MLE_plot.png");
+  gr1->SetLineColor(kRed);
+  gr1->SetLineWidth(3);
+  gr1->Draw("AL");
+
+
+  // TLine *line1 = new TLine(xbins[0], 1, xbins[sizeof(xbins) / sizeof(xbins[0]) - 1], 1);
+  // line1->SetLineStyle(2);
+  // line1->SetLineWidth(2);
+  // line1->Draw("same");
+
+  c1->SetTicks();
+  c1->SetGrid();
+  c1->SaveAs("./MLE_plot.png");
 
 
 
