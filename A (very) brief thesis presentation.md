@@ -61,6 +61,6 @@ Various sources of uncertainties have been studied followed by a measurement of 
 $$ \sigma^{fid}_{ZZ, \ meas} = \mu_S \cdot  \sigma^{fid}_{ZZ, \ MC} $$
 
 
-![xsec](./figures/xsec_plot.png)
+![xsec](./figs/xsec_plot.png)
 
 **Note:** The SR data sample has been kept blinded leading to a value $\mu_S = 1.006 \pm 0.032$ as expected since the corresponding MC prediction has been used as pseudo-data instead. As a result, the cross section measurement corresponds to the theoretically predicted value $\sigma^{fid}_{ZZ, \ MC}$ as expected. However, following the analysis procedure presented, a measurement of the cross section by utilizing the new information provided by the SR data sample, can be performed.
