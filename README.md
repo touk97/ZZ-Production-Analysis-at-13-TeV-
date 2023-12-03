@@ -22,7 +22,8 @@ Various sources of background are present due to the large $E^{miss}_T$ signal s
 
 ![Prelim SR Pie](./figures/pie_charts/pie_pre_SR.png)
 
-A cut based analysis is performed: Certain kinematic variables are selected according to their signal-to-background discriminating power in order to define a phase space maximally enriched in signal. This phase space is called **Signal Region (SR)**. The criterion used is the **Signal Significance**:
+A cut based analysis is performed: Certain kinematic variables are selected according to their signal-to-background discriminating power in order to define a phase space maximally enriched in signal. This phase space is called **Signal Region (SR)**. The criterion used is the **Signal Significance** [[G.Cowan et al.]](https://arxiv.org/abs/1007.1727)
+:
 
 $$ Z = \sqrt{2(s+b) \cdot ln\left( 1 + \frac{s}{b} \right) - s} $$
 
