@@ -22,7 +22,7 @@ Various sources of background are present due to the large $E^{miss}_T$ signal s
 
 ![Prelim SR Pie](./figures/pie_charts/pie_pre_SR.png)
 
-A cut based analysis is performed: Certain kinematic variables are selected according to their signal-to-background discriminating power in order to define a phase space maximally enriched in signal. This phase space is called **Signal Region (SR)**. The criterion used is the **Signal Significance** [[G.Cowan et al.]](https://arxiv.org/abs/1007.1727)
+A cut based analysis is performed: Certain kinematic variables are selected according to their signal-to-background discriminating power in order to define a phase space maximally enriched in signal. This phase space is called **Signal Region (SR)**. The criterion used is the following formula for **Signal Significance** [[G.Cowan et al.]](https://arxiv.org/abs/1007.1727)
 :
 
 $$ Z = \sqrt{2(s+b) \cdot ln\left( 1 + \frac{s}{b} \right) - s} $$
@@ -59,7 +59,10 @@ The data sample in the SR has been kept **blinded** during the entire analysis. 
 
 Various sources of uncertainties have been studied followed by a measurement of the $ZZ \rightarrow \ell \ell \nu \nu$ process. The cross section has been obtained by the MC theoretical prediction $\sigma^{fid}_{ZZ, \ MC}$ corrected by the signal strength $\mu_S$ obtained by the analysis performed in the present work:
 
-$$ \sigma^{fid}_{ZZ, \ meas} = \mu_S \cdot  \sigma^{fid}_{ZZ, \ MC} $$
+<!-- $$ \sigma^{fid}_{ZZ, \ meas} = \mu_S \cdot  \sigma^{fid}_{ZZ, \ MC} $$ -->
+
+$$ \sigma_{ZZ,\text{meas}}^{\text{fid}} = \mu_S \cdot \sigma_{ZZ,\text{MC}}^{\text{fid}} $$
+
 
 
 ![xsec](./figures/xsec_plot.png)
