@@ -4,24 +4,6 @@
 
 This script utilized the ROOT TMVA library for multivariate analysis. This is a more sophisticated approach compared to simple brute force algorithms or the heuristic PSO algorithms where simple rectangular cuts are realised and correlations between variables are not taken under consideration. The variables taken under consideration in the current script are shown in the following table:
 
-
-   loader.AddVariable("met_tst", 'F');
-   loader.AddVariable("met_signif", 'F');
-   // loader.AddVariable("mT_ZZ", 'F');
-   loader.AddVariable("dLepR", 'F');
-   loader.AddVariable("leading_pT_lepton", 'F');
-   loader.AddVariable("subleading_pT_lepton", 'F');
-   loader.AddVariable("Z_pT", 'F');
-   // loader.AddVariable("frac_pT", 'F');
-   // loader.AddVariable("sumpT_scalar", 'F');
-   loader.AddVariable("MetOHT", 'F');
-   // loader.AddVariable( "RhoZ := Z_pT/(leading_pT_lepton+subleading_pT_lepton)", 'F' );
-   // loader.AddVariable("dLepPhi:=fabs(lepplus_phi-lepminus_phi)", 'F');
-   loader.AddVariable("dMetZPhi", 'F');
-   // loader.AddVariable("LepRatio := subleading_pT_lepton/leading_pT_lepton", 'F');
-   // loader.AddVariable("dLepEta:=fabs(lepplus_eta-lepminus_eta)", 'F');
-   loader.AddVariable("M2Lep", 'F');
-
 | Variables | 
 |----------|
 | $E^{miss}_{T}$ | 
