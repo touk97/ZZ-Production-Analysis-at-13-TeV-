@@ -1,6 +1,6 @@
 
 
-// To use TMVA GUI
+// For TMVA GUI
 //  root[0] TMVA::TMVAGui("TMVA.root")
 
 #include <cstdlib>
@@ -19,7 +19,6 @@
 // #include "../tmva/test/TMVAGui.C"
 
 #if not defined(__CINT__) || defined(__MAKECINT__)
-// needs to be included when makecint runs (ACLIC)
 // #include "TMVA/Factory.h"
 // #include "TMVA/Tools.h"
 
@@ -67,7 +66,7 @@ void BDTG_train(TString myMethodList = "")
 {
 
    // Output log file
-   // ofstream logFile("./train/BDTG_train_0jets.txt");
+   // ofstream logFile("./train/BDTG_train_2jets.txt");
    ofstream logFile("./train/BDTG_train.txt");
 
    DualStreamBuffer dualBuffer(cout.rdbuf(), logFile.rdbuf());
@@ -118,7 +117,7 @@ void BDTG_train(TString myMethodList = "")
 
    // --------------------------------------------------------------------------------------------------
 
-   // TString filename( "./train/BDTG_train_0jets.root" );  //Change for jet multiplicity
+   // TString filename( "./train/BDTG_train_2jets.root" );  //Change for jet multiplicity
    TString filename("./train/BDTG_train.root");
    TFile *output = TFile::Open(filename, "RECREATE");
 
@@ -130,19 +129,19 @@ void BDTG_train(TString myMethodList = "")
 
    loader.AddVariable("met_tst", 'F');
    loader.AddVariable("met_signif", 'F');
-   loader.AddVariable("mT_ZZ", 'F');
+   // loader.AddVariable("mT_ZZ", 'F');
    loader.AddVariable("dLepR", 'F');
    loader.AddVariable("leading_pT_lepton", 'F');
    loader.AddVariable("subleading_pT_lepton", 'F');
    loader.AddVariable("Z_pT", 'F');
-   loader.AddVariable("frac_pT", 'F');
-   loader.AddVariable("sumpT_scalar", 'F');
+   // loader.AddVariable("frac_pT", 'F');
+   // loader.AddVariable("sumpT_scalar", 'F');
    loader.AddVariable("MetOHT", 'F');
    // loader.AddVariable( "RhoZ := Z_pT/(leading_pT_lepton+subleading_pT_lepton)", 'F' );
-   loader.AddVariable("dLepPhi:=fabs(lepplus_phi-lepminus_phi)", 'F');
+   // loader.AddVariable("dLepPhi:=fabs(lepplus_phi-lepminus_phi)", 'F');
    loader.AddVariable("dMetZPhi", 'F');
-   loader.AddVariable("LepRatio := subleading_pT_lepton/leading_pT_lepton", 'F');
-   loader.AddVariable("dLepEta:=fabs(lepplus_eta-lepminus_eta)", 'F');
+   // loader.AddVariable("LepRatio := subleading_pT_lepton/leading_pT_lepton", 'F');
+   // loader.AddVariable("dLepEta:=fabs(lepplus_eta-lepminus_eta)", 'F');
    loader.AddVariable("M2Lep", 'F');
    // loader.AddVariable( "n_jets", 'I' );
 
@@ -200,7 +199,7 @@ void BDTG_train(TString myMethodList = "")
    TTree *tree_trib = (TTree *)file_trib->Get("tree_PFLOW");
    TTree *tree_othr = (TTree *)file_othr->Get("tree_PFLOW");
 
-   double Weight = 1; // already all normalized to lumi
+   double Weight = 1; 
    loader.AddSignalTree(tree_signal, Weight);
    loader.AddBackgroundTree(tree_Zjets, Weight);
    loader.AddBackgroundTree(tree_WZ, Weight);
@@ -227,7 +226,7 @@ void BDTG_train(TString myMethodList = "")
       factory.BookMethod(&loader, TMVA::Types::kBDT, "BDTG",
                          //   "!H:!V:NTrees=800:MinNodeSize=5%:BoostType=Grad::nCuts=20:MaxDepth=3");
                          // "!H:!V:NTrees=400:MinNodeSize=10%:BoostType=Grad::shrinkage=0.2");
-                         "!H:!V:NTrees=400:MinNodeSize=10%:BoostType=Grad::shrinkage=0.2:MaxDepth=3");
+                         "!H:!V:NTrees=400:MinNodeSize=10%:BoostType=Grad::shrinkage=0.2");
 
    // Train sample
    factory.TrainAllMethods();
