@@ -70,7 +70,7 @@ vector<Float_t> Counter(string category, string index1, string index2)
   Double_t signal = 0.;
   Double_t signal_var = 0.;
 
-  string filepath = "/home/touk/Desktop/touk/master/thesis/data/SR_nocut_aggelos/" + category + index1 + index2;
+  string filepath = "/home/touk/Desktop/touk/physics/master/thesis/data/SR_nocut/" + category + index1 + index2;
   TFile *file = new TFile((string(filepath)).c_str());
   TTree *tree = file->Get<TTree>("tree");
 
@@ -160,7 +160,7 @@ void truth()
 
   vector<string> categories = {"345666.Sherpa_222_NNPDF30NNLO_", "345723.Sherpa_222_NNPDF30NNLO_", "363724.MadGraphPythia8EvtGen_"};
   vector<string> indexes1 = {"llvvZZ.deriv.DAOD_STDM3.e6240_s3126_", "ggllvvZZ.deriv.DAOD_STDM3.e6213_s3126_", "ZZllvv2jEWK.deriv.DAOD_STDM3.e5712_s3126_"};
-  vector<string> indexes2 = {"r9364_p4252.root.root", "r10201_p4252.root.root", "r10724_p4252.root.root"};
+  vector<string> indexes2 = {"r9364_p4252.root", "r10201_p4252.root", "r10724_p4252.root"};
 
   for (string &category : categories)
   {
@@ -172,17 +172,17 @@ void truth()
             
               if (category == "345666.Sherpa_222_NNPDF30NNLO_" && index1 == "llvvZZ.deriv.DAOD_STDM3.e6240_s3126_")
               {
-                  if (index2 == "r9364_p4252.root.root")
+                  if (index2 == "r9364_p4252.root")
                   {
                     cout << "    QCD qq1" << endl << endl;
                     signal_qq1 = Counter(category, index1, index2);
                   }
-                  else if (index2 == "r10201_p4252.root.root")
+                  else if (index2 == "r10201_p4252.root")
                   {
                     cout << "    QCD qq2" << endl << endl;
                     signal_qq2 = Counter(category, index1, index2);
                   }
-                  else if (index2 == "r10724_p4252.root.root")
+                  else if (index2 == "r10724_p4252.root")
                   {
                     cout << "    QCD qq3" << endl << endl;
                     signal_qq3 = Counter(category, index1, index2);
@@ -191,17 +191,17 @@ void truth()
               }
               else if (category == "345723.Sherpa_222_NNPDF30NNLO_" && index1 == "ggllvvZZ.deriv.DAOD_STDM3.e6213_s3126_")
               {
-                  if (index2 == "r9364_p4252.root.root")
+                  if (index2 == "r9364_p4252.root")
                   {
                     cout << "    QCD gg1" << endl << endl;
                     signal_gg1 = Counter(category, index1, index2);
                   }
-                  else if (index2 == "r10201_p4252.root.root")
+                  else if (index2 == "r10201_p4252.root")
                   {
                     cout << "    QCD gg2" << endl << endl;
                     signal_gg2 = Counter(category, index1, index2);
                   }
-                  else if (index2 == "r10724_p4252.root.root")
+                  else if (index2 == "r10724_p4252.root")
                   {
                     cout << "    QCD gg3" << endl << endl;
                     signal_gg3 = Counter(category, index1, index2);
@@ -210,17 +210,17 @@ void truth()
               }
               else if (category == "363724.MadGraphPythia8EvtGen_" && index1 == "ZZllvv2jEWK.deriv.DAOD_STDM3.e5712_s3126_")
               {
-                  if (index2 == "r9364_p4252.root.root")
+                  if (index2 == "r9364_p4252.root")
                   {
                     cout << "    QCD EWK2" << endl << endl;
                     signal_EWK1 = Counter(category, index1, index2);
                   }
-                  else if (index2 == "r10201_p4252.root.root")
+                  else if (index2 == "r10201_p4252.root")
                   {
                     cout << "    QCD EWK2" << endl << endl;
                     signal_EWK2 = Counter(category, index1, index2);
                   }
-                  else if (index2 == "r10724_p4252.root.root")
+                  else if (index2 == "r10724_p4252.root")
                   {
                     cout << "    QCD EWK3" << endl << endl;
                     signal_EWK3 = Counter(category, index1, index2);
