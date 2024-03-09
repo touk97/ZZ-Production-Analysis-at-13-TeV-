@@ -18,7 +18,7 @@ The $pp \rightarrow ZZ$ production has been studied through the $ZZ \rightarrow 
 
 ![ZZ Process](./figures/ZZ_process.png)
 
-The study of the $ZZ \rightarrow \ell \ell \nu \nu $ signal channel requries an extensive study of the signal as well as the various background processes. The study is performed in terms of various kinematic variables like the missing transverse energy $E^{miss}_T$ due to the neutrino pair passing through the detector without getting identified.
+The study of the $ZZ \rightarrow \ell \ell \nu \nu$ signal channel requries an extensive study of the signal as well as the various background processes. The study is performed in terms of various kinematic variables like the missing transverse energy $E^{miss}_T$ due to the neutrino pair passing through the detector without getting identified.
 
 Various sources of background are present due to the large $E^{miss}_T$ signal signature. **Monte Carlo** simulation samples are utilized. A preliminary phase space attributes the following abundance in signal and the various backgrounds:
 
@@ -29,7 +29,7 @@ A cut based analysis is performed: Certain kinematic variables are selected acco
 
 $$ Z = \sqrt{2(s+b) \cdot ln\left( 1 + \frac{s}{b} \right) - s} $$
 
-where s and b are the total signal and background processes in the selected phase space respectively. An example of a study on the kinematic variable $E^{miss} / H_T $ is given below:
+where s and b are the total signal and background processes in the selected phase space respectively. An example of a study on the kinematic variable $E^{miss}/H_T$ is given below:
 
 ![MetOHT](./figures/sr_nocut/metoht_SR_nocut.png)
 
