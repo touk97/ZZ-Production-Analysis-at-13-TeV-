@@ -171,8 +171,8 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
       // "dLepR",
       // "leading_pT_lepton",
       // "subleading_pT_lepton",
-      // "Z_pT",
-      "n_jets",
+      "Z_pT",
+      // "n_jets",
       // "n_bjets",
       // "detajj",
       // "mjj",
@@ -191,10 +191,11 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
 
   // tree->SetBranchAddress("M2Lep", &M2Lep);
   tree->SetBranchAddress("met_tst", &met_tst);
-  tree->SetBranchAddress("met_signif", &met_signif);
+  // tree->SetBranchAddress("met_signif", &met_signif);
   tree->SetBranchAddress("dMetZPhi", &dMetZPhi);
   tree->SetBranchAddress("MetOHT", &MetOHT);
-  tree->SetBranchAddress("n_jets", &n_jets);
+  tree->SetBranchAddress("Z_pT", &Z_pT);
+  // tree->SetBranchAddress("n_jets", &n_jets);
   tree->SetBranchAddress("global_weight", &weight);
 
   Double_t signal = 0.;
@@ -207,7 +208,8 @@ vector<Float_t> event_counter(particle &particle, TTree *tree)
      
     //Any additional criteria is already accounted for during the sample files generation
     //FID.VOLUME: 80 < M2Lep < 100, met_tst > 70, dLepR < 1.8, dMetZPhi > 2.2
-    if (n_jets < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    if (Z_pT > particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
+    // if (n_jets < particle.position[0] && dMetZPhi > particle.position[1] && met_tst > particle.position[2] && MetOHT > particle.position[3])
     {
       signal = signal + weight;
       signaler = signaler + weight * weight;
@@ -241,7 +243,7 @@ void PSO_4VAR()
   //------------PSO ALGORITHM------------//
 
   int iterations = 80;
-  int n_particles = 40;
+  int n_particles = 20;
 
   Float_t max_signal[n_particles];
   Float_t max_signal_er[n_particles];
@@ -254,7 +256,8 @@ void PSO_4VAR()
 
   // Search space Boundaries {min, max}
   Float_t bounds[4][2] = {
-      {1, 10},    // n_jets bounds
+      // {1, 10},    // n_jets bounds
+      {60, 130},     // Z_pT bounds
       {2.2, 3.},     // dMetZPhi bounds
       {90.0, 120.0}, // met_tst bounds
       {0.5, 0.8}     // MetOHT bounds
@@ -271,20 +274,20 @@ void PSO_4VAR()
   TCanvas *c5 = new TCanvas("c5", "Search Space 3D", 800, 600);
   
 
-  //n_jets: 0  |  dmetzphi: 1  |  met:2  |  metoht:3
+  //Z_pT: 0  |  dmetzphi: 1  |  met:2  |  metoht:3
   
   TH2F *hist2d_njets = new TH2F("hist2d_njets", "Search Space Histogram 2D", 30, bounds[1][0], bounds[1][1], 30, bounds[0][0], bounds[0][1]);
   TH2F *hist2d_metoht = new TH2F("hist2d_metoht", "Search Space Histogram 2D", 30, bounds[1][0], bounds[1][1], 30, bounds[3][0], bounds[3][1]);
   TH2F *hist2d_met = new TH2F("hist2d_met", "Search Space Histogram 2D", 30, bounds[1][0], bounds[1][1], 30, bounds[2][0], bounds[2][1]);
 
   // Position uniform distributions
-  uniform_real_distribution<> uni_n_jets(bounds[0][0], bounds[0][1]);
+  uniform_real_distribution<> uni_Z_pT(bounds[0][0], bounds[0][1]);
   uniform_real_distribution<> uni_dMetZPhi(bounds[1][0], bounds[1][1]);
   uniform_real_distribution<> uni_met_tst(bounds[2][0], bounds[2][1]);
   uniform_real_distribution<> uni_MetOHT(bounds[3][0], bounds[3][1]);
 
   // Velocity uniform distributions
-  uniform_real_distribution<> uni_n_jets2(-fabs(bounds[0][1] - bounds[0][0])/2, fabs(bounds[0][1] - bounds[0][0])/2); // bounds (-|min-max|, |min-max|)
+  uniform_real_distribution<> uni_Z_pT2(-fabs(bounds[0][1] - bounds[0][0])/2, fabs(bounds[0][1] - bounds[0][0])/2); // bounds (-|min-max|, |min-max|)
   uniform_real_distribution<> uni_dMetZPhi2(-fabs(bounds[1][1] - bounds[1][0])/2, fabs(bounds[1][1] - bounds[1][0])/2);
   uniform_real_distribution<> uni_met_tst2(-fabs(bounds[2][1] - bounds[2][0])/2, fabs(bounds[2][1] - bounds[2][0])/2);
   uniform_real_distribution<> uni_MetOHT2(-fabs(bounds[3][1] - bounds[3][0])/2, fabs(bounds[3][1] - bounds[3][0])/2);
@@ -299,7 +302,7 @@ void PSO_4VAR()
   {
     particle &particle = swarm[0][j]; // Define the particle
     // Initialize position
-    particle.position[0] = uni_n_jets(gen);
+    particle.position[0] = uni_Z_pT(gen);
     particle.position[1] = uni_dMetZPhi(gen);
     particle.position[2] = uni_met_tst(gen);
     particle.position[3] = uni_MetOHT(gen);
@@ -309,7 +312,7 @@ void PSO_4VAR()
     particle.pbest[2] = particle.position[2];
     particle.pbest[3] = particle.position[3];
     // Initialize velocity
-    particle.velocity[0] = uni_n_jets2(gen);
+    particle.velocity[0] = uni_Z_pT2(gen);
     particle.velocity[1] = uni_dMetZPhi2(gen);
     particle.velocity[2] = uni_met_tst2(gen);
     particle.velocity[3] = uni_MetOHT2(gen);
