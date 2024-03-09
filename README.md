@@ -12,7 +12,9 @@ The purpose of this thesis was to study methods for the analysis of experimental
 
 ## Brief Presentation
 
-The $pp \rightarrow ZZ$ production has been studied through the $ZZ \rightarrow \ell \ell \nu \nu $ channel:
+The $pp \rightarrow ZZ$ production has been studied through the $ZZ \rightarrow \ell \ell \nu \nu$ channel:
+
+
 
 ![ZZ Process](./figures/ZZ_process.png)
 
